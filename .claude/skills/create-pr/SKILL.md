@@ -7,6 +7,8 @@ disable-model-invocation: true
 
 # /create-pr — gates, commit, rebase onto the latest main, pull request
 
+> **Where to run.** Every path and command here is relative to this repository's root: the folder with its `CLAUDE.md`, `Makefile`, `backend/`, and `frontend/`. These skills also load when Claude Code starts in the private parent folder, which links them in; in that case run `cd portfolio` once before anything else, and read `CLAUDE.md` there if it is not in context yet.
+
 **Mode:** $ARGUMENTS (`draft` opens a draft pull request; empty opens a ready one)
 
 The flow is: gates and scrub → commit on a feature branch → `git fetch` and rebase onto `origin/main` → push the branch → pull request against `main` → its URL. Open a pull request only for what belongs together, only after the gates pass, and only once the user approves the draft. Never push `main` itself. Leave no Claude footprint: the commit message and the pull request carry no AI attribution (see section 4). This repository is public, so everything that ships is published.

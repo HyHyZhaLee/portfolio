@@ -46,7 +46,7 @@ A feature depends on a port it owns and never on a provider's API: `contact` use
 
 ### 9. Privacy by design
 
-The backend never stores or logs a raw IP address, a full user-agent string, or a full referrer URL (Non-Negotiable 3). `ClientInfoResolver` is the only class that reads them: it returns a parsed device type and browser, the referrer host, and `visitorHash = HMAC-SHA256(app.visitor-hash-secret, ip + "|" + userAgent)` as 64 hex characters. Contact messages hold a real visitor's name, email, and text: they are stored for the owner and sent to the owner, and never logged, cached, or returned. The client IP comes from the forwarded headers Render's proxy sets (`server.forward-headers-strategy: framework`); which hop to trust is confirmed against the running service in PF-004 and recorded in `docs/knowledge/`.
+The backend never stores or logs a raw IP address, a full user-agent string, or a full referrer URL (Non-Negotiable 3). `ClientInfoResolver` is the only class that reads them: it returns a parsed device type and browser, the referrer host, and `visitorHash = HMAC-SHA256(app.visitor-hash-secret, ip + "|" + userAgent)` as 64 hex characters. Contact messages hold a real visitor's name, email, and text: they are stored for the owner and sent to the owner, and never logged, cached, or returned. The client IP comes from the forwarded headers Render's proxy sets. The scaffold uses `server.request.header.forwarded.strategy: framework`, whose `ForwardedHeaderFilter` takes the leftmost `X-Forwarded-For` value, which any client can set; before the visitor hash and the rate limits depend on the address, PF-004 must trust only Render's hop (the `native` strategy with the proxy's addresses as trusted proxies, or the rightmost untrusted `X-Forwarded-For` entry in `ClientInfoResolver`), confirm it against the running service, and record it in `docs/knowledge/`.
 
 ### 10. Public write endpoints resist abuse
 
@@ -80,7 +80,7 @@ Pure in-memory logic is covered by `testUnit` alone, and claiming that exemption
 
 ## Known Issues & Anti-Patterns
 
-> When an issue is listed here, apply its rule; there is no need to explore alternatives. Add an entry when a trap costs real time or a review finding recurs. Numbers are permanent; a resolved entry is marked resolved, not deleted. Entries 001 to 010 were verified in the owner's earlier Spring Boot 4 scaffold on 2026-11-11; re-check each one when the code that depends on it lands. Evidence: `docs/knowledge/tooling.md`.
+> When an issue is listed here, apply its rule; there is no need to explore alternatives. Add an entry when a trap costs real time or a review finding recurs. Numbers are permanent; a resolved entry is marked resolved, not deleted. Entries 001 to 010 were verified in the owner's earlier Spring Boot 4 scaffold on 2026-11-11; re-check each one when the code that depends on it lands. PF-002 re-checked 001 to 004 and 009 against Boot 4.2.0 and Gradle 9.9.2 on 2026-11-22. Evidence: `docs/knowledge/tooling.md`.
 
 ### KNOWN-BE-001: The aggregate `test` task ignores `--tests`
 
@@ -317,17 +317,17 @@ Rows marked _built_ exist; the others are planned until the ticket named has run
 | Throw a client-safe failure | `ApiException` + `ErrorCode` (`VALIDATION_FAILED` 400, `NOT_FOUND` 404, `RATE_LIMITED` 429, `INTERNAL_ERROR` 500) | `platform.error` | PF-004 |
 | Turn exceptions into problem JSON | `GlobalExceptionHandler` (the only `@RestControllerAdvice`) | `platform.error` | PF-004 |
 | Correlation ID on requests, logs, and problem bodies | `CorrelationIdFilter` | `platform.web` | PF-004 |
-| CORS allowlist and the public endpoint list | `SecurityConfig` | `platform.security` | PF-004 |
+| CORS allowlist and the public endpoint list | `SecurityConfig` (stateless chain and the public `GET` list built in PF-002; CORS and the API paths come with PF-004) | `platform.security` | PF-002, PF-004 |
 | Client IP, device, browser, referrer host, visitor hash | `ClientInfoResolver` → `ClientInfo` | `platform.client` | PF-004 |
 | Drop bot traffic | `BotFilter` | `platform.client` | PF-004 |
 | Per-visitor rate limits | `RateLimiter` with `RateLimit.VISIT` and `RateLimit.CONTACT` | `platform.ratelimit` | PF-004 |
-| Deterministic OpenAPI output and the snapshot test | `OpenApiConfig`, `OpenApiSnapshotIT` | `platform.openapi` | PF-002 |
+| Deterministic OpenAPI output and the snapshot test | `OpenApiConfig`, `OpenApiSnapshotIT` | `platform.openapi` | PF-002, _built_ |
 | Record a page view | `VisitCommandService` | `visit` | PF-005 |
 | Read totals for the footer | `StatsQueryService` (cached 60 s) | `stats` | PF-005 |
 | Send an email | `EmailSender` port; `ResendEmailSender` (prod), logging sender (local) | `contact` | PF-006 |
 | Accept and deliver a contact message | `ContactCommandService`, `ContactLifecycle`, `ContactRetryJob` | `contact` | PF-006 |
 | List public GitHub repositories | `GitHubClient`, `ProjectQueryService` (cached 1 h, circuit breaker) | `project` | PF-007 |
-| Integration-test context | `@IntegrationTest`, `TestcontainersConfiguration`, WireMock support | `support` (test) | PF-002 |
+| Integration-test context | `@IntegrationTest`, `TestcontainersConfiguration` (_built_ in PF-002); WireMock support arrives with the first adapter | `support` (test) | PF-002, PF-006 or PF-007 |
 
 ## Domain-Specific Guidelines
 

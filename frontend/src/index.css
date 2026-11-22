@@ -1,0 +1,38 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. Utilities such as bg-surface and text-muted read these variables, so the dark scheme only
+ * redefines the variables. PF-003 extends the palette and adds typography.
+ */
+@theme {
+    --color-surface: oklch(0.99 0.003 250);
+    --color-surface-raised: oklch(0.96 0.006 250);
+    --color-ink: oklch(0.22 0.02 260);
+    --color-muted: oklch(0.45 0.02 260);
+    --color-line: oklch(0.88 0.01 260);
+    --color-accent: oklch(0.5 0.16 255);
+    --color-accent-ink: oklch(0.99 0.003 250);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-surface: oklch(0.18 0.015 260);
+        --color-surface-raised: oklch(0.23 0.02 260);
+        --color-ink: oklch(0.94 0.008 250);
+        --color-muted: oklch(0.72 0.015 255);
+        --color-line: oklch(0.32 0.02 260);
+        --color-accent: oklch(0.74 0.13 250);
+        --color-accent-ink: oklch(0.18 0.015 260);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}

@@ -1,14 +1,14 @@
 # backend/CLAUDE.md
 
-> Written before the code (PF-001) as the working contract for `backend/`. Commands are confirmed when PF-002 scaffolds the package, and class names from PF-004 on. Where this file and the code disagree, fix whichever is wrong in the same change.
+> Written before the code (PF-001) as the working contract for `backend/`. The commands were confirmed when PF-002 scaffolded the package; class names are confirmed from PF-004 on. Where this file and the code disagree, fix whichever is wrong in the same change.
 
 ## Quick Reference
 
 | | |
 |---|---|
 | Language | Java 21: records, sealed types, pattern matching, `var`, virtual threads |
-| Framework | Spring Boot 4 (latest GA from Spring Initializr): Spring Framework 7, Spring Security 7, Hibernate 7, Jackson 3 |
-| Build | Gradle 9, Kotlin DSL, wrapper in `backend/`; Spotless for formatting, JaCoCo for coverage |
+| Framework | Spring Boot 4.2.0 (the Spring Initializr default when PF-002 generated the package): Spring Framework 7, Spring Security 7, Hibernate 7, Jackson 3 |
+| Build | Gradle 9.9 wrapper in `backend/`, Kotlin DSL; Spotless with palantir-java-format for formatting, JaCoCo for coverage |
 | Database | PostgreSQL 17 (Neon in production, Docker locally), Flyway migrations, JPA with `ddl-auto: validate` |
 | External services | Resend (email over HTTPS) behind the `EmailSender` port; the GitHub REST API behind `GitHubClient`; both through `RestClient` with explicit timeouts |
 | Resilience and limits | Resilience4j (retry for email, circuit breaker for GitHub), Caffeine caches, Bucket4j rate limits |
@@ -21,11 +21,11 @@ Spring Boot 4 traps (`KNOWN-BE-003` to `005` in `backend/docs/ARCHITECTURE.md`):
 
 ## Commands
 
-_(Planned, PF-002: confirm each command when the package is scaffolded.)_ Agents run these from the repository root in exactly this form: it needs no `cd` and matches the permission allowlist.
+Confirmed in PF-002. Agents run these from the repository root in exactly this form: it needs no `cd` and matches the permission allowlist.
 
 ```bash
 make up                                              # PostgreSQL in Docker
-./backend/gradlew -p backend bootRun                 # run with the local profile on :8080
+./backend/gradlew -p backend bootRun                 # run with the local profile on :8080 (SPRING_PROFILES_ACTIVE overrides it)
 ./backend/gradlew -p backend bootTestRun             # run against Testcontainers; no compose needed
 ./backend/gradlew -p backend testUnit                # unit tier: no Spring context, no Docker
 ./backend/gradlew -p backend testUnit --tests "*VisitorHasherTest"
@@ -74,7 +74,7 @@ make openapi                                         # regenerate backend/openap
 - **Abuse resistance.** Every public `POST` has Bean Validation on its request record and a Bucket4j limit keyed by `visitorHash`: visits 30 per minute, contact messages 3 per hour. A rejected request answers 429 `RATE_LIMITED` with `Retry-After`. Bot user agents are dropped from visit counting (Non-Negotiable 4).
 - **Caching.** Caffeine: `statsSummary` for 60 s and `githubRepos` for 1 h. A cache never holds personal data.
 - **Scheduled jobs.** The job is the feature's own component with an `app.{feature}.*-enabled` switch, such as `app.contact.retry-enabled`. Its `@Scheduled` method returns at once when the switch is off. Integration tests turn the switch off and call the job's work method directly. It takes its work from the current state ("what is still `FAILED`") and claims each item with a compare-and-set, never with a scheduler lock.
-- **Configuration.** Validated `@ConfigurationProperties` records under `app.*`; YAML values as `${ENV_VAR:default}`; secrets have no default outside `application-local.yml`, and the `prod` profile fails at startup when one is missing. `server.port: ${PORT:8080}` (Render injects `PORT`), `server.forward-headers-strategy: framework`, and a Hikari pool of 3.
+- **Configuration.** Validated `@ConfigurationProperties` records under `app.*`; YAML values as `${ENV_VAR:default}`; secrets have no default outside `application-local.yml`, and the `prod` profile fails at startup when one is missing. The datasource settings have no default in `application.yml`; `application-local.yml` derives them from the `POSTGRES_*` variables that `compose.yaml` uses. `server.port: ${PORT:8080}` (Render injects `PORT`; locally `SERVER_PORT` overrides it), `server.request.header.forwarded.strategy: framework` (until PF-004 settles which proxy hop to trust), and a Hikari pool of 3.
 - **Logging.** SLF4J (`LoggerFactory.getLogger`). Log identifiers and outcomes, never request bodies, IP addresses, user agents, email addresses, message text, or tokens. Business failures at WARN without a stack trace; unexpected failures at ERROR with one.
 - **Java style.** Constructor injection only. Records for DTOs and value objects. `final` locals where they are not reassigned. `Optional` only as a return type.
 
@@ -110,18 +110,18 @@ A delivery failure is the owner's problem, not the visitor's: the message is saf
 6. Write an `@IntegrationTest` covering success, each error code, and the rate limit; stub external HTTP with WireMock.
 7. Run `make openapi` and commit the regenerated snapshot with the change.
 
-## Project Structure _(planned, PF-002 and PF-004)_
+## Project Structure
 
 ```
 backend/
 ├── build.gradle.kts · settings.gradle.kts · gradlew
-├── Dockerfile                           # multi-stage build; JVM flags sized for Render Free
+├── Dockerfile                           # multi-stage build; JVM flags sized for Render Free (planned, PF-004)
 ├── openapi/openapi.json                 # committed API contract snapshot
 ├── docs/ARCHITECTURE.md · docs/{domain}/ # design guide and implementation plans
 └── src/
     ├── main/java/com/huygialy/portfolio/
-    │   ├── platform/                    # error, web (correlation ID), security (CORS, filter chain), ratelimit, client (ClientInfoResolver, visitor hash, bot filter), openapi
-    │   ├── visit/                       # page views: service, entity, repository, validator
+    │   ├── platform/                    # security (filter chain, built), openapi (built); error, web (correlation ID), ratelimit, client (ClientInfoResolver, visitor hash, bot filter) from PF-004
+    │   ├── visit/                       # page views: service, entity, repository, validator (planned, PF-005)
     │   │   └── api/                     # POST /api/v1/visits
     │   ├── stats/                       # summary query and its cache
     │   │   └── api/                     # GET /api/v1/stats/summary
@@ -133,7 +133,7 @@ backend/
     │   ├── application.yml · application-{local,prod}.yml
     │   └── db/migration/                # Flyway migrations
     └── test/java/com/huygialy/portfolio/
-        ├── support/                     # @IntegrationTest, TestcontainersConfiguration, WireMock setup (test-only)
+        ├── support/                     # @IntegrationTest, TestcontainersConfiguration (built); WireMock setup with the first adapter (PF-006 or PF-007)
         └── …                            # mirrors main
 ```
 
