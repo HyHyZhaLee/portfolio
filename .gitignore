@@ -1,0 +1,40 @@
+# Machine-local notes and the disclosure scrub list — never commit
+.local/
+
+# Claude Code machine-local state (the shared config in .claude/ is committed)
+.claude/settings.local.json
+.claude/worktrees/
+.claude/agent-memory-local/
+CLAUDE.local.md
+
+# Codacy IDE extension rules
+.github/instructions/codacy.instructions.md
+
+# Environment files: only templates are committed
+.env
+.env.*
+!.env.example
+
+# Browser-automation output (Playwright MCP)
+.playwright-mcp/
+
+# Hosting CLIs
+.vercel/
+
+# OS and editors
+.DS_Store
+.idea/
+.vscode/
+*.iml
+**/out/
+
+# Build output and dependencies
+**/build/
+**/.gradle/
+**/node_modules/
+**/dist/
+**/coverage/
+*.log
+
+# VS Code Java (JDT) build output
+backend/bin/

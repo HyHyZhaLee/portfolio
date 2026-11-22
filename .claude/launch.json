@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend",
+      "runtimeExecutable": "./backend/gradlew",
+      "runtimeArgs": ["-p", "backend", "bootRun"],
+      "port": 8080,
+      "autoPort": false
+    },
+    {
+      "name": "frontend",
+      "runtimeExecutable": "./scripts/with-node.sh",
+      "runtimeArgs": ["pnpm", "--dir", "frontend", "dev"],
+      "port": 5173,
+      "autoPort": false
+    }
+  ]
+}
