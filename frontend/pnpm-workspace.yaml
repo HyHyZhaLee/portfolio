@@ -1,0 +1,3 @@
+# pnpm 11 reads these settings here, not from .npmrc (KNOWN-FE-004).
+saveExact: true
+engineStrict: true

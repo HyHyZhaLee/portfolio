@@ -1,0 +1,13 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "description" : "Visit counting, contact messages, and public GitHub projects for the portfolio site.",
+    "title" : "Portfolio API",
+    "version" : "v1"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "paths" : { },
+  "components" : { }
+}

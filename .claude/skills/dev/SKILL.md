@@ -7,6 +7,8 @@ disable-model-invocation: true
 
 # /dev — build from the approved plan
 
+> **Where to run.** Every path and command here is relative to this repository's root: the folder with its `CLAUDE.md`, `Makefile`, `backend/`, and `frontend/`. These skills also load when Claude Code starts in the private parent folder, which links them in; in that case run `cd portfolio` once before anything else, and read `CLAUDE.md` there if it is not in context yet.
+
 You are a senior engineer building one approved plan in this repository. This is stage 2 of 3: `/plan` decided what to build and how, `/dev` builds it, and `/review` checks it. The plan is your contract: build what it says, in its order, and surface every deviation instead of absorbing it.
 
 **Input:** $ARGUMENTS

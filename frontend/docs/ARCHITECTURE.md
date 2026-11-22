@@ -70,7 +70,7 @@ Visit tracking runs only in production builds, once per page load and route chan
 
 ## Known Issues & Anti-Patterns
 
-> When an issue is listed here, apply its rule; there is no need to explore alternatives. Add an entry when a trap costs real time or a review finding recurs. Numbers are permanent. Entries 001 to 006 were verified in the owner's earlier React and Vite scaffold on 2026-11-11; re-check each one when the code that depends on it lands. Evidence: `docs/knowledge/tooling.md`.
+> When an issue is listed here, apply its rule; there is no need to explore alternatives. Add an entry when a trap costs real time or a review finding recurs. Numbers are permanent. Entries 001 to 006 were verified in the owner's earlier React and Vite scaffold on 2026-11-11; re-check each one when the code that depends on it lands. PF-002 re-checked 001, 003, and 004 on 2026-11-22. Evidence: `docs/knowledge/tooling.md`.
 
 ### KNOWN-FE-001: The shell's default Node can be too old for Vite
 
@@ -94,7 +94,7 @@ A client created before MSW patches `globalThis.fetch` sends real requests in te
 
 ### KNOWN-FE-006: A `DOWN` health status arrives as a 503 with a useful body
 
-Spring Boot answers the health endpoint with 503 when the overall status is `DOWN`, and the body still lists every component. **Rule.** In `api-status`, request it with `tolerateStatus(503)`; the body then comes back as `error` and is rendered as data, not as a network failure.
+Spring Boot answers the health endpoint with 503 when the overall status is `DOWN`, and the body still lists every component. **Rule.** In `api-status`, create the client with `createApiClient<LocalPaths>({ tolerateStatus: [503] })`; the body then comes back as `error` and is rendered as data, not as a network failure.
 
 ## Evaluation Checklist
 
@@ -214,17 +214,17 @@ Rows marked _built_ exist; the others are planned until the ticket named has run
 
 | Path | Holds | Ticket |
 |---|---|---|
-| `src/api/` | `schema.d.ts` (generated), `client.ts`, `errors.ts` | PF-002 |
-| `src/app/` | providers, router, layout, theme | PF-002 |
-| `src/index.css` | Tailwind import and `@theme` design tokens | PF-002 |
-| `src/config/test-ids.config.ts` | `TestIds`, `getTestIdProp` | PF-002 |
-| `src/i18n/en.ts` | UI strings and `t()` | PF-002 |
-| `src/test/` | setup, `renderWithProviders`, MSW handlers | PF-002 |
+| `src/api/` | `schema.d.ts` (generated), `client.ts`, `errors.ts` | PF-002, _built_ |
+| `src/app/` | `App`, `AppProviders`, `queryClient`, `routes`, `RootLayout` | PF-002, _built_ |
+| `src/index.css` | Tailwind import and `@theme` design tokens (a minimal palette; PF-003 extends it) | PF-002, _built_ |
+| `src/config/test-ids.config.ts` | `TestIds`, `getTestIdProp` | PF-002, _built_ |
+| `src/i18n/en.ts` | UI strings and `t()` | PF-002, _built_ |
+| `src/test/` | setup, `renderWithProviders`, `renderRoute`, MSW server and handlers | PF-002, _built_ |
 | `src/utils/format.ts` | `formatInstant`, `formatDate`, `formatCount`, `formatPeriod` | PF-003 |
 | `src/components/` | shared primitives: `Section`, `Card`, `Button`, `Chip`, `Skeleton`, `StatusDot`, `ErrorNote` | PF-003 |
-| `src/content/` | typed static content, including `caseStudies/{slug}.ts` and `fallbackRepos.ts` | PF-003 |
+| `src/content/` | typed static content, including `caseStudies/{slug}.ts` and `fallbackRepos.ts` (`profile.ts` holds only the name and title so far) | PF-003 |
 | `src/sections/` | Hero, About, FeaturedWork, HowIWork, Skills, Experience, OpenSource, Education, Contact, Footer | PF-003 |
-| `src/pages/` | `HomePage`, `CaseStudyPage`, `NotFoundPage` | PF-003 |
+| `src/pages/` | `HomePage`, `CaseStudyPage`, `NotFoundPage`, `RouteErrorPage` (`HomePage` is a placeholder; `NotFoundPage` and `RouteErrorPage` exist since PF-002) | PF-003 |
 | `vercel.json` | SPA rewrite for `/work/:slug` | PF-003 |
 | `src/features/visits/` | `useTrackPageView` and its API call | PF-005 |
 | `src/features/stats/` | the footer visit counter | PF-005 |

@@ -28,7 +28,7 @@ flowchart LR
 
 ## Request lifecycle (backend)
 
-1. Render's proxy forwards the request; `server.forward-headers-strategy: framework` resolves the client address.
+1. Render's proxy forwards the request; the forwarded-headers strategy (`server.request.header.forwarded.strategy`) resolves the client address, trusting only Render's hop from PF-004 on.
 2. A correlation filter accepts or creates `X-Correlation-Id` and puts it in the logging context.
 3. CORS allows only the configured origins; the rate-limit filter checks the visitor's bucket for public `POST` endpoints.
 4. The controller validates the request shape and calls one service method.

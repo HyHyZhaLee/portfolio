@@ -1,0 +1,40 @@
+# Shared settings. Connection settings come from environment variables with no default here:
+# application-local.yml supplies the developer-machine defaults, tests use Testcontainers, and Render sets them.
+server:
+  port: ${PORT:8080} # Render injects PORT
+  request:
+    header:
+      forwarded:
+        strategy: framework # resolve the client address behind Render's proxy
+spring:
+  application:
+    name: portfolio
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 3 # 512 MB of RAM and Neon's free connection limits
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate # Flyway owns the schema (Non-Negotiable 6)
+  threads:
+    virtual:
+      enabled: true
+  # spring.mvc.problemdetails stays off: Boot's handler puts framework text in `detail` (Non-Negotiable 5).
+  # PF-004's GlobalExceptionHandler writes the problem responses instead.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-components: always # component statuses (db UP/DOWN), never their details
+springdoc:
+  writer-with-order-by-keys: true # deterministic snapshot
+  api-docs:
+    enabled: true # public on purpose: the README links Swagger UI
+  swagger-ui:
+    enabled: true

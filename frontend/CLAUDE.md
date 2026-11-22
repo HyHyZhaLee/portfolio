@@ -1,16 +1,16 @@
 # frontend/CLAUDE.md
 
-> Written before the code (PF-001) as the working contract for `frontend/`. Commands are confirmed when PF-002 scaffolds the package, and component names from PF-003 on. Where this file and the code disagree, fix whichever is wrong in the same change.
+> Written before the code (PF-001) as the working contract for `frontend/`. The commands were confirmed when PF-002 scaffolded the package; component names are confirmed from PF-003 on. Where this file and the code disagree, fix whichever is wrong in the same change.
 
 ## Quick Reference
 
 | | |
 |---|---|
 | Runtime | Node 24.22.0, pinned in the root `.nvmrc` |
-| Package manager | pnpm 11 through corepack, pinned in `packageManager`; exact versions via `saveExact` in `frontend/pnpm-workspace.yaml` (`KNOWN-FE-004`) |
+| Package manager | pnpm 11.0.9 through corepack, pinned in `packageManager` to corepack's default because commands run from the repository root (`docs/knowledge/tooling.md`); exact versions via `saveExact` in `frontend/pnpm-workspace.yaml` (`KNOWN-FE-004`) |
 | Build | Vite 8, TypeScript 6.0 in strict mode with `noUncheckedIndexedAccess` (7.x waits for typescript-eslint, `KNOWN-FE-003`) |
 | UI | React 19, Tailwind CSS v4 with design tokens in `@theme` (`src/index.css`), dark mode through `prefers-color-scheme` |
-| Routing | React Router: `/`, `/work/:slug`, and a 404; Vercel SPA rewrite in `frontend/vercel.json`; per-route `<title>` and meta description |
+| Routing | React Router 8: `/` and a 404 today; `/work/:slug`, the Vercel SPA rewrite in `frontend/vercel.json`, and per-route `<title>` and meta description come with PF-003 |
 | Data | TanStack Query for server state; `openapi-fetch` with types from `openapi-typescript` |
 | Forms | react-hook-form with zod schemas |
 | Analytics | `@vercel/analytics` (cookieless) plus the site's own visit tracking |
@@ -19,7 +19,7 @@
 
 ## Commands
 
-_(Planned, PF-002: confirm each command when the package is scaffolded.)_ Agents run these from the repository root in exactly this form. `scripts/with-node.sh` selects the Node version from `.nvmrc` and fails clearly if it is not installed. People can run `nvm use`, `cd frontend`, and plain `pnpm …` instead.
+Confirmed in PF-002. Agents run these from the repository root in exactly this form. `scripts/with-node.sh` selects the Node version from `.nvmrc` and fails clearly if it is not installed. People can run `nvm use`, `cd frontend`, and plain `pnpm …` instead.
 
 ```bash
 scripts/with-node.sh pnpm --dir frontend install
@@ -42,7 +42,7 @@ scripts/with-node.sh pnpm --dir frontend gen:api          # regenerate src/api/s
 - Named exports, one component per file. Components are `PascalCase.tsx`, hooks `useThing.ts`, other modules `camelCase.ts`, tests `*.test.ts(x)` next to the code they test.
 - Tailwind utility classes with the theme's tokens (`bg-surface`, `text-muted`); no inline hex colours, no `style` props for colour or spacing, and no new CSS file without a reason.
 
-## Project Structure _(planned, PF-002 and PF-003)_
+## Project Structure _(PF-002 built `api/`, `app/`, `config/`, `i18n/`, `test/`, `index.css`, and the two pages; the rest is planned, PF-003 and later)_
 
 ```
 frontend/
@@ -57,7 +57,7 @@ frontend/
     ├── config/                 # test-ids.config.ts
     ├── content/                # typed static content: profile, skills, experience, howIWork, education, featuredWork, caseStudies/{slug}.ts, fallbackRepos
     ├── features/               # API-backed: visits, stats, contact, projects, api-status
-    ├── pages/                  # HomePage, CaseStudyPage, NotFoundPage
+    ├── pages/                  # HomePage, CaseStudyPage, NotFoundPage, RouteErrorPage
     ├── sections/               # Hero, About, FeaturedWork, HowIWork, Skills, Experience, OpenSource, Education, Contact, Footer
     ├── i18n/                   # en.ts and t() for UI strings
     ├── test/                   # setup, renderWithProviders, MSW handlers
@@ -69,12 +69,12 @@ frontend/
 - **Content is data.** Every word of portfolio copy lives in a typed file under `src/content/`: one file per section, one file per case study in `content/caseStudies/{slug}.ts`. Sections and pages render it; they hold no copy of their own. Only text the owner has reviewed goes in, it follows the disclosure tiers, and it matches the CV (Non-Negotiable 2, `.claude/rules/content-conventions.md`). UI strings such as button labels, form errors, and status messages come from `t('key')` instead.
 - **Sections vs features.** A section (`src/sections/`) is presentational and renders static content. A feature (`src/features/{feature}/`) talks to the API: `api.ts` for typed calls, `queries.ts` for hooks and the query-key factory, `types.ts`, `validation.ts` for zod schemas when there is a form, then components and their tests. Other code imports a feature only from its `index.ts`. A section may embed a feature component, as `OpenSource` embeds the projects list and `Footer` embeds the visit counter and the API status dot.
 - **The page never waits for the API.** Every API-backed view has a loading state, a fallback, and an error state, and nothing above it waits for it (Non-Negotiable 1). The projects list starts from `content/fallbackRepos.ts` and swaps in live data; the counter and the status dot hide or grey out on failure. After about 3 s of loading, a view shows the cold-start hint ("Waking up the free-tier API…").
-- **API calls.** Use the client from `src/api/client.ts` only. Its base URL is `import.meta.env.VITE_API_URL` (empty in development, where the Vite proxy forwards `/api`, `/actuator`, `/v3/api-docs`, and `/swagger-ui` to `localhost:8080`). It adds `X-Correlation-Id`, applies a timeout (15 s by default, 75 s for the contact form so it survives a cold start), and throws `ApiError` (`status`, `code`, `detail`, `correlationId`, `errors`) for problem responses, or `code: 'NETWORK_ERROR'` when no response arrives. The health endpoint is outside the OpenAPI contract; `api-status` calls it through `createApiClient<LocalPaths>()` with types in its `types.ts`, and treats a 503 as data (`KNOWN-FE-006`).
+- **API calls.** Use the client from `src/api/client.ts` only. Its base URL is `import.meta.env.VITE_API_URL` (empty in development, where the Vite proxy forwards `/api`, `/actuator`, `/v3/api-docs`, and `/swagger-ui` to `localhost:8080`). It adds `X-Correlation-Id`, applies a timeout (15 s by default, 75 s for the contact form so it survives a cold start), and throws `ApiError` (`status`, `code`, `detail`, `correlationId`, `errors`) for problem responses, `code: 'UNEXPECTED_RESPONSE'` for an error without problem JSON or a 2xx body that is not JSON, and `code: 'NETWORK_ERROR'` when no usable response arrives. It falls back when the browser lacks `AbortSignal.any` or `crypto.randomUUID`. The health endpoint is outside the OpenAPI contract; `api-status` calls it through `createApiClient<LocalPaths>({ tolerateStatus: [503] })` with types in its `types.ts`, and treats the 503 body as data (`KNOWN-FE-006`).
 - **Queries.** One hook per query, keys from the feature's factory, no retry on 4xx. Live data never replaces content the visitor is reading mid-scroll with a layout jump: reserve its space.
 - **Mutations.** Creating mutations (a visit, a contact message) never retry on their own.
 - **Visit tracking.** `useTrackPageView` in `features/visits` runs once per page load and once per route change, only in production builds. It reads `?ref=`, keeps it in `sessionStorage`, removes it from the address bar with `history.replaceState`, and posts `{path, referrer, ref}` with `keepalive: true`. It does nothing when `localStorage.notrack === '1'` (set by visiting `?notrack=1`) or when `navigator.globalPrivacyControl` is true (Non-Negotiable 3). It never sets a cookie.
 - **Forms.** react-hook-form with `zodResolver`. Schemas mirror the server's limits. Map `ApiError.errors` onto fields after a `VALIDATION_FAILED` response; show a friendly message for `RATE_LIMITED`. The contact form's honeypot field is visually hidden, skipped by keyboard focus, and labelled so screen readers ignore it.
-- **Routing and SEO.** `/` is the home page, `/work/:slug` a case study whose slug must exist in `content/caseStudies/` (anything else renders the 404 page), and every route sets its own `<title>` and meta description. `vercel.json` rewrites unknown paths to `index.html`.
+- **Routing and SEO.** `/` is the home page, `/work/:slug` a case study whose slug must exist in `content/caseStudies/` (anything else renders the 404 page), and every route sets its own `<title>` and meta description. A page that throws while rendering is replaced by `RouteErrorPage` inside the layout (`buildRoutes` in `src/app/routes.tsx`); it never shows the error itself. `vercel.json` rewrites unknown paths to `index.html`.
 - **Errors.** Render with `ErrorNote`, which shows a short message and, for API errors, the `code` and a copyable `correlationId`. Branch on `code`, never on text.
 - **Test IDs.** Every interactive element: `{...getTestIdProp(TestIds.contact.submitButton)}`, which renders `data-test-id="contact-submit-button"`. Naming is `{feature}-{element}-{type}`.
 - **Performance.** Images below the fold are lazy-loaded with explicit `width` and `height`; fonts are self-hosted or preloaded; the home page stays within a Lighthouse score of 90 or more in every category.

@@ -6,6 +6,8 @@ argument-hint: "[PF-NNN] [harden]"
 
 # /review — check the change against the plan and the conventions
 
+> **Where to run.** Every path and command here is relative to this repository's root: the folder with its `CLAUDE.md`, `Makefile`, `backend/`, and `frontend/`. These skills also load when Claude Code starts in the private parent folder, which links them in; in that case run `cd portfolio` once before anything else, and read `CLAUDE.md` there if it is not in context yet.
+
 This is stage 3 of 3: `/plan` decided what to build and how, `/dev` built it, and `/review` checks it before `/create-pr`. **Report first, and change nothing until the user picks the findings to fix.**
 
 **Input:** $ARGUMENTS (a ticket ID, `harden`, both, or empty)

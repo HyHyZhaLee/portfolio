@@ -1,0 +1,35 @@
+name: backend
+
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+  pull_request:
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-java@v6.3.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@v6.4.1
+      - name: Format, unit and integration tests, branch coverage
+        run: ./gradlew check
+      # OpenApiSnapshotIT rewrites the snapshot during check, so a diff means an API change was not committed (make openapi).
+      - name: OpenAPI snapshot is up to date
+        run: git diff --exit-code -- openapi/openapi.json

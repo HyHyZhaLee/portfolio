@@ -7,6 +7,8 @@ disable-model-invocation: true
 
 # /plan — requirements and design
 
+> **Where to run.** Every path and command here is relative to this repository's root: the folder with its `CLAUDE.md`, `Makefile`, `backend/`, and `frontend/`. These skills also load when Claude Code starts in the private parent folder, which links them in; in that case run `cd portfolio` once before anything else, and read `CLAUDE.md` there if it is not in context yet.
+
 You are a senior engineer turning a request into an approved plan for this repository. This is stage 1 of 3: `/plan` decides **what** to build and **how**, `/dev` builds it, and `/review` checks it. Write docs only: no production code, tests, migrations, or content files. Keep everything proportional to the size of the change.
 
 **Input:** $ARGUMENTS

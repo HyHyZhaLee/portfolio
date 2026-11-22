@@ -7,6 +7,11 @@ FRONTEND := scripts/with-node.sh pnpm --dir frontend
 
 # $(call require,<path>) stops with a clear message until the scaffold ticket that creates <path> has run.
 require = @test -e $(1) || { echo "$(1) does not exist yet: it arrives with PF-002 (docs/prd/backlog.md)."; exit 1; }
+# $(LOAD_ENV) exports the repository's .env (gitignored; template .env.example) into one recipe line, so the run targets
+# and the helper scripts see the same port and database overrides that docker compose reads by itself. The check and
+# test targets do not load it, so a local SPRING_PROFILES_ACTIVE never leaks into the test suites. As with compose, a
+# variable already exported by the shell wins: its value is saved before .env is read and restored after.
+LOAD_ENV = if [ -f .env ]; then shell_env="$$(export -p)"; set -a; . ./.env; set +a; eval "$$shell_env"; fi;
 # $(call frontend_or_skip,<pnpm script and args>) runs a frontend script once frontend/ is scaffolded, and says so when skipped.
 frontend_or_skip = @if [ -e frontend/package.json ]; then $(FRONTEND) $(1); else echo "frontend: skipped, frontend/package.json arrives with PF-002"; fi
 
@@ -28,17 +33,15 @@ ps: ## Show the compose services
 	docker compose ps
 
 status: ## Report the whole local stack (read-only)
-	@scripts/check-services.sh
+	@$(LOAD_ENV) scripts/check-services.sh
 
 backend: ## Run the backend with the local profile on :8080, first stopping a stale copy that holds the port
 	$(call require,backend/gradlew)
-	@scripts/free-port.sh backend
-	$(GRADLE) bootRun
+	@$(LOAD_ENV) scripts/free-port.sh backend && $(GRADLE) bootRun
 
 frontend: ## Run the frontend dev server on :5173, first stopping a stale copy that holds the port
 	$(call require,frontend/package.json)
-	@scripts/free-port.sh frontend
-	$(FRONTEND) dev
+	@$(LOAD_ENV) scripts/free-port.sh frontend && $(FRONTEND) dev
 
 check: ## Full quality gate: formatting, lint, types, tests, coverage
 	$(call require,backend/gradlew)

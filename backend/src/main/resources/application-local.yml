@@ -1,0 +1,10 @@
+# Developer machine (make backend). The database defaults match compose.yaml and follow the same
+# POSTGRES_* overrides, which `make backend` loads from the repository's .env when it exists.
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:${POSTGRES_PORT:5432}/${POSTGRES_DB:portfolio}}
+    username: ${DB_USERNAME:${POSTGRES_USER:portfolio}}
+    password: ${DB_PASSWORD:${POSTGRES_PASSWORD:portfolio}}
+logging:
+  level:
+    com.huygialy.portfolio: DEBUG

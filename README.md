@@ -2,15 +2,15 @@
 
 Personal portfolio site and live full-stack demo: a React frontend that always loads, a Spring Boot API for visit stats, contact messages, and GitHub projects, and PostgreSQL, all on free hosting tiers.
 
-> **Status:** under construction. The repository has its conventions, docs, and tooling; the application code arrives with PF-002 onward ([backlog](docs/prd/backlog.md)).
+> **Status:** under construction. Both packages are scaffolded and pass their quality gates (PF-002); the site's sections and the API features arrive with PF-003 onward ([backlog](docs/prd/backlog.md)).
 
-## Stack _(planned)_
+## Stack
 
 | Layer | Technology | Hosting |
 |---|---|---|
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS, TanStack Query, React Router | Vercel |
-| Backend | Java 21, Spring Boot 4, Gradle, Flyway, springdoc OpenAPI | Render (Docker) |
-| Database | PostgreSQL 17 | Neon |
+| Frontend | React 19, TypeScript 6, Vite 8, Tailwind CSS 4, TanStack Query, React Router 8 | Vercel _(planned, PF-003)_ |
+| Backend | Java 21, Spring Boot 4.2, Gradle 9, Flyway, springdoc OpenAPI | Render, Docker _(planned, PF-004)_ |
+| Database | PostgreSQL 17 | Neon _(planned, PF-004)_ |
 | Quality | JUnit, Testcontainers, WireMock, Vitest, Testing Library, MSW, GitHub Actions | — |
 
 ## Repository layout
@@ -28,13 +28,14 @@ Personal portfolio site and live full-stack demo: a React frontend that always l
 ```bash
 make help        # list every target
 make up          # start PostgreSQL in Docker
-make backend     # run the API on :8080 (after PF-002)
-make frontend    # run the site on :5173 (after PF-002)
+make backend     # run the API on :8080 with the local profile (Swagger UI at /swagger-ui.html)
+make frontend    # run the site on :5173; it proxies /api and /actuator to the backend
 make status      # read-only report of the local stack
 make check       # all quality gates
+make openapi     # regenerate the API snapshot and the frontend's generated types
 ```
 
-Copy `.env.example` to `.env` to override local defaults. Node commands run through `scripts/with-node.sh`, which uses the version pinned in `.nvmrc`.
+Copy `.env.example` to `.env` to override local ports and database settings: `docker compose`, `make backend`, `make frontend`, and `make status` all read it, and a variable exported in your shell wins over it. Node commands run through `scripts/with-node.sh`, which uses the version pinned in `.nvmrc`.
 
 ## How it is built
 

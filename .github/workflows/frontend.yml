@@ -1,0 +1,41 @@
+name: frontend
+
+on:
+  push:
+    branches: [main]
+    paths: ["frontend/**", "backend/openapi/openapi.json", ".nvmrc", ".github/workflows/frontend.yml"]
+  pull_request:
+    paths: ["frontend/**", "backend/openapi/openapi.json", ".nvmrc", ".github/workflows/frontend.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v6.1.1
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Generated API types match the OpenAPI snapshot
+        run: pnpm gen:api && git diff --exit-code -- src/api/schema.d.ts
+      - run: pnpm check:type
+      - run: pnpm check:lint
+      - run: pnpm check:format
+      - run: pnpm coverage
+      - run: pnpm build

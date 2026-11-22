@@ -29,8 +29,8 @@ It is under construction: `docs/prd/backlog.md` says what exists today.
 
 | Path | What it is | Read |
 |---|---|---|
-| `backend/` | Java 21, Spring Boot 4, Gradle 9, REST + OpenAPI, PostgreSQL + Flyway; the visits, stats, contact, and projects APIs _(planned, PF-002)_ | `backend/CLAUDE.md`, `backend/docs/ARCHITECTURE.md` |
-| `frontend/` | React 19, TypeScript, Vite, Tailwind CSS, TanStack Query, React Router, API types generated from OpenAPI _(planned, PF-002)_ | `frontend/CLAUDE.md`, `frontend/docs/ARCHITECTURE.md` |
+| `backend/` | Java 21, Spring Boot 4, Gradle 9, REST + OpenAPI, PostgreSQL + Flyway; scaffolded in PF-002 (health, security chain, OpenAPI snapshot, test tiers); the visits, stats, contact, and projects APIs _(planned, PF-004 to PF-007)_ | `backend/CLAUDE.md`, `backend/docs/ARCHITECTURE.md` |
+| `frontend/` | React 19, TypeScript, Vite, Tailwind CSS, TanStack Query, React Router, API types generated from OpenAPI; scaffolded in PF-002 (API client, providers, routes, test harness); the sections _(planned, PF-003)_ | `frontend/CLAUDE.md`, `frontend/docs/ARCHITECTURE.md` |
 | `docs/` | Product rules and disclosure tiers, cross-package architecture, ADRs, knowledge base, backlog | `docs/README.md` |
 | `scripts/` | Helper scripts for people and agents (`with-node.sh`, `check-services.sh`, `free-port.sh`) | the script headers |
 | `.claude/` | Skills, path-scoped rules, the `code-reviewer` agent, launch and permission settings | this file |
@@ -127,7 +127,7 @@ Record a fact in `docs/knowledge/` when you verified it during the work and it i
 
 Run `/review` after any non-trivial change; it runs the `code-reviewer` agent as part of its check. Conventions load automatically from `.claude/rules/` when matching files are read or edited: Java (`backend/`), REST API (`backend/`, `frontend/src/api/`), React (`frontend/`), content (`frontend/src/content/`, `docs/product/`), docs (`*.md`), and security (always).
 
-Start Claude Code from this folder (`CV/portfolio`), not from the parent CV folder, so this file, the rules, the skills, and the permission settings all load.
+Start Claude Code from this folder (`CV/portfolio`) or from the parent CV folder. The parent folder's `.claude/skills/`, `.claude/agents/`, and `.claude/settings.json` link to this repository's, so the skills, the `code-reviewer` agent, and the permission rules apply from there too; each skill then starts with `cd portfolio`, and the allowlisted commands match once the session works from here. Starting in the parent folder, this file and the rules load as soon as a file here is read.
 
 ## Key Documentation
 

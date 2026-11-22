@@ -1,0 +1,5 @@
+# Render. DB_URL, DB_USERNAME, and DB_PASSWORD come from the Render environment (application.yml gives them no default).
+logging:
+  structured:
+    format:
+      console: ecs # one JSON object per line
