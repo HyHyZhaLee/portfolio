@@ -88,6 +88,48 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Verified**: two regenerations of the snapshot diffed identical; 2026-11-11. Re-confirmed with springdoc 3.2.1 on 2026-11-22
 - **Discovered in**: Carried over; re-checked in PF-002
 
+### Security denials and problem JSON in Spring 7
+- **Rule / Behavior**: An `AuthenticationEntryPoint` and an `AccessDeniedHandler` that call the MVC `HandlerExceptionResolver` bean named `handlerExceptionResolver` (`resolveException(request, response, null, ex)`) make the `@RestControllerAdvice` render security denials, so they answer the same problem JSON as MVC errors. With Jackson 3, values set through `ProblemDetail.setProperty(...)` serialize as top-level members (`$.code`, not `$.properties.code`). A correlation filter registered through a `FilterRegistrationBean` at the highest precedence runs before the security chain, so denials carry the ID too.
+- **Source**: `backend/src/main/java/com/huygialy/portfolio/platform/security/SecurityConfig.java`, `platform/error/GlobalExceptionHandler.java`, `platform/web/WebConfig.java`
+- **Verified**: `PlatformWebIT` asserts 404 `application/problem+json` with top-level `code` and `correlationId` for `GET /actuator/env` and `POST /actuator/health`; 2026-11-23
+- **Discovered in**: PF-004
+
+### CORS rejection bypasses the exception handler
+- **Rule / Behavior**: With `http.cors(withDefaults())` and a `CorsConfigurationSource` bean, Spring Security answers a preflight from an allowed origin with 200 before authorization, even when the path ends in `denyAll()` for other methods. A cross-origin request from any other origin gets 403 with no allow headers from Spring's `DefaultCorsProcessor`, which does not go through the `@RestControllerAdvice`, so it is not problem JSON.
+- **Source**: `DefaultCorsProcessor.rejectRequest` in spring-web; `backend/src/main/java/com/huygialy/portfolio/platform/security/SecurityConfig.java`
+- **Verified**: `PlatformWebIT` preflights from `https://allowed.example` (200 with `Access-Control-Allow-Origin`) and `https://evil.example` (403 without it); 2026-11-23
+- **Discovered in**: PF-004
+
+### Boot 4.2 class locations used by platform code and tests
+- **Rule / Behavior**: `FilterRegistrationBean` is still `org.springframework.boot.web.servlet.FilterRegistrationBean`. For `ApplicationContextRunner` tests, `ConfigurationPropertiesAutoConfiguration` is in `org.springframework.boot.autoconfigure.context` and `ValidationAutoConfiguration` in `org.springframework.boot.validation.autoconfigure` (module `spring-boot-validation`, brought by `spring-boot-starter-validation`).
+- **Source**: `backend/src/main/java/com/huygialy/portfolio/platform/web/WebConfig.java`; `backend/src/test/java/com/huygialy/portfolio/platform/PlatformPropertiesTest.java`
+- **Verified**: both compile and pass against Boot 4.2.0; 2026-11-23
+- **Discovered in**: PF-004
+
+### Bucket4j 8.22 API
+- **Rule / Behavior**: The Java 17+ artifact is `com.bucket4j:bucket4j_jdk17-core`. A limit is `Bandwidth.builder().capacity(n).refillGreedy(n, period).build()`, a bucket `Bucket.builder().addLimit(bandwidth).withCustomTimePrecision(timeMeter).build()`, and `tryConsumeAndReturnRemaining(1)` returns a probe with `isConsumed()` and `getNanosToWaitForRefill()`. A custom `TimeMeter` that reads an injected `Clock` lets tests move time. 8.23.0 was published on 2026-11-22, so PF-004 pinned 8.22.0 (2026-11-03).
+- **Source**: `backend/src/main/java/com/huygialy/portfolio/platform/ratelimit/RateLimiter.java`; Maven Central `maven-metadata.xml`
+- **Verified**: `RateLimiterTest` rejects the 31st visit in a minute and passes again after the clock moves one minute; 2026-11-23
+- **Discovered in**: PF-004
+
+### Backend Docker image baseline
+- **Rule / Behavior**: `backend/Dockerfile` builds on `eclipse-temurin:21.0.13_9-jdk` and runs on `eclipse-temurin:21.0.13_9-jre` (both Ubuntu-based, so `useradd` exists). The image is about 600 MB. Under `docker run --memory=512m` with the Render Free JVM flags it starts in about 2.4 s on a developer laptop and uses about 250 MiB after startup; Render's 0.1 CPU will be far slower, which PF-012 measures. Without a required setting such as `ALLOWED_ORIGINS` it stops at startup with a binding error naming the property.
+- **Source**: `backend/Dockerfile`; `docker run` against the compose PostgreSQL
+- **Verified**: health UP with `db` UP on the image, `docker stats`, and the failed start without `ALLOWED_ORIGINS`; 2026-11-23
+- **Discovered in**: PF-004
+
+### Firewall rejections reach `/error`, not the advice
+- **Rule / Behavior**: Spring Security's `StrictHttpFirewall` rejects URLs such as one containing a semicolon before any controller and answers 400 through `sendError`, so the response goes through the `/error` dispatch. Boot's `BasicErrorController` then writes its default body (`timestamp`, `status`, `error`, `path` as `application/json`), bypassing the `@RestControllerAdvice`. A bean implementing `org.springframework.boot.webmvc.error.ErrorController` (Boot 4 package) replaces `BasicErrorController`; on that dispatch the status is in `RequestDispatcher.ERROR_STATUS_CODE` and the original path in `RequestDispatcher.ERROR_REQUEST_URI`.
+- **Source**: `backend/src/main/java/com/huygialy/portfolio/platform/error/ProblemErrorController.java`
+- **Verified**: a probe test saw Boot's default body for `GET /api/v1/x;jsessionid=1`; with the controller, `PlatformWebIT` gets 400 problem JSON with `code` `VALIDATION_FAILED` and the original path as `instance`; 2026-11-23
+- **Discovered in**: PF-004
+
+### `bootTestRun` is a separate `BootRun` task
+- **Rule / Behavior**: Configuration on `tasks.named<BootRun>("bootRun")` does not reach `bootTestRun`, which is another `BootRun` task (it runs the test entry point against Testcontainers). Settings meant for both, such as a default profile, go on `tasks.withType<BootRun>().configureEach { … }`.
+- **Source**: `backend/build.gradle.kts`
+- **Verified**: `bootTestRun` failed at startup without the `local` profile's settings, then started with `The following 1 profile is active: "local"` and answered health UP on a spare port; 2026-11-23
+- **Discovered in**: PF-004
+
 ### Spring Boot's scheduler defaults to one thread and does not wait at shutdown
 - **Rule / Behavior**: In Boot 4.1.2, `spring.task.scheduling.pool.size` defaults to 1, `spring.task.scheduling.shutdown.await-termination` to false, and `await-termination-period` has no default, so one slow `@Scheduled` job delays every other job, and shutdown interrupts a running one. Relevant to the contact retry job.
 - **Source**: `META-INF/spring-configuration-metadata.json` in `spring-boot-autoconfigure-4.1.2.jar`

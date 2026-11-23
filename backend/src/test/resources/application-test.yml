@@ -1,0 +1,6 @@
+# Integration tests (@IntegrationTest). Synthetic values for the settings that have no default outside the local profile.
+app:
+  cors:
+    allowed-origins: https://allowed.example
+  client:
+    visitor-hash-secret: integration-test-secret

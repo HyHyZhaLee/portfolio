@@ -2,7 +2,6 @@ package com.huygialy.portfolio;
 
 import com.huygialy.portfolio.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @IntegrationTest
@@ -36,14 +35,35 @@ class HealthIT {
     }
 
     @Test
-    void pathsOutsideThePublicListAreDenied() {
-        client.get().uri("/actuator/env").exchange().expectStatus().isEqualTo(HttpStatus.FORBIDDEN);
-        client.post().uri("/actuator/health").exchange().expectStatus().isEqualTo(HttpStatus.FORBIDDEN);
+    void pathsOutsideThePublicListAnswerNotFound() {
+        client.get()
+                .uri("/actuator/env")
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody()
+                .jsonPath("$.code")
+                .isEqualTo("NOT_FOUND");
+        client.post()
+                .uri("/actuator/health")
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody()
+                .jsonPath("$.code")
+                .isEqualTo("NOT_FOUND");
     }
 
     @Test
     void anErrorOnAPublicPathKeepsItsStatus() {
         // The 404 is rendered through the /error dispatch, which the security chain must not deny.
-        client.get().uri("/swagger-ui/missing.js").exchange().expectStatus().isNotFound();
+        client.get()
+                .uri("/swagger-ui/missing.js")
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody()
+                .jsonPath("$.code")
+                .isEqualTo("NOT_FOUND");
     }
 }

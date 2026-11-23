@@ -46,11 +46,11 @@ A feature depends on a port it owns and never on a provider's API: `contact` use
 
 ### 9. Privacy by design
 
-The backend never stores or logs a raw IP address, a full user-agent string, or a full referrer URL (Non-Negotiable 3). `ClientInfoResolver` is the only class that reads them: it returns a parsed device type and browser, the referrer host, and `visitorHash = HMAC-SHA256(app.visitor-hash-secret, ip + "|" + userAgent)` as 64 hex characters. Contact messages hold a real visitor's name, email, and text: they are stored for the owner and sent to the owner, and never logged, cached, or returned. The client IP comes from the forwarded headers Render's proxy sets. The scaffold uses `server.request.header.forwarded.strategy: framework`, whose `ForwardedHeaderFilter` takes the leftmost `X-Forwarded-For` value, which any client can set; before the visitor hash and the rate limits depend on the address, PF-004 must trust only Render's hop (the `native` strategy with the proxy's addresses as trusted proxies, or the rightmost untrusted `X-Forwarded-For` entry in `ClientInfoResolver`), confirm it against the running service, and record it in `docs/knowledge/`.
+The backend never stores or logs a raw IP address, a full user-agent string, or a full referrer URL (Non-Negotiable 3). `ClientInfoResolver` is the only class that reads them: it returns a parsed device type and browser family, a bot flag, and `visitorHash = HMAC-SHA256(app.client.visitor-hash-secret, ip + "|" + userAgent)` as 64 hex characters. The referrer arrives in the visit request body, and the visit feature keeps its host only. Contact messages hold a real visitor's name, email, and text: they are stored for the owner and sent to the owner, and never logged, cached, or returned. The client IP is the `X-Forwarded-For` entry the trusted proxy added, never one a client sent: the forwarded strategy is `none` (the `framework` strategy would trust the leftmost, client-set entry), and `ClientInfoResolver` takes the entry at `app.client.trusted-proxy-hops` counted from the right (default 1), or the connection's address when there are fewer entries or no header. Render's layout is confirmed once in PF-012 with `app.client.log-forwarded-for-once`, the owner-approved one-time exception to the no-IP-in-logs rule (PF-004 D3), and recorded in `docs/knowledge/`.
 
 ### 10. Public write endpoints resist abuse
 
-There is no login, so every public `POST` defends itself (Non-Negotiable 4). Its request record has Bean Validation with explicit maximum lengths. A Bucket4j limit keyed by `visitorHash` caps it: visits 30 per minute, contact messages 3 per hour; a rejected request answers 429 `RATE_LIMITED` with `Retry-After`. The contact form has a honeypot field: a filled one is stored as `SPAM`, answered with the same 202 as a real message, and never sent. Visits from bot user agents are dropped before they are counted. CORS allows only the origins in `app.allowed-origins`. The frontend's checks are a convenience, never the defense.
+There is no login, so every public `POST` defends itself (Non-Negotiable 4). Its request record has Bean Validation with explicit maximum lengths. A Bucket4j limit keyed by `rateLimitKey` (an HMAC of the client IP alone, so a changed user agent does not reset it; PF-004 D6) caps it, through `RateLimiter.check` called by the command service before any work: visits 30 per minute, contact messages 3 per hour; a rejected request answers 429 `RATE_LIMITED` with `Retry-After`. The contact form has a honeypot field: a filled one is stored as `SPAM`, answered with the same 202 as a real message, and never sent. Visits from bot user agents are dropped before they are counted. CORS allows only the origins in `app.cors.allowed-origins`. The frontend's checks are a convenience, never the defense.
 
 ### 11. It fits the free tier
 
@@ -58,7 +58,7 @@ The backend runs on Render Free: 512 MB of RAM, 0.1 CPU, a disk that is wiped on
 
 ### 12. Configuration is typed and validated
 
-Settings bind to validated `@ConfigurationProperties` records under `app.*`; `@Value` is not used. YAML values are written as `${ENV_VAR:default}`. Secrets (`app.visitor-hash-secret`, the Resend key, the GitHub token) have no default except in `application-local.yml`, and the `prod` profile fails at startup when one is missing. `server.port` is `${PORT:8080}` because Render injects `PORT`. Time comes from the injected `Clock`, never from `Instant.now()` directly.
+Settings bind to validated `@ConfigurationProperties` records under `app.*`; `@Value` is not used. YAML values are written as `${ENV_VAR:default}`. Secrets (`app.client.visitor-hash-secret`, the Resend key, the GitHub token) and the CORS origins (`app.cors.allowed-origins`) have no default except in `application-local.yml`, and the `prod` profile fails at startup when one is missing. `server.port` is `${PORT:8080}` because Render injects `PORT`. Time comes from the injected `Clock`, never from `Instant.now()` directly.
 
 ### 13. Observable by default
 
@@ -177,13 +177,13 @@ Rows marked _built_ exist; the others are planned until the ticket named has run
 
 | Need | Use | Package | Ticket |
 |---|---|---|---|
-| Throw a client-safe failure | `ApiException` + `ErrorCode` (`VALIDATION_FAILED` 400, `NOT_FOUND` 404, `RATE_LIMITED` 429, `INTERNAL_ERROR` 500) | `platform.error` | PF-004 |
-| Turn exceptions into problem JSON | `GlobalExceptionHandler` (the only `@RestControllerAdvice`) | `platform.error` | PF-004 |
-| Correlation ID on requests, logs, and problem bodies | `CorrelationIdFilter` | `platform.web` | PF-004 |
-| CORS allowlist and the public endpoint list | `SecurityConfig` (stateless chain and the public `GET` list built in PF-002; CORS and the API paths come with PF-004) | `platform.security` | PF-002, PF-004 |
-| Client IP, device, browser, referrer host, visitor hash | `ClientInfoResolver` → `ClientInfo` | `platform.client` | PF-004 |
-| Drop bot traffic | `BotFilter` | `platform.client` | PF-004 |
-| Per-visitor rate limits | `RateLimiter` with `RateLimit.VISIT` and `RateLimit.CONTACT` | `platform.ratelimit` | PF-004 |
+| Throw a client-safe failure | `ApiException` + `ErrorCode` (`VALIDATION_FAILED` 400, `NOT_FOUND` 404, `RATE_LIMITED` 429, `INTERNAL_ERROR` 500) | `platform.error` | PF-004, _built_ |
+| Turn exceptions into problem JSON | `GlobalExceptionHandler` (the only `@RestControllerAdvice`; also renders the security chain's denials as 404 `NOT_FOUND`), with `ProblemErrorController` for the `/error` dispatch | `platform.error` | PF-004, _built_ |
+| Correlation ID on requests, logs, and problem bodies | `CorrelationIdFilter`, registered first by `WebConfig` | `platform.web` | PF-004, _built_ |
+| CORS allowlist and the public endpoint list | `SecurityConfig` and `CorsProperties` (each feature adds its API paths to the public list) | `platform.security` | PF-002, PF-004, _built_ |
+| Visitor hash, rate-limit key, device type, browser family, bot flag | `ClientInfoResolver` → `ClientInfo` (`VisitorHasher`, `UserAgentParser` inside) | `platform.client` | PF-004, _built_ |
+| Drop bot traffic | `ClientInfo.bot()`, from `BotFilter` | `platform.client` | PF-004, _built_ |
+| Per-client rate limits | `RateLimiter.check(RateLimit.VISIT or RateLimit.CONTACT, client.rateLimitKey())` | `platform.ratelimit` | PF-004, _built_ |
 | Deterministic OpenAPI output and the snapshot test | `OpenApiConfig`, `OpenApiSnapshotIT` | `platform.openapi` | PF-002, _built_ |
 | Record a page view | `VisitCommandService` | `visit` | PF-005 |
 | Read totals for the footer | `StatsQueryService` (cached 60 s) | `stats` | PF-005 |
