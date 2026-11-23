@@ -1,8 +1,10 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { TestIds } from '../config/test-ids.config';
+import { caseStudyPath } from '../content/caseStudies/slugs';
 import { profile } from '../content/profile';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { renderRoute, renderWithProviders } from '../test/renderWithProviders';
@@ -20,6 +22,18 @@ describe('routes', () => {
         expect(screen.getByTestId(TestIds.app.skipLink)).toHaveAttribute('href', '#main-content');
     });
 
+    it('renders the header, the hero proof links, the CV links, and the home title', () => {
+        renderRoute('/');
+
+        expect(screen.getByTestId(TestIds.header.homeLink)).toBeInTheDocument();
+        const proofLinks = screen.getAllByTestId(TestIds.hero.proofLink);
+        expect(proofLinks.map((link) => link.getAttribute('href'))).toEqual(profile.proofPoints.map((point) => caseStudyPath(point.slug)));
+        expect(proofLinks).toHaveLength(3);
+        expect(screen.getByTestId(TestIds.header.cvLink)).toHaveAttribute('href', '/cv.pdf');
+        expect(screen.getByTestId(TestIds.hero.cvLink)).toHaveAttribute('href', '/cv.pdf');
+        expect(document.title).toBe('Will Ly - Full-stack Software Engineer');
+    });
+
     it('renders the 404 page for an unknown path and links back home', async () => {
         const { router } = renderRoute('/no-such-page');
 
@@ -34,7 +48,11 @@ describe('routes', () => {
         vi.spyOn(console, 'error').mockImplementation(() => undefined); // React and the router report the caught error
         const router = createMemoryRouter(buildRoutes([{ index: true, element: <Broken /> }]), { initialEntries: ['/'] });
 
-        render(<RouterProvider router={router} />);
+        render(
+            <QueryClientProvider client={new QueryClient()}>
+                <RouterProvider router={router} />
+            </QueryClientProvider>,
+        );
 
         expect(screen.getByRole('heading', { level: 1, name: 'Something went wrong' })).toBeInTheDocument();
         expect(screen.getByTestId(TestIds.app.skipLink)).toBeInTheDocument();

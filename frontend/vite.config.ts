@@ -28,6 +28,8 @@ export default defineConfig(({ mode }) => {
         },
         test: {
             environment: 'jsdom',
+            // An absolute API origin: in Node, openapi-fetch's \`new Request()\` rejects the relative paths browsers resolve.
+            env: { VITE_API_URL: 'http://api.test' },
             setupFiles: ['./src/test/setup.ts'],
             coverage: {
                 provider: 'v8',

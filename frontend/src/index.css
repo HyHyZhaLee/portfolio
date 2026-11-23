@@ -1,28 +1,146 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens. Utilities such as bg-surface and text-muted read these variables, so the dark scheme only
- * redefines the variables. PF-003 extends the palette and adds typography.
+ * Design tokens from the owner-approved design (PF-003 D1). Utilities such as bg-surface, text-muted, font-ui, and
+ * rounded-panel read these variables. The site uses the light palette whatever the system colour scheme (PF-003 D9);
+ * the approved dark values are kept in the PF-003 plan (P1) for a possible toggle. Status colours are used for dots
+ * only, never for text, so every status label stays readable.
  */
 @theme {
-    --color-surface: oklch(0.99 0.003 250);
-    --color-surface-raised: oklch(0.96 0.006 250);
-    --color-ink: oklch(0.22 0.02 260);
-    --color-muted: oklch(0.45 0.02 260);
-    --color-line: oklch(0.88 0.01 260);
-    --color-accent: oklch(0.5 0.16 255);
-    --color-accent-ink: oklch(0.99 0.003 250);
+    --color-surface: #f2f4f3;
+    --color-surface-raised: #ffffff;
+    --color-surface-sunk: #e7ebe9;
+    --color-ink: #18211e;
+    --color-muted: #55615c;
+    --color-line: #cbd3d0;
+    --color-accent: #1f4fd1;
+    --color-accent-ink: #ffffff;
+    --color-accent-soft: #e3e9fb;
+    --color-status-ok: #17855a;
+    --color-status-wake: #b7770a;
+    --color-status-idle: #87918e;
+
+    --font-ui: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-read: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
+
+    --text-caption: 0.8125rem;
+    --text-caption--line-height: 1.4;
+    --text-label: 0.9375rem;
+    --text-label--line-height: 1.5;
+    --text-body: 1.0625rem;
+    --text-body--line-height: 1.6;
+    --text-title: 1.1875rem;
+    --text-title--line-height: 1.25;
+    --text-display: clamp(3.1rem, 8vw, 5.4rem);
+    --text-display--line-height: 0.92;
+    --text-display--letter-spacing: -0.045em;
+    --text-subtitle: clamp(1.3rem, 2.6vw, 1.75rem);
+    --text-subtitle--line-height: 1.2;
+    --text-section: clamp(1.9rem, 3.4vw, 2.5rem);
+    --text-section--line-height: 1.15;
+    --text-section--letter-spacing: -0.03em;
+    --text-case: clamp(2.1rem, 5vw, 3.4rem);
+    --text-case--line-height: 1.02;
+    --text-case--letter-spacing: -0.035em;
+    --text-lead: clamp(1.15rem, 1.8vw, 1.3rem);
+    --text-lead--line-height: 1.5;
+
+    --container-page: 74rem;
+
+    --shadow-panel: 0 1px 0 var(--color-line), 0 18px 40px -28px color-mix(in oklab, var(--color-ink) 45%, transparent);
+
+    --radius-panel: 1rem;
+    --radius-control: 0.625rem;
+
+    --animate-travel: travel 1.5s cubic-bezier(0.5, 0, 0.3, 1) 0.35s 1 forwards;
+    --animate-breathe: breathe 1.6s ease-in-out infinite;
+
+    /* The one-time pulse that runs down the system panel's connector on load. */
+    @keyframes travel {
+        0% {
+            opacity: 0;
+            transform: translateY(0);
+        }
+        12% {
+            opacity: 1;
+        }
+        88% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(9rem);
+        }
+    }
+
+    /* The waking status dot. */
+    @keyframes breathe {
+        50% {
+            opacity: 0.35;
+        }
+    }
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --color-surface: oklch(0.18 0.015 260);
-        --color-surface-raised: oklch(0.23 0.02 260);
-        --color-ink: oklch(0.94 0.008 250);
-        --color-muted: oklch(0.72 0.015 255);
-        --color-line: oklch(0.32 0.02 260);
-        --color-accent: oklch(0.74 0.13 250);
-        --color-accent-ink: oklch(0.18 0.015 260);
+/* The page width and gutter every section, the header, and the footer share. */
+@utility wrap {
+    margin-inline: auto;
+    max-width: var(--container-page);
+    padding-inline: 1rem;
+
+    @media (width >= 40rem) {
+        padding-inline: 2rem;
+    }
+}
+
+@layer base {
+    html {
+        /* Keeps anchored headings clear of the sticky header. */
+        scroll-padding-top: 5rem;
+    }
+
+    body {
+        font-family: var(--font-read);
+        font-size: 1.0625rem;
+        line-height: 1.65;
+        text-rendering: optimizeLegibility;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    nav,
+    button,
+    input,
+    textarea,
+    label {
+        font-family: var(--font-ui);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        letter-spacing: -0.015em;
+        line-height: 1.15;
+        text-wrap: balance;
+    }
+
+    a {
+        color: var(--color-accent);
+        text-decoration-line: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.18em;
+    }
+
+    a:hover {
+        text-decoration-thickness: 2px;
+    }
+
+    :focus-visible {
+        border-radius: 0.25rem;
+        outline: 2px solid var(--color-accent);
+        outline-offset: 3px;
     }
 }
 

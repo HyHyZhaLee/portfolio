@@ -172,6 +172,24 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Verified**: type check and route tests passing with 8.5.1; 2026-11-22
 - **Discovered in**: PF-002
 
+### React Router 8 scroll restoration and jsdom
+- **Rule / Behavior**: `<ScrollRestoration />` needs a data router (`createBrowserRouter`, `createMemoryRouter`). After a navigation whose location has a hash it calls `scrollIntoView()` on the element with that id, and otherwise scrolls to the top with `window.scrollTo`, so `<Link to={{ pathname: '/', hash: '#work' }}>` lands on the section from any route with no extra effect. jsdom implements neither `window.scrollTo` nor `Element.prototype.scrollIntoView`, so the test setup stubs both.
+- **Source**: `useScrollRestoration` in `node_modules/react-router/dist/development/lib/dom/lib.js`; `frontend/src/app/RootLayout.tsx`; `frontend/src/test/setup.ts`
+- **Verified**: `CaseStudyPage.test.tsx` clicks a header link from a case study and sees `scrollIntoView` called on the home page; 2026-11-23
+- **Discovered in**: PF-003
+
+### openapi-fetch rejects a relative URL in Node
+- **Rule / Behavior**: With an empty `baseUrl`, openapi-fetch 0.17 builds `new Request('/actuator/health')`. Browsers resolve that against the page, but Node's `Request` throws `TypeError` (`ERR_INVALID_URL`) inside `client.GET`, before any middleware, so the call rejects with a raw `TypeError` rather than an `ApiError`, and MSW never sees a request. Vitest therefore sets `test.env.VITE_API_URL` to an absolute origin (`http://api.test`).
+- **Source**: `frontend/vite.config.ts`; `frontend/src/features/api-status/api.ts`
+- **Verified**: a probe test of `getHealth()` failed with `ERR_INVALID_URL` and passed against the default MSW handler once the origin was set; 2026-11-23
+- **Discovered in**: PF-003
+
+### Fontsource variable fonts
+- **Rule / Behavior**: `@fontsource-variable/bricolage-grotesque` 5.3.0 and `@fontsource-variable/source-serif-4` 5.3.1 ship `opsz.css` (roman, weight and optical-size axes; Source Serif 4 also has `opsz-italic.css`) and register the families as `'Bricolage Grotesque Variable'` and `'Source Serif 4 Variable'`, not the plain names. Each subset is its own `@font-face` with a `unicode-range` and `font-display: swap`; Vite emits every subset's woff2, and a browser downloads only the subsets its text uses. The Latin files are 76.9 kB and 122.4 kB.
+- **Source**: `node_modules/@fontsource-variable/*/opsz.css`; `scripts/with-node.sh pnpm --dir frontend build` output
+- **Verified**: production build of PF-003; 2026-11-23
+- **Discovered in**: PF-003
+
 ### openapi-fetch middleware error routing
 - **Rule / Behavior**: In openapi-fetch 0.17, `onError` runs only when `fetch` itself rejects (no response, abort, timeout). An error thrown from `onRequest` or `onResponse` skips `onError` and rejects the client call directly, and the 2xx body is parsed with `JSON.parse` after all middleware, outside any of them. So the client converts its own failures in `onRequest`, reads and checks 2xx bodies in `onResponse`, and handles network failures in `onError`. A contract with no endpoints generates `export type paths = Record<string, never>`.
 - **Source**: `node_modules/openapi-fetch/dist/index.mjs`; `frontend/src/api/client.ts`; `frontend/src/api/schema.d.ts`

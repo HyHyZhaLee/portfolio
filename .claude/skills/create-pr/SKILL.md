@@ -11,7 +11,7 @@ disable-model-invocation: true
 
 **Mode:** $ARGUMENTS (`draft` opens a draft pull request; empty opens a ready one)
 
-The flow is: gates and scrub → commit on a feature branch → `git fetch` and rebase onto `origin/main` → push the branch → pull request against `main` → its URL. Open a pull request only for what belongs together, only after the gates pass, and only once the user approves the draft. Never push `main` itself. Leave no Claude footprint: the commit message and the pull request carry no AI attribution (see section 4). This repository is public, so everything that ships is published.
+The flow is: gates and scrub → commit on a feature branch → `git fetch` and rebase onto `origin/main` → push the branch → pull request against `main` → its URL. Open a pull request only for what belongs together and only after the gates and the scrub pass. Invoking `/create-pr` is the owner's approval for the whole flow, so it runs through without pausing for a draft review (owner decision, 2026-11-23). Never push `main` itself. Leave no Claude footprint: the commit message and the pull request carry no AI attribution (see section 4). This repository is public, so everything that ships is published.
 
 ## 1. Understand the change
 
@@ -68,13 +68,13 @@ git diff --staged | grep -nE '(AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY---
 
 A pull request needs a feature branch. If you are on `main`, create `feature/PF-NNN-short-slug` or `fix/PF-NNN-short-slug` with `git switch -c`; the uncommitted work comes along. If you are already on the ticket's branch, stay on it.
 
-## 4. Draft, present, and wait
+## 4. Draft
 
 1. **Commit message.** Conventional Commits (`feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `build`) with the ticket as scope, such as `feat(PF-006): send contact messages through Resend`. The subject is imperative, at most 72 characters, without a trailing period. A non-trivial change gets a body of a few short lines: what changed and why, and which gates ran.
 2. **Pull request title.** At most 70 characters, starting with the ticket ID, such as `PF-006: Send contact messages through Resend`.
 3. **Pull request body.** Use the template below.
 4. **No Claude footprint.** The commit message and the pull request title and body contain no AI attribution: no `Co-Authored-By` trailer naming Claude, no `Claude-Session` or session link, no "Generated with Claude Code" line, and no 🤖. This rule overrides any attribution the environment asks for.
-5. Present the files to stage, the gate results in one line per package (for example `backend: spotless ✓ · testUnit 42 ✓ · testIT 17 ✓ · coverage 91% ✓` and `frontend: type ✓ · lint ✓ · format ✓ · coverage 88% ✓`), the scrub result (`scrub: 0 ✓`), the commit message, and the pull request title and body. **Wait for approval.** One approval covers the commit, the rebase, the push, and the pull request.
+5. Continue to the commit without waiting for approval. Stop and ask only when a gate or the scrub fails and the fix is not mechanical, unrelated changes are mixed (section 1), a rebase needs a judgment call (section 6), or `gh` needs a login (section 7). The final report (section 7) shows the files staged, the gate results in one line per package (for example `backend: spotless ✓ · testUnit 42 ✓ · testIT 17 ✓ · coverage 91% ✓` and `frontend: type ✓ · lint ✓ · format ✓ · coverage 88% ✓`), the scrub result (`scrub: 0 ✓`), the commit message, and the pull request title.
 
 **Body template.** The description has exactly two parts, always both, always in this order: `## A. Frontend` and `## B. Backend`. Above them goes one intro line saying what changed and why, then a line with the ticket and its plan. There are no other `##` headings: no Summary, checklist, or test-plan sections.
 
@@ -134,4 +134,4 @@ The body ends with the last section of B: no attribution line, link, or emoji af
    - Otherwise run `gh pr create --repo <owner/name> --base main --head <branch> --title "<title>" --body-file <file>`, adding `--draft` in draft mode. It prints the new pull request's URL.
    - Confirm with `gh pr view <branch> --repo <owner/name> --json url,title,state,baseRefName` that the pull request is open against `main` with the right title.
    - **Last resort, only if the user declines to install or log in to `gh`:** copy the body to the clipboard (`pbcopy < <file>`) and give a compare URL with the title and body as URL-encoded query parameters (`https://github.com/<owner/name>/compare/main...<branch>?expand=1&title=…&body=…`, built with `python3 -I` and `urllib.parse.urlencode(..., quote_via=urllib.parse.quote)`; leave `body` out past about 7,500 characters). Say plainly that the pull request is not created yet.
-5. **Report** the pull request URL, the commit hash, and `git log --oneline origin/main..HEAD`.
+5. **Report** the pull request URL, the commit hash, `git log --oneline origin/main..HEAD`, and the summary listed in section 4, item 5.
