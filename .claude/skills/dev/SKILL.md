@@ -125,6 +125,6 @@ When done, run your tests once, scoped: {./backend/gradlew -p backend testIT --t
 
 ## Commit and push rules
 
-- Commit, push, and open a pull request only when the user asks, through `/create-pr`. It runs the gates, including the blocking integration-test gate and the disclosure scrub, commits on the feature branch, rebases onto the latest `origin/main`, and opens the pull request once the user approves the draft.
+- Commit, push, and open a pull request only when the user asks, through `/create-pr`. It runs the gates, including the blocking integration-test gate and the disclosure scrub, commits on the feature branch, rebases onto the latest `origin/main`, and opens the pull request without pausing for a draft review.
 - Never commit to or push `main` unless the user explicitly says so.
 - Plan, refined-requirement, PROGRESS, and knowledge docs are committed with the code they describe.
