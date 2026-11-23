@@ -5,7 +5,7 @@ paths:
 
 # Java / Spring Boot conventions
 
-Applies to everything under `backend/`. The principles behind these rules are in `backend/docs/ARCHITECTURE.md`; names and commands are in `backend/CLAUDE.md`.
+Applies to everything under `backend/`. The principles behind these rules are in `docs/architecture/backend.md`; names and commands are in `backend/CLAUDE.md`.
 
 ## Structure
 
@@ -54,7 +54,7 @@ Applies to everything under `backend/`. The principles behind these rules are in
 ## Tests
 
 - Unit tests are untagged `{Class}Test` classes without a Spring context. Integration tests are `{Subject}IT` classes annotated `@IntegrationTest`.
-- Apply the integration-test gate from principle 14 of `backend/docs/ARCHITECTURE.md`. No `@MockitoBean` in integration tests; external HTTP is stubbed with WireMock.
+- Apply the integration-test gate from principle 14 of `docs/architecture/backend.md`. No `@MockitoBean` in integration tests; external HTTP is stubbed with WireMock.
 - Assert on the problem `code` and HTTP status, not on message text. Use synthetic data only.
 - Filter runs with `testUnit --tests` or `testIT --tests`, never on the aggregate `test` task.
 

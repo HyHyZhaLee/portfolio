@@ -19,7 +19,7 @@ interface ApiErrorInit {
 
 /**
  * The only error type the API client throws. UI code branches on `code`, never on `message` or `detail`
- * (frontend/docs/ARCHITECTURE.md, principle 8). `status` is 0 when no response arrived.
+ * (docs/architecture/frontend.md, principle 8). `status` is 0 when no response arrived.
  */
 export class ApiError extends Error {
     readonly status: number;

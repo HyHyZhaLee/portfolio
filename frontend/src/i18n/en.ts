@@ -1,4 +1,4 @@
-/** UI strings. Long-form portfolio copy lives in src/content/ instead (frontend/docs/ARCHITECTURE.md, principle 11). */
+/** UI strings. Long-form portfolio copy lives in src/content/ instead (docs/architecture/frontend.md, principle 11). */
 const en = {
     'app.skipToContent': 'Skip to content',
     'home.underConstruction': 'This site is under construction.',

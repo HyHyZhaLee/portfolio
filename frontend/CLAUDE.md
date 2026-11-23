@@ -1,6 +1,6 @@
 # frontend/CLAUDE.md
 
-> Written before the code (PF-001) as the working contract for `frontend/`. The commands were confirmed when PF-002 scaffolded the package; component names are confirmed from PF-003 on. Where this file and the code disagree, fix whichever is wrong in the same change.
+> Written before the code (PF-001) as the working contract for `frontend/`. The commands were confirmed when PF-002 scaffolded the package; component names are confirmed from PF-003 on. Where this file and the code disagree, fix whichever is wrong in the same change. This package has no docs folder: its design guide is `docs/architecture/frontend.md`, and its work is planned in the frontend section of each ticket's plan in `docs/plans/`.
 
 ## Quick Reference
 

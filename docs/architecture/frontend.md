@@ -1,13 +1,13 @@
 # Frontend Architecture Guide
 
-> The design reference for `frontend/`. `/plan` designs against it, `/dev` builds to it, and `/review` and the `code-reviewer` agent check diffs against it. It was written before the code (PF-001) as the design contract. Paths in the Key Directories Reference arrive with the ticket named next to them.
+> The companion design guide for `frontend/`. The docs focus on the backend (`docs/README.md`), so this guide stays short, and frontend work is planned in the compact section 6 of the one plan template. `/plan` designs against it, `/dev` builds to it, and `/review` and the `code-reviewer` agent check diffs against it. It was written before the code (PF-001) as the design contract. Paths in the Key Directories Reference arrive with the ticket named next to them.
 
 ## Purpose
 
 1. State the principles every frontend change follows.
 2. List known issues and anti-patterns (`KNOWN-FE-NNN`) so they are neither rediscovered nor re-litigated.
 3. Give the evaluation checklist to run before writing a plan.
-4. Provide the implementation plan template. Plans go to `frontend/docs/{domain}/PF-NNN-{title}.md`.
+4. Set what section 6 *Frontend* of every plan specifies (template in `docs/plans/README.md`): the components and routes, the content table with tiers, the loading, fallback, and error states, the forms, and the test IDs.
 5. Point at the shared building blocks to reuse.
 
 ## Architecture Principles
@@ -124,7 +124,7 @@ Run this before writing a plan. Record anything that fails as a risk or a decisi
 ### API alignment
 
 - [ ] `pnpm gen:api` run after the backend change; no hand-written request or response types
-- [ ] The error codes handled are the ones the backend plan lists
+- [ ] The error codes handled are the ones the plan's API table lists
 
 ### States, accessibility, test IDs, i18n
 
@@ -138,75 +138,6 @@ Run this before writing a plan. Record anything that fails as a risk or a decisi
 - [ ] Nothing new is sent about a visitor beyond `{path, referrer, ref}`; tracking still honors `?notrack=1` and Global Privacy Control; no cookies (Non-Negotiable 3)
 - [ ] New content is owner-reviewed, within its disclosure tier, and consistent with the CV; nothing is invented (Non-Negotiable 2)
 - [ ] No secret in a `VITE_` variable; nothing about a visitor is logged to the console (Non-Negotiable 9)
-
-## Implementation Plan Template
-
-Copy this into `frontend/docs/{domain}/PF-NNN-{title}.md`. Drop a section that does not apply instead of filling it with "n/a". Keep each paragraph on one line. `/plan` writes it with Status Draft and sets it to Approved when the user approves; `/dev` builds only from an Approved plan.
-
-```markdown
-# PF-NNN — {Title} (frontend)
-
-**Ticket**: PF-NNN · **Refined requirement**: {link, next to the plan of the package that carries most of the work} · **Backend plan**: `backend/docs/{domain}/PF-NNN-{title}.md` or "none" · **Status**: Draft | Approved {YYYY-MM-DD} · **Last updated**: {YYYY-MM-DD}
-
-> ⚠️ **Review these flows first** — {links to the subsections under section 6, or "No complex flows"}
-
-## 1. Requirement summary
-{Two to five lines, linking the product rules (SITE-NNN) this presents or enforces and the master plan section it maps to.}
-
-## 2. Requirement analysis
-| Need | Source | Frontend work |
-|---|---|---|
-
-## 3. Current state
-{Existing components, sections, hooks, content files, and routes this touches or reuses, with `path:line` references.}
-
-## 4. Approach
-{The chosen approach and why.}
-
-| Alternative | Why not |
-|---|---|
-
-## 5. Build
-### Component hierarchy
-{Indented list from page to section to components, marking each as new or reused.}
-### Content
-{New or changed content types and files in `src/content/`.}
-
-| Block | Source | Tier | Status |
-|---|---|---|---|
-
-{Source is the master CV section or the approved content-pack item. Tier is A, or B with the owner's approval noted. Status is placeholder or reviewed; only reviewed blocks ship (Non-Negotiable 2). Every new route gets its own `<title>` and meta description.}
-### Hooks and data layer
-| Hook | Query key | Endpoint | Fallback |
-|---|---|---|---|
-### Forms and validation
-{Schema, fields, limits mirrored from the server, server error mapping.}
-### States
-| View | Loading | Fallback | Error |
-|---|---|---|---|
-### data-test-id plan
-| Element | Test ID | Type | Purpose |
-|---|---|---|---|
-### Routes and SEO
-{Routes added or changed, their titles and meta descriptions, sitemap entries.}
-### User flow
-{Numbered steps of the main interaction.}
-
-## 6. Complex flows
-{Only for hooks or components that merge several queries or derive state in several steps: diagram, steps, why, simplest alternative.}
-
-## 7. Files, order, risks, tests
-**New**: {paths}. **Modified**: {paths}.
-
-**Order**: `pnpm gen:api` → content types → `api.ts` → `queries.ts` → components → section or route → tests.
-
-| Risk | Mitigation |
-|---|---|
-
-**Tests**: {hook tests against MSW (success, fallback, problem response), component tests, content shape tests, the scenarios they cover}.
-```
-
-The diagram conventions in `backend/docs/ARCHITECTURE.md` apply here too.
 
 ## Key Directories Reference
 

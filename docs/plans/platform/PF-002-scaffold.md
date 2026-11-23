@@ -1,6 +1,6 @@
 # PF-002 — Scaffold both packages
 
-**Ticket**: PF-002 · **Refined requirement**: none (a chore; the scope is the backlog line and the master implementation plan, Phase 1) · **Frontend plan**: this file covers both packages · **Status**: Approved 2026-11-22 (the owner asked for the scaffold to be built directly, without a separate `/plan` round) · **Last updated**: 2026-11-22
+**Ticket**: PF-002 · **Refined requirement**: none (a chore; the scope is the backlog line and the master implementation plan, Phase 1) · **Packages**: backend and frontend · **Status**: Approved 2026-11-22 (the owner asked for the scaffold to be built directly, without a separate `/plan` round) · **Last updated**: 2026-11-22
 
 > ⚠️ **Review these flows first** — No complex flows
 
@@ -25,7 +25,7 @@ Both packages exist, start locally, and pass the quality gates; no product featu
 | D11 | React Router 8, the current major. The API used here (`createBrowserRouter`, `RouterProvider`, `createMemoryRouter`, `MemoryRouter`) is unchanged from 7 | Current release line; peer `react >=19.2.7` |
 | D12 | `packageManager` is `pnpm@11.0.9`, the version corepack runs by default | `pnpm --dir frontend` from the repository root takes its version from the root, which has no `package.json`, and pnpm then rejects a different pin (`docs/knowledge/tooling.md`) |
 | D13 | react-hook-form, zod, and @hookform/resolvers are installed now, as the master plan lists; `@vercel/analytics` comes with PF-003 | No runtime cost until imported |
-| D14 | One `createApiClient<Paths>()` factory. Its middleware adds `X-Correlation-Id` and a timeout (15 s default; a 75 s client for the contact form) and throws only `ApiError` (`status`, `code`, `detail`, `correlationId`, `errors`): no usable response (including a body that breaks off) is `NETWORK_ERROR`; an error without problem JSON, or a 2xx body that is not JSON, is `UNEXPECTED_RESPONSE`. A `tolerateStatus` option returns listed statuses as `error` data (KNOWN-FE-006). It falls back when `AbortSignal.any` (Safari before 17.4) or `crypto.randomUUID` (plain-http pages) is missing. Queries never retry a 4xx; mutations never retry | frontend/docs/ARCHITECTURE.md principles 6–8; openapi-fetch routes only `fetch` failures to `onError` (`docs/knowledge/tooling.md`) |
+| D14 | One `createApiClient<Paths>()` factory. Its middleware adds `X-Correlation-Id` and a timeout (15 s default; a 75 s client for the contact form) and throws only `ApiError` (`status`, `code`, `detail`, `correlationId`, `errors`): no usable response (including a body that breaks off) is `NETWORK_ERROR`; an error without problem JSON, or a 2xx body that is not JSON, is `UNEXPECTED_RESPONSE`. A `tolerateStatus` option returns listed statuses as `error` data (KNOWN-FE-006). It falls back when `AbortSignal.any` (Safari before 17.4) or `crypto.randomUUID` (plain-http pages) is missing. Queries never retry a 4xx; mutations never retry | `docs/architecture/frontend.md` principles 6–8; openapi-fetch routes only `fetch` failures to `onError` (`docs/knowledge/tooling.md`) |
 | D15 | Routes `/` (a placeholder with the name and title from the product guide) and a 404. Per-route `<title>` and meta, sections, content files, and the full design tokens are PF-003 | Scope of PF-003 |
 | D16 | The Dockerfile and the `bootJar` naming stay with PF-004; Dependabot, actions pinned by commit SHA, and branch protection stay with PF-008. Actions are pinned to exact release tags for now | Backlog scope |
 | D17 | `make backend`, `make frontend`, and `make status` load the repository's `.env`, with variables already exported by the shell winning; `vite.config.ts` reads the same file with `loadEnv`. `make check` and `make test` do not load it | The documented `.env` overrides now reach the backend, Vite, and the helper scripts, as they already reached compose; a local `SPRING_PROFILES_ACTIVE` never reaches the test suites |
@@ -59,7 +59,7 @@ Both packages exist, start locally, and pass the quality gates; no product featu
 
 ## 5. Review
 
-`/code-review` on 2026-11-22 raised 15 findings. 14 are fixed in this ticket (D2, D5, D9, D14, D17–D19, docs, constructor injection in tests). The 15th, that `ForwardedHeaderFilter` trusts a client-supplied `X-Forwarded-For`, has no consumer yet and moves to PF-004 (`backend/docs/ARCHITECTURE.md`, principle 9).
+`/code-review` on 2026-11-22 raised 15 findings. 14 are fixed in this ticket (D2, D5, D9, D14, D17–D19, docs, constructor injection in tests). The 15th, that `ForwardedHeaderFilter` trusts a client-supplied `X-Forwarded-For`, has no consumer yet and moves to PF-004 (`docs/architecture/backend.md`, principle 9).
 
 ## 6. Follow-ups
 

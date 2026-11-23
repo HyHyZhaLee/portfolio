@@ -17,9 +17,9 @@ Personal portfolio site and live full-stack demo: a React frontend that always l
 
 | Path | What it is |
 |---|---|
-| `backend/` | Spring Boot API; guide in `backend/CLAUDE.md` and `backend/docs/ARCHITECTURE.md` |
-| `frontend/` | React site; guide in `frontend/CLAUDE.md` and `frontend/docs/ARCHITECTURE.md` |
-| `docs/` | Product rules, architecture, ADRs, knowledge base, backlog ([index](docs/README.md)) |
+| `backend/` | Spring Boot API; working guide in `backend/CLAUDE.md` |
+| `frontend/` | React site; working guide in `frontend/CLAUDE.md` |
+| `docs/` | All documentation, focused on the backend: product rules, design guides, ADRs, ticket plans, knowledge base, backlog ([index](docs/README.md)) |
 | `scripts/` | Helper scripts used by the Makefile |
 | `.claude/` | AI-assisted workflow: rules, skills, and a review agent |
 

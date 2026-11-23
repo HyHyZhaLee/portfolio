@@ -29,12 +29,12 @@ Check its substitutions on the main loop, and refresh the file list before Wave 
 **2a. Tests.** One `general-purpose` agent with `model: "sonnet"`, writing **test files only**. Tell it to:
 
 - bring the changed code to at least 80% branch coverage, covering the happy paths and the boundary, fallback, and failure cases the diff introduces;
-- meet the integration-test gate (in `backend/docs/ARCHITECTURE.md`) and never defer a required integration test; if Docker is unavailable, write the test anyway and report that it did not run;
+- meet the integration-test gate (in `docs/architecture/backend.md`) and never defer a required integration test; if Docker is unavailable, write the test anyway and report that it did not run;
 - stub the Resend and GitHub APIs with WireMock, use synthetic data only, and never call a real external service;
 - run what it writes, scoped with `./backend/gradlew -p backend testUnit --tests`, `./backend/gradlew -p backend testIT --tests`, or `scripts/with-node.sh pnpm --dir frontend test --run <file>`;
 - report real bugs it finds instead of changing production code.
 
-**2b. Review.** The `code-reviewer` agent on the full change, read-only, with the same base `/review` uses. It checks against `CLAUDE.md`, `.claude/rules/`, and both `ARCHITECTURE.md` files, including the privacy, disclosure, and free-tier checklist, and reports high-confidence findings only.
+**2b. Review.** The `code-reviewer` agent on the full change, read-only, with the same base `/review` uses. It checks against `CLAUDE.md`, `.claude/rules/`, and both design guides in `docs/architecture/`, including the privacy, disclosure, and free-tier checklist, and reports high-confidence findings only.
 
 While both run, the main loop does the conformance review from `/review` step 3. When both return, continue with `/review` steps 4 to 6: verify and merge the findings, counting real bugs from 2a as findings, report them, and apply only the fixes the user approves.
 

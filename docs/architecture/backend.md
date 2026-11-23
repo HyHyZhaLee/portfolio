@@ -1,13 +1,13 @@
 # Backend Architecture Guide
 
-> The design reference for `backend/`. `/plan` designs against it, `/dev` builds to it, and `/review` and the `code-reviewer` agent check diffs against it. It was written before the code (PF-001) as the design contract. Classes in the Key Services Reference arrive with the ticket named next to them; update the table as each lands.
+> The main design reference for this repository, covering `backend/`. The docs focus on the backend (`docs/README.md`), so this guide carries the design rules in full; the frontend has a shorter companion in `frontend.md`. `/plan` designs against it, `/dev` builds to it, and `/review` and the `code-reviewer` agent check diffs against it. It was written before the code (PF-001) as the design contract. Classes in the Key Services Reference arrive with the ticket named next to them; update the table as each lands.
 
 ## Purpose
 
 1. State the principles every backend change follows.
 2. List known issues and anti-patterns (`KNOWN-BE-NNN`) so they are neither rediscovered nor re-litigated.
 3. Give the evaluation checklist to run before writing a plan.
-4. Provide the implementation plan template. Plans go to `backend/docs/{domain}/PF-NNN-{title}.md`.
+4. Set what section 5 *Backend* of every plan specifies (template and diagram conventions in `docs/plans/README.md`): the migration with its ER diagram and column table, the services and their transactions, the API table with status and error codes, the failure modes, and a sequence diagram for each complex flow.
 5. Point at the platform services to reuse instead of rebuilding.
 
 ## Architecture Principles
@@ -170,143 +170,6 @@ Run this before writing a plan. Record anything that fails as a risk or a decisi
 - [ ] A provider outage degrades to a fallback or a retry, never to a failed page (Non-Negotiable 1)
 - [ ] Nothing is written to the local disk; memory and startup cost of any new dependency are stated (Non-Negotiable 8)
 - [ ] Seed data, fixtures, and examples are synthetic and contain no Tier C content (Non-Negotiables 2 and 9)
-
-## Implementation Plan Template
-
-Copy this into `backend/docs/{domain}/PF-NNN-{title}.md`. Drop a section that does not apply instead of filling it with "n/a". Keep each paragraph on one line. `/plan` writes it with Status Draft and sets it to Approved when the user approves; `/dev` builds only from an Approved plan.
-
-```markdown
-# PF-NNN — {Title} (backend)
-
-**Ticket**: PF-NNN · **Refined requirement**: [PF-NNN-refined-requirement.md](PF-NNN-refined-requirement.md) · **Frontend plan**: `frontend/docs/{domain}/PF-NNN-{title}.md` · **Status**: Draft | Approved {YYYY-MM-DD} · **Last updated**: {YYYY-MM-DD}
-
-> ⚠️ **Review these flows first** — {links to the subsections under section 6, or "No complex flows"}
-
-## 1. Requirement summary
-{Two to five lines. Link the product rules (SITE-NNN) this implements and the master plan section it maps to.}
-
-## 2. Requirement analysis
-| Need | Source | Backend work |
-|---|---|---|
-
-## 3. Current state
-{What exists today that this touches or reuses, with `path:line` references.}
-
-## 4. Approach
-{The chosen approach and why.}
-
-| Alternative | Why not |
-|---|---|
-
-**Reuse**: {existing classes used as-is or extended}. **Single responsibility**: {one line per new unit}.
-
-## 5. Build
-### Database
-{Migration file name `V{yyyyMMddHHmmss}__{snake_description}.sql`, and whether it is additive or needs a backfill. Then a Mermaid `erDiagram` of the new and changed tables, with referenced existing tables shown by their key columns (conventions below).}
-
-| Table.column | SQL type | Null | Default or constraint | Why |
-|---|---|---|---|---|
-
-**Constraints and indexes**: {each unique key, check, foreign key, and index, with its reason: the rule it enforces or the query it serves.}
-### Domain
-{Entities, states and transitions, validator rules.}
-### Services
-| Unit | Responsibility | Transaction |
-|---|---|---|
-### API
-| Method and path | Rate limit | Success | Errors (code → status) |
-|---|---|---|---|
-### Failure modes
-| Failure | Behavior | Test |
-|---|---|---|
-
-{Include a provider timeout and outage for every external call, invalid input, and the rate limit. The Test column names the test for the rows that get one within the test budget in `.claude/skills/dev/SKILL.md`, and says "none" for the rest.}
-
-## 6. Complex flows
-### F1 — {name}
-> ⚠️ **Review this flow** — `{Class.method}` or the process: {participants, queries and external calls, transactions}
-
-{Mermaid `sequenceDiagram` with `autonumber` from the trigger to the result, with transaction boundaries as notes and the failure and retry branches as `alt` blocks. Then numbered steps matching its message numbers, why each step exists, and the simplest alternative. Add a `flowchart` only for branching inside one method.}
-
-## 7. Files, order, risks, tests
-**New**: {paths}. **Modified**: {paths}.
-
-**Order**: per slice, the contract first (migration → entity → records → port, service, and controller signatures), then the implementation while the test writers write the tests in parallel → `make openapi`.
-
-| Risk | Mitigation |
-|---|---|
-
-**Tests**: {per slice, the unit and integration tests within the test budget, which integration-test gate surfaces they cover, and the WireMock stubs they need.}
-```
-
-### Diagram conventions
-
-**Sequence diagrams** are the default for a complex flow or process.
-
-- Start with `autonumber`, so the numbered steps under the diagram match the message numbers.
-- Declare participants in call order with short aliases: `actor C as Client`, `participant API as ContactController`, `participant S as ContactCommandService`, `participant DB as PostgreSQL`, `participant R as Resend`. Add a scheduler or another external system as its own participant.
-- Mark each transaction with `Note over S,DB: TX 1 …`, so it is visible that no transaction spans a provider call (Non-Negotiable 7).
-- Show the failure-modes rows that change the flow as `alt` and `else` blocks (a provider failure, a honeypot hit, a rate limit), and an optional step as `opt`. Use `->>` for a call and `-->>` for its reply.
-- Keep message text plain: no `;` or `#`, which break the parser.
-- Keep one diagram to about 15 messages; split a bigger process into sub-flows.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor C as Client
-    participant API as ContactController
-    participant S as ContactCommandService
-    participant DB as PostgreSQL
-    participant R as Resend
-    C->>API: POST /api/v1/contact-messages
-    API->>S: submit(request, clientInfo)
-    Note over S,DB: TX 1
-    S->>DB: insert contact_message PENDING
-    S->>R: send email, no transaction open
-    alt delivered
-        Note over S,DB: TX 2
-        S->>DB: mark SENT with the provider message ID
-    else provider error or timeout
-        Note over S,DB: TX 2
-        S->>DB: mark FAILED, the retry job resends it later
-    end
-    API-->>C: 202 Accepted
-```
-
-**ER diagrams** show every schema change.
-
-- One `erDiagram` per migration: the new and changed tables in full, and the existing tables they reference by their key columns only.
-- Attributes are `type name KEYS "comment"`, with keys `PK`, `FK`, or `UK`. Mark new and changed columns in the comment: `"new"`, `"changed: now nullable"`.
-- Use plain types without precision (`bigint`, `text`, `varchar`, `int`, `date`, `timestamptz`, `boolean`), because a type cannot contain a comma. Exact SQL types such as `VARCHAR(64)` go in the comment and in the column table.
-- Draw relationships with cardinality and a quoted verb when tables reference each other: `PARENT ||--o{ CHILD : "contains"`.
-
-```mermaid
-erDiagram
-    PAGE_VIEW {
-        bigint id PK "new, identity"
-        timestamptz viewed_at "new"
-        varchar path "new, VARCHAR(255)"
-        varchar referrer_host "new, host only, null when direct"
-        varchar ref_tag "new, VARCHAR(64), from ?ref="
-        varchar visitor_hash "new, VARCHAR(64), CHECK hex"
-        varchar device_type "new, CHECK DESKTOP MOBILE TABLET"
-    }
-    CONTACT_MESSAGE {
-        bigint id PK "new, identity"
-        timestamptz created_at "new"
-        varchar email "new, VARCHAR(254)"
-        text message "new"
-        varchar status "new, CHECK PENDING SENT FAILED SPAM"
-        int attempts "new, default 0"
-        bigint version "new, optimistic lock"
-    }
-```
-
-**Flowcharts** are only for branching inside one method, such as a decision table.
-
-- Quote every label that contains `(`, `)`, `[`, `]`, `:`, or `/`. Never put `#` in a label. Write `Step 1 - …` rather than `1. …`, which renders as an unsupported list.
-- Prefix calls with where they go, inside quoted labels: `"DB: insert page_view"`, `"GitHub: list repos"`.
-- Keep one diagram to about 15 nodes.
 
 ## Key Services Reference
 

@@ -1,6 +1,6 @@
 # Architecture overview
 
-> What the system is made of and how a request moves through it. Everything below is _(planned)_ until the ticket named next to it is done; the full design is in the private master plan (`portfolio-implementation-plan.md` §2 and §5–§6 in the parent folder).
+> What the system is made of and how a request moves through it. Everything below is _(planned)_ until the ticket named next to it is done; the full design is in the private master plan (`portfolio-implementation-plan.md` §2 and §5–§6 in the parent folder). The design rules for code are in [backend.md](backend.md), the main guide, and [frontend.md](frontend.md).
 
 ## System context
 

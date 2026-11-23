@@ -17,7 +17,7 @@ Review the change your brief names, not pre-existing code. By default that is th
 ## Process
 
 1. List the changed files and read the full diff.
-2. Read what governs them: the Non-Negotiables in `CLAUDE.md`, the matching `.claude/rules/` files, and the package `ARCHITECTURE.md`, especially its `KNOWN-*` entries and its evaluation checklist.
+2. Read what governs them: the Non-Negotiables in `CLAUDE.md`, the matching `.claude/rules/` files, and the design guide of each package touched (`docs/architecture/backend.md`, `docs/architecture/frontend.md`), especially its `KNOWN-*` entries and its evaluation checklist.
 3. Read enough surrounding code to judge each change in context. Every finding needs evidence: a `file:line` and a concrete failure scenario.
 4. Score each candidate finding from 0 to 100 for confidence, and report only those scoring 80 or more.
 5. Check your memory for patterns found in earlier reviews of this repository. Afterwards, record new recurring patterns briefly: patterns and code areas only, nothing about people.
@@ -40,7 +40,7 @@ Review the change your brief names, not pre-existing code. By default that is th
 - An external API called from outside its adapter; `@Value` instead of a properties record; field injection.
 - A migration edited after it was applied, or a schema change outside Flyway; a `CHAR(n)` hash column.
 - Lost updates: no `@Version`, constraint, or compare-and-set where a request and the retry job can both write.
-- A new or changed query, endpoint, persistence flow, or external interaction without an integration test (principle 14 in `backend/docs/ARCHITECTURE.md`).
+- A new or changed query, endpoint, persistence flow, or external interaction without an integration test (principle 14 in `docs/architecture/backend.md`).
 - An unbounded query or an N+1 access pattern.
 
 ## Frontend checklist
