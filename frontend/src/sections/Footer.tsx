@@ -2,6 +2,7 @@ import { getTestIdProp, TestIds } from '../config/test-ids.config';
 import { profile } from '../content/profile';
 import { site } from '../content/site';
 import { ApiStatusDot } from '../features/api-status';
+import { VisitCounter } from '../features/stats';
 import { t } from '../i18n/en';
 
 export function Footer() {
@@ -12,6 +13,7 @@ export function Footer() {
                     <span>{t('footer.copyright', { year: new Date().getFullYear(), name: profile.name })}</span>
                     <div className='flex flex-wrap items-center gap-x-6 gap-y-2 lg:justify-center'>
                         <ApiStatusDot />
+                        <VisitCounter />
                     </div>
                     <a href={profile.links.repository} {...getTestIdProp(TestIds.footer.sourceLink)}>
                         {t('footer.source')}

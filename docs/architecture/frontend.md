@@ -66,7 +66,7 @@ The site is judged in its first ten seconds. The home page scores 90 or more in 
 
 ### 14. Privacy in the browser
 
-Visit tracking runs only in production builds, once per page load and route change. It honors `?notrack=1` (stored in `localStorage`) and Global Privacy Control, never sets a cookie, and sends only `{path, referrer, ref}` (Non-Negotiable 3). `@vercel/analytics` is cookieless. Nothing about a visitor is written to the browser console.
+Visit tracking runs only in production builds, once per page load and route change. It honors `?notrack=1` (stored in `localStorage`, removed again by `?notrack=0`) and Global Privacy Control, never sets a cookie, and sends only `{path, referrer, ref}`, with the referrer reduced to its origin so the previous page's path and query never leave the browser (Non-Negotiable 3, PF-005 P13). `@vercel/analytics` is cookieless. Nothing about a visitor is written to the browser console.
 
 ## Known Issues & Anti-Patterns
 
@@ -151,14 +151,14 @@ Rows marked _built_ exist; the others are planned until the ticket named has run
 | `src/config/test-ids.config.ts` | `TestIds`, `getTestIdProp` | PF-002, _built_ |
 | `src/i18n/en.ts` | UI strings and `t()` | PF-002, _built_ |
 | `src/test/` | setup, `renderWithProviders`, `renderRoute`, MSW server and handlers | PF-002, _built_ |
-| `src/utils/format.ts` | `formatInstant`, `formatDate`, `formatCount` (periods are display strings in content, so there is no `formatPeriod`, PF-003 P4) | PF-005 |
+| `src/utils/format.ts` | `formatCount` (grouped digits, fixed to English); `formatInstant` and `formatDate` wait for a caller, because the counter hides the since date (PF-005 D6); periods are display strings in content, so there is no `formatPeriod` (PF-003 P4) | PF-005, _built_ |
 | `src/components/` | shared primitives: `Section`, `ChipList`, `ButtonLink`, `StatusDot`, `DownloadIcon`; `Card`, `Skeleton`, and `ErrorNote` come with their first caller | PF-003, _built_ |
 | `src/content/` | typed static content: `profile`, `site`, `featuredWork`, `howIWork`, `skills`, `experience`, `education`, `caseStudies/{slug}.ts`, and `placeholder` (placeholder copy until PF-012); `fallbackRepos.ts` arrives in PF-007 | PF-003, _built_ |
 | `src/sections/` | Header, Hero, ProofPoints, About, FeaturedWork, WorkRow, HowIWork, Skills, Experience, Education, Contact, Footer; OpenSource arrives in PF-007 | PF-003, _built_ |
 | `src/pages/` | `HomePage`, `CaseStudyPage` (resolves the slug), `CaseStudyArticle`, `GlanceAside`, `NotFoundPage`, `RouteErrorPage` | PF-002, PF-003, _built_ |
 | `vercel.json` | SPA rewrite for `/work/:slug` | PF-003, _built_ |
-| `src/features/visits/` | `useTrackPageView` and its API call | PF-005 |
-| `src/features/stats/` | the footer visit counter | PF-005 |
+| `src/features/visits/` | `useTrackPageView`, its 75 s API call, and `useVisitCounted` for the system panel's note | PF-005, _built_ |
+| `src/features/stats/` | the footer visit counter (`VisitCounter`), asked for once the API is online | PF-005, _built_ |
 | `src/features/api-status/` | the hero system panel and the footer API status dot, from one health check | PF-003, _built_ |
 | `src/features/contact/` | the contact form, its schema, and its mutation | PF-006 |
 | `src/features/projects/` | the open-source list with its fallback | PF-007 |

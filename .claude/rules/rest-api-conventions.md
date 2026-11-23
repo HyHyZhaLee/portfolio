@@ -15,14 +15,16 @@ The contract between `backend/` and `frontend/`. Every endpoint follows these ru
 - Partial updates, if ever needed, use `PATCH` with explicit fields, never `PUT`.
 - Changes within `v1` are additive only: new optional fields or new endpoints. Removing or renaming anything requires a new version, because a deployed frontend can lag behind the backend.
 
-## Endpoints today _(planned)_
+## Endpoints today
+
+Rows marked _(planned)_ arrive with the ticket named.
 
 | Method and path | Purpose | Success | Ticket |
 |---|---|---|---|
-| `POST /api/v1/visits` | Record a page view | 202 | PF-005 |
-| `GET /api/v1/stats/summary` | Total views, unique visitors, first visit date | 200 | PF-005 |
-| `POST /api/v1/contact-messages` | Accept a contact message for delivery | 202 | PF-006 |
-| `GET /api/v1/projects` | Public GitHub repositories, featured first | 200 | PF-007 |
+| `POST /api/v1/visits` (`recordVisit`) | Record a page view | 202 | PF-005 |
+| `GET /api/v1/stats/summary` (`getStatsSummary`) | Total views, unique visitors, first visit time (`since`, null before the first view) | 200 | PF-005 |
+| `POST /api/v1/contact-messages` _(planned)_ | Accept a contact message for delivery | 202 | PF-006 |
+| `GET /api/v1/projects` _(planned)_ | Public GitHub repositories, featured first | 200 | PF-007 |
 | `GET /actuator/health` | Health, Render health check, keep-alive ping | 200 | PF-002 |
 
 ## Status codes

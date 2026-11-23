@@ -1,11 +1,16 @@
 import { Outlet, ScrollRestoration } from 'react-router';
 import { getTestIdProp, TestIds } from '../config/test-ids.config';
+import { useTrackPageView } from '../features/visits';
 import { t } from '../i18n/en';
 import { Footer } from '../sections/Footer';
 import { Header } from '../sections/Header';
 
-/** Skip link, sticky header, the page, and the footer. `ScrollRestoration` scrolls to the hash or to the top on navigation (PF-003 P6). */
+/**
+ * Skip link, sticky header, the page, and the footer. `ScrollRestoration` scrolls to the hash or to the top on navigation
+ * (PF-003 P6). Each route opened sends one page view from production builds (PF-005 F2).
+ */
 export function RootLayout() {
+    useTrackPageView();
     return (
         <>
             <a

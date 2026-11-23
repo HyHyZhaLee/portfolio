@@ -8,6 +8,89 @@
   "servers" : [ {
     "url" : "/"
   } ],
-  "paths" : { },
-  "components" : { }
+  "paths" : {
+    "/api/v1/stats/summary" : {
+      "get" : {
+        "operationId" : "getStatsSummary",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StatsSummaryResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "stats-controller" ]
+      }
+    },
+    "/api/v1/visits" : {
+      "post" : {
+        "operationId" : "recordVisit",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RecordVisitRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "description" : "Accepted"
+          }
+        },
+        "tags" : [ "visit-controller" ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "RecordVisitRequest" : {
+        "type" : "object",
+        "properties" : {
+          "path" : {
+            "type" : "string",
+            "maxLength" : 255,
+            "minLength" : 0,
+            "pattern" : "/[^?#\\x00-\\x1F\\x7F]*"
+          },
+          "ref" : {
+            "type" : "string",
+            "maxLength" : 256,
+            "minLength" : 0
+          },
+          "referrer" : {
+            "type" : "string",
+            "maxLength" : 2048,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "path" ]
+      },
+      "StatsSummaryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "since" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time"
+          },
+          "totalViews" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "uniqueVisitors" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "totalViews", "uniqueVisitors" ]
+      }
+    }
+  }
 }

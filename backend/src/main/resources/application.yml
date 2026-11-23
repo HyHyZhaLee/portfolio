@@ -26,6 +26,13 @@ spring:
   threads:
     virtual:
       enabled: true
+  jackson:
+    factory:
+      constraints:
+        read:
+          # Public JSON bodies are a few hundred bytes. The cap stops parsing an oversized body before binding,
+          # validation, and the rate limit, so it cannot fill the heap; it answers 400 VALIDATION_FAILED (PF-005).
+          max-document-length: 65536
   # spring.mvc.problemdetails stays off: Boot's handler puts framework text in `detail` (Non-Negotiable 5).
   # PF-004's GlobalExceptionHandler writes the problem responses instead.
 management:
@@ -43,6 +50,8 @@ app:
     visitor-hash-secret: ${VISITOR_HASH_SECRET:} # required outside the local profile
     trusted-proxy-hops: ${TRUSTED_PROXY_HOPS:1}
     log-forwarded-for-once: ${LOG_FORWARDED_FOR_ONCE:false} # PF-004 D3: on for one deploy in PF-012, then off
+  stats:
+    cache-ttl: ${STATS_CACHE_TTL:60s} # how old the stats summary may be (PF-005 FR-9)
 logging:
   pattern:
     correlation: "[%X{correlationId:-}] "

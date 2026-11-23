@@ -88,6 +88,12 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Verified**: two regenerations of the snapshot diffed identical; 2026-11-11. Re-confirmed with springdoc 3.2.1 on 2026-11-22
 - **Discovered in**: Carried over; re-checked in PF-002
 
+### springdoc 3.2.1 output for request and response records
+- **Rule / Behavior**: A record component is listed in the schema's `required` when it carries `@NotBlank` or `@Schema(requiredMode = Schema.RequiredMode.REQUIRED)`; one with only `@Size` stays optional and also gets `minLength: 0`. `@Schema(types = {"string", "null"})` on an `Instant` emits `"type": ["string", "null"]` with `format: date-time`, which openapi-typescript 7.13.0 generates as `since?: string | null`. A `void` handler with `@ResponseStatus(HttpStatus.ACCEPTED)` gets a `202` response described "Accepted" with no content (`content?: never` in the generated operation). A handler without `produces` lists its 200 body under `*/*`, and openapi-fetch 0.17 still types `data` from it, because its default media type is the template `${string}/${string}` (openapi-typescript-helpers 0.1.0).
+- **Source**: `backend/src/main/java/com/huygialy/portfolio/visit/api/RecordVisitRequest.java`, `stats/api/StatsSummaryResponse.java`, `visit/api/VisitController.java`; `backend/openapi/openapi.json`; `frontend/src/api/schema.d.ts`; `MediaType` in `openapi-typescript-helpers/dist/index.d.ts`
+- **Verified**: `make openapi` output read after PF-005 S2, and `check:type` passing with `data.totalViews` read from `getStatsSummary`; 2026-11-23
+- **Discovered in**: PF-005
+
 ### Security denials and problem JSON in Spring 7
 - **Rule / Behavior**: An `AuthenticationEntryPoint` and an `AccessDeniedHandler` that call the MVC `HandlerExceptionResolver` bean named `handlerExceptionResolver` (`resolveException(request, response, null, ex)`) make the `@RestControllerAdvice` render security denials, so they answer the same problem JSON as MVC errors. With Jackson 3, values set through `ProblemDetail.setProperty(...)` serialize as top-level members (`$.code`, not `$.properties.code`). A correlation filter registered through a `FilterRegistrationBean` at the highest precedence runs before the security chain, so denials carry the ID too.
 - **Source**: `backend/src/main/java/com/huygialy/portfolio/platform/security/SecurityConfig.java`, `platform/error/GlobalExceptionHandler.java`, `platform/web/WebConfig.java`
@@ -153,6 +159,12 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Source**: `backend/build.gradle.kts`
 - **Verified**: with the output declared, overwriting the snapshot made `make openapi` rerun `testIT` and restore an identical file, and a second run was UP-TO-DATE; 2026-11-22
 - **Discovered in**: PF-002
+
+### Gradle `--rerun` applies to one task
+- **Rule / Behavior**: `--rerun` is an option of the task named just before it, not of the whole build: `gradlew testUnit testIT --rerun check` reran only `testIT` and left `testUnit` UP-TO-DATE. Put `--rerun` after each task that must run again (`testUnit --rerun testIT --rerun`).
+- **Source**: `./backend/gradlew -p backend …` with Gradle 9.9.2
+- **Verified**: the task log showed `> Task :testUnit UP-TO-DATE` and the unit-test result timestamps stayed old until `testUnit --rerun` was run; 2026-11-23
+- **Discovered in**: PF-005
 
 ## PostgreSQL
 
@@ -249,3 +261,15 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Source**: `npm view <package> version` and `npm view <package> time`
 - **Verified**: 2026-11-22
 - **Discovered in**: PF-002
+
+### Vitest `stubEnv` and the production flag
+- **Rule / Behavior**: In Vitest 5.1, `vi.stubEnv('PROD', true)` makes `import.meta.env.PROD` true for code that reads it while the test runs, and `vi.unstubAllEnvs()` in `afterEach` restores it. So production-only code reads the flag when it is called, not into a module constant, to stay testable.
+- **Source**: `frontend/src/features/visits/tracking.ts` (`trackingAllowed`); `frontend/src/features/visits/useTrackPageView.test.tsx`
+- **Verified**: the beacon test posts with `PROD` stubbed true and posts nothing with it stubbed false; 2026-11-23
+- **Discovered in**: PF-005
+
+### `useEffectEvent` and the hooks lint
+- **Rule / Behavior**: React 19.3.1 exports `useEffectEvent` from `react` with types. eslint-plugin-react-hooks 7.1.1, with `exhaustive-deps` at `error`, accepts an effect that calls a `useEffectEvent` function without listing it, so an effect keyed only on `pathname` can read the latest `search` and `hash` without a suppression comment.
+- **Source**: `frontend/src/features/visits/useTrackPageView.ts`; `frontend/eslint.config.js`
+- **Verified**: `check:lint` (`--max-warnings 0`) and `check:type` pass; 2026-11-23
+- **Discovered in**: PF-005

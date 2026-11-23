@@ -50,7 +50,7 @@ The backend never stores or logs a raw IP address, a full user-agent string, or 
 
 ### 10. Public write endpoints resist abuse
 
-There is no login, so every public `POST` defends itself (Non-Negotiable 4). Its request record has Bean Validation with explicit maximum lengths. A Bucket4j limit keyed by `rateLimitKey` (an HMAC of the client IP alone, so a changed user agent does not reset it; PF-004 D6) caps it, through `RateLimiter.check` called by the command service before any work: visits 30 per minute, contact messages 3 per hour; a rejected request answers 429 `RATE_LIMITED` with `Retry-After`. The contact form has a honeypot field: a filled one is stored as `SPAM`, answered with the same 202 as a real message, and never sent. Visits from bot user agents are dropped before they are counted. CORS allows only the origins in `app.cors.allowed-origins`. The frontend's checks are a convenience, never the defense.
+There is no login, so every public `POST` defends itself (Non-Negotiable 4). Every JSON body is capped at 64 KB (`spring.jackson.factory.constraints.read.max-document-length`), so an oversized body stops at parsing with 400 `VALIDATION_FAILED`, before binding, validation, or the rate limit (PF-005 P18). Its request record has Bean Validation with explicit maximum lengths. A Bucket4j limit keyed by `rateLimitKey` (an HMAC of the client IP alone, so a changed user agent does not reset it; PF-004 D6) caps it, through `RateLimiter.check` called by the command service before any work: visits 30 per minute, contact messages 3 per hour; a rejected request answers 429 `RATE_LIMITED` with `Retry-After`. The contact form has a honeypot field: a filled one is stored as `SPAM`, answered with the same 202 as a real message, and never sent. Visits from bot user agents are dropped before they are counted. CORS allows only the origins in `app.cors.allowed-origins`. The frontend's checks are a convenience, never the defense.
 
 ### 11. It fits the free tier
 
@@ -185,8 +185,8 @@ Rows marked _built_ exist; the others are planned until the ticket named has run
 | Drop bot traffic | `ClientInfo.bot()`, from `BotFilter` | `platform.client` | PF-004, _built_ |
 | Per-client rate limits | `RateLimiter.check(RateLimit.VISIT or RateLimit.CONTACT, client.rateLimitKey())` | `platform.ratelimit` | PF-004, _built_ |
 | Deterministic OpenAPI output and the snapshot test | `OpenApiConfig`, `OpenApiSnapshotIT` | `platform.openapi` | PF-002, _built_ |
-| Record a page view | `VisitCommandService` | `visit` | PF-005 |
-| Read totals for the footer | `StatsQueryService` (cached 60 s) | `stats` | PF-005 |
+| Record a page view | `VisitCommandService` (rate limit, bot drop, referrer host and ref tag reduced, one insert) | `visit` | PF-005, _built_ |
+| Read totals for the footer | `StatsQueryService` (cached for `app.stats.cache-ttl`, 60 s by default), which reads page views only through `VisitQueryService.totals()` | `stats` | PF-005, _built_ |
 | Send an email | `EmailSender` port; `ResendEmailSender` (prod), logging sender (local) | `contact` | PF-006 |
 | Accept and deliver a contact message | `ContactCommandService`, `ContactLifecycle`, `ContactRetryJob` | `contact` | PF-006 |
 | List public GitHub repositories | `GitHubClient`, `ProjectQueryService` (cached 1 h, circuit breaker) | `project` | PF-007 |

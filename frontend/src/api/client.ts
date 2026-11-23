@@ -3,7 +3,7 @@ import { ApiError, NETWORK_ERROR, toApiError, UNEXPECTED_RESPONSE } from './erro
 import type { paths } from './schema';
 
 export const CORRELATION_HEADER = 'X-Correlation-Id';
-/** Most calls give up after 15 s; the contact form uses a 75 s client so a cold start on the free tier still succeeds. */
+/** Most calls give up after 15 s; the visit beacon and the contact form use a 75 s client so a cold start on the free tier still succeeds. */
 export const DEFAULT_TIMEOUT_MS = 15_000;
 export const COLD_START_TIMEOUT_MS = 75_000;
 

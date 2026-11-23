@@ -42,7 +42,7 @@ scripts/with-node.sh pnpm --dir frontend gen:api          # regenerate src/api/s
 - Named exports, one component per file. Components are `PascalCase.tsx`, hooks `useThing.ts`, other modules `camelCase.ts`, tests `*.test.ts(x)` next to the code they test.
 - Tailwind utility classes with the theme's tokens (`bg-surface`, `text-muted`); no inline hex colours, no `style` props for colour or spacing, and no new CSS file without a reason.
 
-## Project Structure _(PF-002 and PF-003 built everything below except `utils/`, the files marked with a later ticket, and the `visits`, `stats`, `contact`, and `projects` features)_
+## Project Structure _(PF-002 and PF-003 built everything below except the files marked with a later ticket and the `contact` and `projects` features; PF-005 built `utils/` and the `visits` and `stats` features)_
 
 ```
 frontend/
@@ -61,7 +61,7 @@ frontend/
     ├── sections/               # Header, Hero, ProofPoints, About, FeaturedWork, WorkRow, HowIWork, Skills, Experience, Education, Contact, Footer; OpenSource (PF-007)
     ├── i18n/                   # en.ts and t() for UI strings
     ├── test/                   # setup, renderWithProviders, MSW handlers
-    └── utils/                  # format.ts (PF-005)
+    └── utils/                  # format.ts with formatCount (PF-005)
 ```
 
 ## Key Patterns
@@ -69,10 +69,10 @@ frontend/
 - **Content is data.** Every word of portfolio copy lives in a typed file under `src/content/`: one file per section, one file per case study in `content/caseStudies/{slug}.ts`. Sections and pages render it; they hold no copy of their own. Only text the owner has reviewed goes in, it follows the disclosure tiers, and it matches the CV (Non-Negotiable 2, `.claude/rules/content-conventions.md`). UI strings such as button labels, form errors, and status messages come from `t('key')` instead.
 - **Sections vs features.** A section (`src/sections/`) is presentational and renders static content. A feature (`src/features/{feature}/`) talks to the API: `api.ts` for typed calls, `queries.ts` for hooks and the query-key factory, `types.ts`, `validation.ts` for zod schemas when there is a form, then components and their tests. Other code imports a feature only from its `index.ts`. A section may embed a feature component, as `Hero` embeds the system panel, `Footer` embeds the API status dot and the visit counter, and `OpenSource` embeds the projects list.
 - **The page never waits for the API.** Every API-backed view has a loading state, a fallback, and an error state, and nothing above it waits for it (Non-Negotiable 1). The projects list starts from `content/fallbackRepos.ts` and swaps in live data; the counter and the status dot hide or grey out on failure. After about 3 s of loading, a view shows the cold-start hint ("Waking up the free-tier API…").
-- **API calls.** Use the client from `src/api/client.ts` only. Its base URL is `import.meta.env.VITE_API_URL` (empty in development, where the Vite proxy forwards `/api`, `/actuator`, `/v3/api-docs`, and `/swagger-ui` to `localhost:8080`). It adds `X-Correlation-Id`, applies a timeout (15 s by default, 75 s for the contact form so it survives a cold start), and throws `ApiError` (`status`, `code`, `detail`, `correlationId`, `errors`) for problem responses, `code: 'UNEXPECTED_RESPONSE'` for an error without problem JSON or a 2xx body that is not JSON, and `code: 'NETWORK_ERROR'` when no usable response arrives. It falls back when the browser lacks `AbortSignal.any` or `crypto.randomUUID`. The health endpoint is outside the OpenAPI contract; `api-status` calls it once per page load through `createApiClient<LocalPaths>({ tolerateStatus: [503], timeoutMs: COLD_START_TIMEOUT_MS })` with types in its `types.ts`, and treats the 503 body as data (`KNOWN-FE-006`).
+- **API calls.** Use the client from `src/api/client.ts` only. Its base URL is `import.meta.env.VITE_API_URL` (empty in development, where the Vite proxy forwards `/api`, `/actuator`, `/v3/api-docs`, and `/swagger-ui` to `localhost:8080`). It adds `X-Correlation-Id`, applies a timeout (15 s by default, 75 s for the visit beacon and the contact form so they survive a cold start), and throws `ApiError` (`status`, `code`, `detail`, `correlationId`, `errors`) for problem responses, `code: 'UNEXPECTED_RESPONSE'` for an error without problem JSON or a 2xx body that is not JSON, and `code: 'NETWORK_ERROR'` when no usable response arrives. It falls back when the browser lacks `AbortSignal.any` or `crypto.randomUUID`. The health endpoint is outside the OpenAPI contract; `api-status` calls it once per page load through `createApiClient<LocalPaths>({ tolerateStatus: [503], timeoutMs: COLD_START_TIMEOUT_MS })` with types in its `types.ts`, and treats the 503 body as data (`KNOWN-FE-006`).
 - **Queries.** One hook per query, keys from the feature's factory, no retry on 4xx. Live data never replaces content the visitor is reading mid-scroll with a layout jump: reserve its space.
 - **Mutations.** Creating mutations (a visit, a contact message) never retry on their own.
-- **Visit tracking.** `useTrackPageView` in `features/visits` runs once per page load and once per route change, only in production builds. It reads `?ref=`, keeps it in `sessionStorage`, removes it from the address bar with `history.replaceState`, and posts `{path, referrer, ref}` with `keepalive: true`. It does nothing when `localStorage.notrack === '1'` (set by visiting `?notrack=1`) or when `navigator.globalPrivacyControl` is true (Non-Negotiable 3). It never sets a cookie.
+- **Visit tracking.** `useTrackPageView` in `features/visits`, called by `RootLayout`, posts one view per page load and one per route change, only in production builds (`import.meta.env.PROD`); its effect is keyed on the pathname, so anchors and query changes never count and the address-bar cleanup cannot re-trigger it (`KNOWN-FE-002`). It reads `?ref=` and keeps it in `sessionStorage`, applies `?notrack=1` (sets `localStorage.notrack = '1'`) and `?notrack=0` (removes it), then removes only those two parameters with the router's replace navigation and `preventScrollReset`, never `history.replaceState`, which would leave `useLocation` on the old address. It posts `{path, referrer, ref}`, with the referrer reduced to its origin, through its own 75 s client (`COLD_START_TIMEOUT_MS`) with `keepalive: true`, so the first view after an idle period survives a cold start and the visitor leaving. It does nothing after `?notrack=1` (`localStorage.notrack === '1'`, also kept in memory for the page load) or when `navigator.globalPrivacyControl` is true (Non-Negotiable 3), and never sets a cookie. Storage access is wrapped: when storage is blocked, the opt-out still holds for the rest of the page load and the ref tag goes with the first view only. `useVisitCounted` reads the mutation's outcome for the system panel's "counted" note.
 - **Forms.** react-hook-form with `zodResolver`. Schemas mirror the server's limits. Map `ApiError.errors` onto fields after a `VALIDATION_FAILED` response; show a friendly message for `RATE_LIMITED`. The contact form's honeypot field is visually hidden, skipped by keyboard focus, and labelled so screen readers ignore it.
 - **Routing and SEO.** `/` is the home page, `/work/:slug` a case study whose slug must exist in `content/caseStudies/` (anything else renders the 404 page), and every route sets its own `<title>` and meta description. A page that throws while rendering is replaced by `RouteErrorPage` inside the layout (`buildRoutes` in `src/app/routes.tsx`); it never shows the error itself. `vercel.json` rewrites unknown paths to `index.html`.
 - **Errors.** Render with `ErrorNote`, which shows a short message and, for API errors, the `code` and a copyable `correlationId`. Branch on `code`, never on text.
@@ -83,16 +83,16 @@ frontend/
 
 | Value | On the wire | Display with |
 |---|---|---|
-| Instant | ISO-8601 UTC string | `formatInstant` (local time zone) |
-| Date | `YYYY-MM-DD` | `formatDate` |
-| Count | integer | `formatCount` (`Intl.NumberFormat`, grouped digits) |
+| Instant | ISO-8601 UTC string | `formatInstant` (local time zone) _(planned: waits for its first caller)_ |
+| Date | `YYYY-MM-DD` | `formatDate` _(planned: waits for its first caller)_ |
+| Count | integer | `formatCount` (`Intl.NumberFormat('en')`, grouped digits whatever the visitor's locale, PF-005) |
 | Period in content | a display string written in content, such as `06/2026 – Present` | rendered as written (PF-003 P4) |
 
 ## Testing
 
 - Vitest with jsdom, Testing Library, and jest-dom; the setup file configures `data-test-id` as the test ID attribute.
 - `renderWithProviders` wraps the query client and a memory router.
-- MSW handlers emulate the API: defaults in `src/test/handlers.ts` (a healthy `GET /actuator/health`, which every page renders), per-test overrides with `server.use(...)`. Vitest sets `VITE_API_URL` to `http://api.test`, because openapi-fetch's `new Request()` rejects a relative URL in Node. MSW 3's unhandled-request option is `onUnhandledFrame`. Cover the success, fallback, and problem-response paths of every hook, and the main interaction of every page.
+- MSW handlers emulate the API: defaults in `src/test/handlers.ts` (a healthy `GET /actuator/health`, which every page renders, a 202 for `POST /api/v1/visits`, and zero totals for `GET /api/v1/stats/summary`, which the footer counter asks for once health answers), per-test overrides with `server.use(...)`. Vitest sets `VITE_API_URL` to `http://api.test`, because openapi-fetch's `new Request()` rejects a relative URL in Node. MSW 3's unhandled-request option is `onUnhandledFrame`. Cover the success, fallback, and problem-response paths of every hook, and the main interaction of every page.
 - Content tests check shape, not wording: every case study slug referenced by a card exists, every skill link points at an existing case study, and no content string is empty.
 - Find elements by test ID or role, never by CSS class or DOM structure.
 - Branch coverage stays at or above 80%.

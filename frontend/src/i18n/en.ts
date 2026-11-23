@@ -74,11 +74,18 @@ const en = {
     'apiStatus.note.online': 'The API is online and answering.',
     'apiStatus.note.databaseDown': 'The API is online, but its database is unavailable right now. Everything you read here still works.',
     'apiStatus.note.unreachable': 'The API is unreachable right now. Everything you read here still works without it.',
+    'apiStatus.note.counted': 'Your visit was counted anonymously.',
     'apiStatus.howBuilt': 'How this site is built',
     'apiStatus.footer.checking': 'API checking',
     'apiStatus.footer.waking': 'API waking up',
     'apiStatus.footer.online': 'API online',
     'apiStatus.footer.unreachable': 'API unreachable',
+
+    'stats.counter': '{visits} from {visitors}',
+    'stats.visitsOne': '1 visit',
+    'stats.visitsMany': '{count} visits',
+    'stats.visitorsOne': '1 visitor',
+    'stats.visitorsMany': '{count} visitors',
 
     'caseStudy.back': 'All work',
     'caseStudy.glance': 'At a glance',

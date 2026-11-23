@@ -29,8 +29,10 @@ class SecurityConfig {
 
     private static final String HEALTH_PATH = "/actuator/health";
     private static final String[] PUBLIC_GET_PATHS = {
-        HEALTH_PATH, "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**"
+        HEALTH_PATH, "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/api/v1/stats/summary"
     };
+    /** Public write endpoints; each has Bean Validation and a per-client rate limit (Non-Negotiable 4). */
+    private static final String[] PUBLIC_POST_PATHS = {"/api/v1/visits"};
 
     private final HandlerExceptionResolver exceptionResolver;
 
@@ -56,6 +58,8 @@ class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.ERROR)
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_GET_PATHS)
+                        .permitAll()
+                        .requestMatchers(HttpMethod.POST, PUBLIC_POST_PATHS)
                         .permitAll()
                         // Uptime monitors may probe with HEAD.
                         .requestMatchers(HttpMethod.HEAD, HEALTH_PATH)
