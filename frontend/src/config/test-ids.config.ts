@@ -45,6 +45,9 @@ export const TestIds = {
     footer: {
         sourceLink: 'footer-source-link',
     },
+    stats: {
+        counterText: 'stats-counter-text',
+    },
     notFound: {
         homeLink: 'not-found-home-link',
     },

@@ -73,7 +73,7 @@ docker build -t portfolio-backend backend            # the Render image (backend
 - **Entities.** Created through static factories; state changes only through guarded methods that throw on an illegal transition. No public setters. Keys are `BIGINT GENERATED ALWAYS AS IDENTITY`. Timestamps are `Instant` mapped to `TIMESTAMPTZ` and taken from the injected `Clock`. Mutable entities (`ContactMessageEntity`) carry `@Version`; append-only ones (`PageViewEntity`) do not. Lombok is allowed on entities only.
 - **Visitor identity.** `ClientInfoResolver` turns a request into `ClientInfo`: a parsed device type and browser family, a bot flag, a `rateLimitKey` (an HMAC of the IP alone), and `visitorHash = HMAC-SHA256(app.client.visitor-hash-secret, ip + "|" + userAgent)` as 64 hex characters, with the IP taken from the trusted proxy's `X-Forwarded-For` entry. The raw IP and the full user agent never leave that resolver: not into a column, a log line, or a response (Non-Negotiable 3). Referrers are reduced to their host.
 - **Abuse resistance.** Every public `POST` has Bean Validation on its request record and a Bucket4j limit keyed by `ClientInfo.rateLimitKey()` (an HMAC of the IP alone): visits 30 per minute, contact messages 3 per hour. A rejected request answers 429 `RATE_LIMITED` with `Retry-After`. Bot user agents are dropped from visit counting (Non-Negotiable 4).
-- **Caching.** Caffeine: `statsSummary` for 60 s and `githubRepos` for 1 h. A cache never holds personal data.
+- **Caching.** Caffeine, built where it is used, with no cache starter or proxy: the stats summary in `StatsQueryService` (one entry, `app.stats.cache-ttl`, 60 s by default, read straight through when zero as in the test profile; built in PF-005) and `githubRepos` for 1 h. A cache never holds personal data.
 - **Scheduled jobs.** The job is the feature's own component with an `app.{feature}.*-enabled` switch, such as `app.contact.retry-enabled`. Its `@Scheduled` method returns at once when the switch is off. Integration tests turn the switch off and call the job's work method directly. It takes its work from the current state ("what is still `FAILED`") and claims each item with a compare-and-set, never with a scheduler lock.
 - **Configuration.** Validated `@ConfigurationProperties` records under `app.*`; YAML values as `${ENV_VAR:default}`; secrets have no default outside `application-local.yml`, and the `prod` profile fails at startup when one is missing. The datasource settings have no default in `application.yml`; `application-local.yml` derives them from the `POSTGRES_*` variables that `compose.yaml` uses. `server.port: ${PORT:8080}` (Render injects `PORT`; locally `SERVER_PORT` overrides it), `server.request.header.forwarded.strategy: none` (`ClientInfoResolver` reads `X-Forwarded-For` itself and trusts only `app.client.trusted-proxy-hops` from the right), and a Hikari pool of 3.
 - **Logging.** SLF4J (`LoggerFactory.getLogger`). Log identifiers and outcomes, never request bodies, IP addresses, user agents, email addresses, message text, or tokens. Business failures at WARN without a stack trace; unexpected failures at ERROR with one.
@@ -101,7 +101,7 @@ public Accepted submit(CreateContactMessageRequest body, ClientInfo client) {
 
 A delivery failure is the owner's problem, not the visitor's: the message is safe in the database and the retry job resends it.
 
-### Adding an endpoint _(planned; confirmed in PF-005)_
+### Adding an endpoint (confirmed in PF-005)
 
 1. Write a migration if the data model changes.
 2. Add or extend the entity (factory, guarded transitions) and its repository.
@@ -121,13 +121,13 @@ backend/
 └── src/
     ├── main/java/com/huygialy/portfolio/
     │   ├── platform/                    # error, web (correlation ID), security (chain, CORS), client (ClientInfoResolver, visitor hash, user agent, bot filter), ratelimit, openapi, ClockConfig
-    │   ├── visit/                       # page views: service, entity, repository, validator (planned, PF-005)
+    │   ├── visit/                       # page views: command and query services, entity, repository, validator (PF-005)
     │   │   └── api/                     # POST /api/v1/visits
-    │   ├── stats/                       # summary query and its cache
+    │   ├── stats/                       # summary query and its cache, StatsProperties (PF-005)
     │   │   └── api/                     # GET /api/v1/stats/summary
-    │   ├── contact/                     # outbox: command service, lifecycle, entity, EmailSender port + Resend adapter, retry job
+    │   ├── contact/                     # outbox: command service, lifecycle, entity, EmailSender port + Resend adapter, retry job (planned, PF-006)
     │   │   └── api/                     # POST /api/v1/contact-messages
-    │   └── project/                     # GitHubClient, cache, circuit breaker
+    │   └── project/                     # GitHubClient, cache, circuit breaker (planned, PF-007)
     │       └── api/                     # GET /api/v1/projects
     ├── main/resources/
     │   ├── application.yml · application-{local,prod}.yml

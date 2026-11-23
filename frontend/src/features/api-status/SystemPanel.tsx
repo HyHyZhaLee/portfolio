@@ -4,6 +4,7 @@ import { StatusDot, type StatusTone } from '../../components/StatusDot';
 import { getTestIdProp, TestIds } from '../../config/test-ids.config';
 import { caseStudyPath } from '../../content/caseStudies/slugs';
 import { t, type MessageKey } from '../../i18n/en';
+import { useVisitCounted } from '../visits';
 import { apiTone, databaseTone } from './statusTone';
 import type { ApiStatus } from './types';
 import { useApiStatus } from './useApiStatus';
@@ -34,6 +35,7 @@ function noteFor({ api, database }: ApiStatus): MessageKey {
  */
 export function SystemPanel() {
     const status = useApiStatus();
+    const counted = useVisitCounted();
     const rows: Row[] = [
         {
             key: 'browser',
@@ -94,6 +96,8 @@ export function SystemPanel() {
         },
     ];
     const answered = status.api === 'online' || status.api === 'unreachable';
+    // Only a recorded view of this page load is mentioned, never a skipped, failed, or rate-limited one (PF-005 D3).
+    const showCounted = status.api === 'online' && status.database === 'connected' && counted;
 
     return (
         <aside
@@ -136,6 +140,7 @@ export function SystemPanel() {
             </div>
             <p aria-live='polite' className='mt-3.5 min-h-14 border-t border-line pt-3.5 font-ui text-sm leading-snug text-muted'>
                 {t(noteFor(status))}
+                {showCounted && <> {t('apiStatus.note.counted')}</>}
                 {answered && (
                     <>
                         {' '}

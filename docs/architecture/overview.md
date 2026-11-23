@@ -20,8 +20,8 @@ flowchart LR
 | Component | Responsibility | Hosting | Ticket |
 |---|---|---|---|
 | Frontend (`frontend/`) | Renders the portfolio from static content; calls the API for the counter, open-source list, contact form, and status dot; never waits for it | Vercel Hobby | PF-002, PF-003 |
-| Backend (`backend/`) | Records visits and serves stats, accepts and delivers contact messages, lists GitHub projects, reports health | Render Free, Docker, 512 MB / 0.1 CPU | PF-002, PF-004 |
-| Database | `page_view` and `contact_message` tables, migrated by Flyway | Neon Free PostgreSQL 17 | PF-005, PF-006 |
+| Backend (`backend/`) | Records visits and serves stats, accepts and delivers contact messages, lists GitHub projects, reports health | Render Free, Docker, 512 MB / 0.1 CPU | PF-002, PF-004, PF-005 |
+| Database | `page_view` table (built in PF-005) and `contact_message` table _(planned, PF-006)_, migrated by Flyway | Neon Free PostgreSQL 17 | PF-005, PF-006 |
 | Email API | Delivers contact messages to the owner's inbox over HTTPS | Free tier | PF-006 |
 | GitHub API | Source of the public repository list | Public API with a read-only token | PF-007 |
 | Uptime monitor | Pings the health endpoint so the backend rarely sleeps | Free tier | PF-009 |
