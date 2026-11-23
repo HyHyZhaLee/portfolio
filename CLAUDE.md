@@ -29,9 +29,9 @@ It is under construction: `docs/prd/backlog.md` says what exists today.
 
 | Path | What it is | Read |
 |---|---|---|
-| `backend/` | Java 21, Spring Boot 4, Gradle 9, REST + OpenAPI, PostgreSQL + Flyway; scaffolded in PF-002 (health, security chain, OpenAPI snapshot, test tiers); the visits, stats, contact, and projects APIs _(planned, PF-004 to PF-007)_ | `backend/CLAUDE.md`, `backend/docs/ARCHITECTURE.md` |
-| `frontend/` | React 19, TypeScript, Vite, Tailwind CSS, TanStack Query, React Router, API types generated from OpenAPI; scaffolded in PF-002 (API client, providers, routes, test harness); the sections _(planned, PF-003)_ | `frontend/CLAUDE.md`, `frontend/docs/ARCHITECTURE.md` |
-| `docs/` | Product rules and disclosure tiers, cross-package architecture, ADRs, knowledge base, backlog | `docs/README.md` |
+| `backend/` | Java 21, Spring Boot 4, Gradle 9, REST + OpenAPI, PostgreSQL + Flyway; scaffolded in PF-002 (health, security chain, OpenAPI snapshot, test tiers); the visits, stats, contact, and projects APIs _(planned, PF-004 to PF-007)_ | `backend/CLAUDE.md`, `docs/architecture/backend.md` |
+| `frontend/` | React 19, TypeScript, Vite, Tailwind CSS, TanStack Query, React Router, API types generated from OpenAPI; scaffolded in PF-002 (API client, providers, routes, test harness); the sections _(planned, PF-003)_ | `frontend/CLAUDE.md`, `docs/architecture/frontend.md` |
+| `docs/` | The only docs folder, for both packages and focused on the backend: product rules and disclosure tiers, the design guides, ADRs, ticket plans, knowledge base, backlog | `docs/README.md` |
 | `scripts/` | Helper scripts for people and agents (`with-node.sh`, `check-services.sh`, `free-port.sh`) | the script headers |
 | `.claude/` | Skills, path-scoped rules, the `code-reviewer` agent, launch and permission settings | this file |
 
@@ -53,11 +53,11 @@ Every change in either package respects these. A diff that breaks one is not don
 
 ## Documentation Organization
 
-Three concerns, three places:
+All docs live in one folder, `docs/`, for the backend and the frontend alike; the packages have no docs folders, only their `CLAUDE.md`. **The docs focus on the backend**: it carries the design weight, so its guide is the main reference and every plan specifies its schema, services, API, failure modes, and flows in full, while the frontend gets a shorter guide and a compact section in each plan. Three concerns, three places inside `docs/`:
 
-- **Product knowledge → `docs/`.** What the site does: rules, site map, and disclosure tiers in `docs/product/product-guide.md`, verified facts in `docs/knowledge/`, tickets in `docs/prd/backlog.md`, cross-package design and ADRs in `docs/architecture/`.
-- **Architecture guidelines → `backend/docs/ARCHITECTURE.md` and `frontend/docs/ARCHITECTURE.md`.** How code must be designed: principles, known issues (`KNOWN-BE-NNN`, `KNOWN-FE-NNN`), evaluation checklists, and the implementation plan template.
-- **Implementation plans → `backend/docs/{domain}/` and `frontend/docs/{domain}/`.** How one ticket is built: `PF-NNN-{title}.md` (the plan), `PF-NNN-refined-requirement.md` (what to build, as clarified), and `PF-NNN-PROGRESS.md` (where the work stands).
+- **Product knowledge.** What the site does: rules, site map, and disclosure tiers in `docs/product/product-guide.md`, verified facts in `docs/knowledge/`, tickets in `docs/prd/backlog.md`.
+- **Architecture guidelines → `docs/architecture/`.** How code must be designed: `backend.md` (the main guide) and `frontend.md` (its companion), each with principles, known issues (`KNOWN-BE-NNN`, `KNOWN-FE-NNN`), and an evaluation checklist; plus the system `overview.md` and the ADRs.
+- **Implementation plans → `docs/plans/{domain}/`.** How one ticket is built: `PF-NNN-{title}.md` (one plan for both packages, backend first), `PF-NNN-refined-requirement.md` (what to build, as clarified), and `PF-NNN-PROGRESS.md` (where the work stands). The template, the domains, and the diagram conventions are in `docs/plans/README.md`.
 
 The master build plan and content plan live in the private parent folder (see *Overview*); the backlog maps their phases to tickets.
 
@@ -74,8 +74,8 @@ Feature work runs in three stages. Each ends at a gate, and each hands off throu
 Whichever skill runs, these steps hold:
 
 1. **Read** the ticket in `docs/prd/backlog.md`, the product rules it touches in `docs/product/`, and the master plan section it maps to (`/plan`).
-2. **Read** the target package's `ARCHITECTURE.md`: principles, known issues, checklist (`/plan`).
-3. **Plan** in `{package}/docs/{domain}/PF-NNN-{title}.md` using the template there, and get approval before building (`/plan`).
+2. **Read** the design guides the change touches, `docs/architecture/backend.md` first, then `docs/architecture/frontend.md`: principles, known issues, checklist (`/plan`).
+3. **Plan** in `docs/plans/{domain}/PF-NNN-{title}.md` using the template in `docs/plans/README.md`, and get approval before building (`/plan`).
 4. **Build** from the approved plan, smallest working vertical slice first (`/dev`).
 5. **Trace** each implementation decision back to a product rule or a decision recorded in the plan (`/dev`).
 6. **Capture** knowledge you verified while working in `docs/knowledge/`, as described below (`/dev`).
@@ -133,6 +133,6 @@ Start Claude Code from this folder (`CV/portfolio`) or from the parent CV folder
 
 - Start here: `docs/product/product-guide.md`
 - System overview: `docs/architecture/overview.md`; decisions: `docs/architecture/adr/`
-- Backend guide: `backend/docs/ARCHITECTURE.md`; frontend guide: `frontend/docs/ARCHITECTURE.md`
+- Design guides: `docs/architecture/backend.md` (main), `docs/architecture/frontend.md`; plans and their template: `docs/plans/`
 - Backlog: `docs/prd/backlog.md`; knowledge base: `docs/knowledge/`
 - Master plans (private, parent folder): `../portfolio-implementation-plan.md`, `../cv-portfolio-content-plan.md`

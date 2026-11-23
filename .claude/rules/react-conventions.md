@@ -5,7 +5,7 @@ paths:
 
 # React / TypeScript conventions
 
-Applies to everything under `frontend/`. The principles behind these rules are in `frontend/docs/ARCHITECTURE.md`; commands are in `frontend/CLAUDE.md`. Content files under `src/content/` also follow `.claude/rules/content-conventions.md`.
+Applies to everything under `frontend/`. The principles behind these rules are in `docs/architecture/frontend.md`; commands are in `frontend/CLAUDE.md`. Content files under `src/content/` also follow `.claude/rules/content-conventions.md`.
 
 ## Structure
 

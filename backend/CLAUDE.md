@@ -1,6 +1,6 @@
 # backend/CLAUDE.md
 
-> Written before the code (PF-001) as the working contract for `backend/`. The commands were confirmed when PF-002 scaffolded the package; class names are confirmed from PF-004 on. Where this file and the code disagree, fix whichever is wrong in the same change.
+> Written before the code (PF-001) as the working contract for `backend/`. The commands were confirmed when PF-002 scaffolded the package; class names are confirmed from PF-004 on. Where this file and the code disagree, fix whichever is wrong in the same change. This package has no docs folder: its design guide is `docs/architecture/backend.md` and its plans live in `docs/plans/`.
 
 ## Quick Reference
 
@@ -17,7 +17,7 @@
 | Runtime target | Render Free: 512 MB RAM, 0.1 CPU, no persistent disk (Non-Negotiable 8) |
 | Base package | `com.huygialy.portfolio` |
 
-Spring Boot 4 traps (`KNOWN-BE-003` to `005` in `backend/docs/ARCHITECTURE.md`): split starters, Jackson 3 runtime packages under `tools.jackson`, and Testcontainers 2 artifact and class names. When a compile error contradicts what you expected, look up the current API. Never downgrade a dependency to make old code compile.
+Spring Boot 4 traps (`KNOWN-BE-003` to `005` in `docs/architecture/backend.md`): split starters, Jackson 3 runtime packages under `tools.jackson`, and Testcontainers 2 artifact and class names. When a compile error contradicts what you expected, look up the current API. Never downgrade a dependency to make old code compile.
 
 ## Commands
 
@@ -117,7 +117,6 @@ backend/
 ├── build.gradle.kts · settings.gradle.kts · gradlew
 ├── Dockerfile                           # multi-stage build; JVM flags sized for Render Free (planned, PF-004)
 ├── openapi/openapi.json                 # committed API contract snapshot
-├── docs/ARCHITECTURE.md · docs/{domain}/ # design guide and implementation plans
 └── src/
     ├── main/java/com/huygialy/portfolio/
     │   ├── platform/                    # security (filter chain, built), openapi (built); error, web (correlation ID), ratelimit, client (ClientInfoResolver, visitor hash, bot filter) from PF-004
@@ -156,7 +155,7 @@ backend/
 
 - `testUnit` holds untagged tests of pure logic (the visitor hasher, the bot filter, the referrer reducer, validators), using Mockito where collaborators are needed and no Spring context.
 - `testIT` holds `@IntegrationTest` classes. They share one Spring context with a Testcontainers PostgreSQL and a WireMock server that stands in for Resend and GitHub, and never use `@MockitoBean` (`KNOWN-BE-008`). No test reaches a real external service.
-- The integration-test gate (principle 14 in `backend/docs/ARCHITECTURE.md`) decides when a change needs an integration test.
+- The integration-test gate (principle 14 in `docs/architecture/backend.md`) decides when a change needs an integration test.
 - Build test data in code through small factories. Data is synthetic: invented names, `example.com` emails, documentation IP ranges such as `203.0.113.0/24`.
 - Assert on problem `code` and HTTP status, never on message text.
 - Branch coverage stays at or above 80%; `check` enforces it.

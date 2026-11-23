@@ -62,7 +62,7 @@ Tests prove the acceptance criteria and the Non-Negotiables and keep branch cove
 A long feature rarely fits one context window, and each compaction blurs early decisions. Prefer ending a saturated session and resuming from a file over riding through many compactions.
 
 - **Trigger:** when context is running low, after the first compaction, or at a natural break such as a finished slice, offer to write `PF-NNN-PROGRESS.md` and continue in a fresh session. Do not wait to be asked.
-- **Where:** next to the plan in the primary package. **Template:** [templates/progress.md](templates/progress.md).
+- **Where:** next to the plan, in `docs/plans/{domain}/`. **Template:** [templates/progress.md](templates/progress.md).
 - **Who:** the main loop writes it, because it is a snapshot of your own working state.
 - **On resume:** read §0 first, then the docs it points to. Confirm the state with the user in two lines, then continue from "What's next".
 
@@ -70,9 +70,9 @@ A long feature rarely fits one context window, and each compaction blurs early d
 
 **Goal:** start building from the approved plan, on the right branch.
 
-1. **Check for a resume first.** Look for `backend/docs/**/PF-NNN*-PROGRESS.md` and `frontend/docs/**/PF-NNN*-PROGRESS.md`. If one exists, follow *Progress handoff* and skip whatever it already covers.
-2. **Find the docs.** Read the ticket's plans under `backend/docs/` and `frontend/docs/` and its refined requirement in full, plus the `KNOWN-*` entries and rules they cite.
-3. **Gate.** Each plan's Status must be **Approved**. If there is no plan, or it is Draft, stop and point the user to `/plan PF-NNN`. A plain feature description instead of a ticket ID also goes to `/plan`. A plan written before the Status field existed needs the user's explicit confirmation that it is approved.
+1. **Check for a resume first.** Look for `docs/plans/**/PF-NNN*-PROGRESS.md`. If one exists, follow *Progress handoff* and skip whatever it already covers.
+2. **Find the docs.** Read the ticket's plan under `docs/plans/` and its refined requirement in full, plus the `KNOWN-*` entries and rules they cite.
+3. **Gate.** The plan's Status must be **Approved**. If there is no plan, or it is Draft, stop and point the user to `/plan PF-NNN`. A plain feature description instead of a ticket ID also goes to `/plan`. A plan written before the Status field existed needs the user's explicit confirmation that it is approved.
 4. **Branch.** Work on the ticket's branch. If you are on `main`, propose `feature/PF-NNN-short-slug` or `fix/PF-NNN-short-slug` and create it on confirmation.
 5. Set the ticket's status to In progress in `docs/prd/backlog.md`.
 6. State in at most six lines the slices in build order, the first slice's files, the test writers you will start for it, and anything in the plan that the current code contradicts. Then start; stop first only if the plan is stale.
@@ -83,7 +83,7 @@ A long feature rarely fits one context window, and each compaction blurs early d
 
 For each slice, in the plan's order:
 
-1. **Contract first (you, a few minutes).** Write what the tests compile against: the migration, the entity, the request and response records, the `ErrorCode` entries, and the public service and controller signatures the plan names. A method body may start as `throw new UnsupportedOperationException("PF-NNN: not built yet")`. Run `./backend/gradlew -p backend spotlessApply assemble testClasses` so the contract compiles. For a frontend slice, the contract is the regenerated `schema.d.ts`, the feature's `types.ts` and `api.ts` signatures, the strings, the content types, and the test IDs from the frontend plan.
+1. **Contract first (you, a few minutes).** Write what the tests compile against: the migration, the entity, the request and response records, the `ErrorCode` entries, and the public service and controller signatures the plan names. A method body may start as `throw new UnsupportedOperationException("PF-NNN: not built yet")`. Run `./backend/gradlew -p backend spotlessApply assemble testClasses` so the contract compiles. For a frontend slice, the contract is the regenerated `schema.d.ts`, the feature's `types.ts` and `api.ts` signatures, the strings, the content types, and the test IDs from the plan's frontend section.
 2. **Start the test writers at once, in one message**, with the brief below: `subagent_type: "general-purpose"`, `model: "sonnet"` (or `"haiku"` for a small mechanical slice), `run_in_background: true`. A backend slice usually needs one writer for the integration tests, plus a second for unit tests only when the slice has pure logic with branches. A frontend slice needs one. Each writer owns the test files named in its brief, and no file has two writers. Keep backend and frontend writers in separate waves, and at most about four agents at once.
 3. **Implement the bodies while they write.** Follow the plan; do not edit the test files they own. After each layer, check with `./backend/gradlew -p backend assemble`, which compiles only production code and runs no formatter, so a half-written test file cannot break it, and which never reformats a file a writer is editing. In a frontend slice, run `scripts/with-node.sh pnpm --dir frontend check:type` and ignore errors in the writer's test files until it reports.
 4. **Converge.** When the writers have reported and your implementation is done, run `./backend/gradlew -p backend spotlessApply assemble testClasses` (or the frontend `format` and `check:type`), then run their tests scoped yourself. Sort each failure: unfinished production code (finish it), a real bug (fix the production code), or a test that contradicts the plan (fix the test). Never bend a test to match code that contradicts the plan; that is a deviation (see the table).

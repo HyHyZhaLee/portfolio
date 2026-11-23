@@ -28,7 +28,7 @@ Run them yourself and make the green or red call. Fix failures and re-run before
 
 1. `./backend/gradlew -p backend spotlessApply`, then `./backend/gradlew -p backend spotlessCheck`.
 2. `./backend/gradlew -p backend testUnit`.
-3. **Integration-test gate (blocking).** If the diff adds or changes a repository query, an endpoint, a persistence flow, a migration that changes queryable behavior, or a call to an external service (the Resend email API, the GitHub API), a passing `@IntegrationTest` must cover it (the integration-test gate in `backend/docs/ARCHITECTURE.md`). Confirm the covering tests exist, then run `./backend/gradlew -p backend testIT`. If one is missing, stop and write it first. If the diff is exempt because it is pure in-memory logic, say so explicitly in the report.
+3. **Integration-test gate (blocking).** If the diff adds or changes a repository query, an endpoint, a persistence flow, a migration that changes queryable behavior, or a call to an external service (the Resend email API, the GitHub API), a passing `@IntegrationTest` must cover it (the integration-test gate in `docs/architecture/backend.md`). Confirm the covering tests exist, then run `./backend/gradlew -p backend testIT`. If one is missing, stop and write it first. If the diff is exempt because it is pure in-memory logic, say so explicitly in the report.
 4. Run `./backend/gradlew -p backend check`, which adds the branch-coverage gate.
 
 **Frontend**
@@ -80,7 +80,7 @@ A pull request needs a feature branch. If you are on `main`, create `feature/PF-
 
 - **Inside each part**, write one numbered `###` section per main change (`### 1.`, `### 2.`, …, usually two to four). Each says what changed and why in one to three lines and names its key files. Fold small edits into the closest section instead of listing files.
 - **A side with no changes** says `No changes.` under its heading.
-- **Docs, content, and tooling** go under the part they serve: a frontend plan, portfolio content, and `docs/product/` under A; a backend plan, migration notes, or the OpenAPI snapshot under B. A change that serves both, such as a skill, `CLAUDE.md`, or the README, goes under B, unless it is mostly about the frontend.
+- **Docs, content, and tooling** go under the part they serve: portfolio content, `docs/product/`, and `docs/architecture/frontend.md` under A; `docs/architecture/backend.md`, migration notes, and the OpenAPI snapshot under B. The ticket's plan covers both packages and goes under B, unless the ticket is frontend-only. A change that serves both, such as a skill, `CLAUDE.md`, the README, or `docs/plans/README.md`, goes under B, unless it is mostly about the frontend.
 - **Tests:** when a part changes code or content, its last numbered section is `Tests`, with the tests added and that package's gate results, then the Non-Negotiables that apply, one line each. In A: the fallback without the API (NN1), disclosure with the scrub count (NN2), and no tracking cookie with `?notrack=1` honored (NN3). In B: visitor privacy (NN3), validation and rate limits (NN4), problem responses (NN5), Flyway-only schema changes (NN6), no transaction across network I/O (NN7), free-tier fit (NN8), and nothing sensitive logged (NN9).
 
 ```markdown

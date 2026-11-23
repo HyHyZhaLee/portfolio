@@ -14,7 +14,7 @@ This is stage 3 of 3: `/plan` decided what to build and how, `/dev` built it, an
 
 ## What counts as a finding
 
-Every finding has a `file:line`; what is wrong, as a concrete failure scenario or the exact rule broken; its **source** (a Non-Negotiable in `CLAUDE.md`, a `.claude/rules/` file, an `ARCHITECTURE.md` principle, checklist item, or `KNOWN-*` entry, a `SITE-NNN` rule, a plan section, or an `FR-n` or `AC-n`); and a suggested fix.
+Every finding has a `file:line`; what is wrong, as a concrete failure scenario or the exact rule broken; its **source** (a Non-Negotiable in `CLAUDE.md`, a `.claude/rules/` file, a design-guide principle, checklist item, or `KNOWN-*` entry (`docs/architecture/`), a `SITE-NNN` rule, a plan section, or an `FR-n` or `AC-n`); and a suggested fix.
 
 | Severity | Means |
 |---|---|
@@ -28,7 +28,7 @@ Not a finding: pre-existing issues the change neither introduced nor worsened; a
 
 1. Run `git branch --show-current` and `git status --short`. On a branch other than `main`, the change is `git diff main...HEAD` plus the uncommitted diff (`git diff HEAD`) plus untracked files. On `main`, it is the uncommitted diff plus untracked files.
 2. List the changed files, grouped as backend production code, frontend production code, content (`frontend/src/content/`, `docs/product/`), tests, migrations, docs, and `.claude/`. If the change is empty, say so and stop.
-3. Find the ticket: the argument, otherwise the branch name (`feature/PF-NNN-…`). Read its plans under `backend/docs/` and `frontend/docs/` and its refined requirement. With no ticket or no plan, such as a chore, review against the conventions only and say so.
+3. Find the ticket: the argument, otherwise the branch name (`feature/PF-NNN-…`). Read its plan under `docs/plans/` and its refined requirement. With no ticket or no plan, such as a chore, review against the conventions only and say so.
 
 ## 2. Independent read (background)
 
@@ -40,7 +40,7 @@ Read the whole change, then check each item for the files it covers:
 
 1. **Plan conformance.** Every unit, endpoint, error code, migration, and content block the plan names exists with that name and shape. Nothing significant exists that the plan does not name. The plan's diagrams match the code: each sequence diagram follows the real call order and transactions, and the ER diagram and column table match the migration.
 2. **Requirement coverage.** Map each `FR-n` and `AC-n` to the code that implements it and the test that proves it. An acceptance criterion without a test is a finding.
-3. **Conventions.** For each changed file, the matching `.claude/rules/` file plus the evaluation checklist and the `KNOWN-*` entries in its package `ARCHITECTURE.md`. Backend: layering, the command shape, transaction boundaries, `ApiException` and `ErrorCode`, properties records under `app.*`, migration naming. Frontend: the feature-folder shape, generated API types only, query keys from the feature's factory, loading, fallback, and error states, test IDs, `t()` strings, accessible names, and the per-page title and meta description.
+3. **Conventions.** For each changed file, the matching `.claude/rules/` file plus the evaluation checklist and the `KNOWN-*` entries in the package's design guide (`docs/architecture/backend.md` or `docs/architecture/frontend.md`). Backend: layering, the command shape, transaction boundaries, `ApiException` and `ErrorCode`, properties records under `app.*`, migration naming. Frontend: the feature-folder shape, generated API types only, query keys from the feature's factory, loading, fallback, and error states, test IDs, `t()` strings, accessible names, and the per-page title and meta description.
 4. **Complex flows** (definition in `.claude/skills/plan/SKILL.md`, *Complex flows*): every complex function has a current diagram, and every step serves a reachable case.
 5. **Loops and effects.** Exit conditions are reachable, retries (the email retry job, the GitHub circuit breaker) and polling are bounded, effects do not re-trigger themselves, subscriptions and listeners are cleaned up, and no service calls form a cycle.
 6. **Concurrency and persistence.** Every new write handles concurrent modification where two writers are possible (a constraint, a conditional update, or a lock); the retry job claims each message with a status compare-and-set so two runs never send it twice; no check-then-act on shared state.
@@ -53,7 +53,7 @@ Read the whole change, then check each item for the files it covers:
    - [ ] **Network I/O (NN7):** no transaction spans a call to the email provider or the GitHub API; the write order is `PENDING`, call, outcome;
    - [ ] **Free tier (NN8):** nothing is written to the local disk, email goes over HTTPS, the Hikari pool stays small, and every new dependency is justified in the plan;
    - [ ] **Secrets and personal data (NN9):** no secret, real email, or message content in code, logs, fixtures, docs, or commits.
-8. **Tests and contract.** The integration-test gate (in `backend/docs/ARCHITECTURE.md`) is met. After an API change, `backend/openapi/openapi.json` and `frontend/src/api/schema.d.ts` are part of the change. Judge tests against the test budget in `.claude/skills/dev/SKILL.md`: a missing test for an acceptance criterion or a marked failure-modes row is a finding, and a test the budget skips on purpose is not.
+8. **Tests and contract.** The integration-test gate (in `docs/architecture/backend.md`) is met. After an API change, `backend/openapi/openapi.json` and `frontend/src/api/schema.d.ts` are part of the change. Judge tests against the test budget in `.claude/skills/dev/SKILL.md`: a missing test for an acceptance criterion or a marked failure-modes row is a finding, and a test the budget skips on purpose is not.
 9. **Docs.** The plan's **Last updated** is current; the refined requirement's Open Questions are resolved or explicitly deferred; changed Markdown follows `.claude/rules/docs-conventions.md`; new knowledge entries follow `docs/knowledge/README.md`.
 10. **Compile.** `./backend/gradlew -p backend assemble testClasses` and `scripts/with-node.sh pnpm --dir frontend check:type`, for the packages touched. Running the full test suites is the job of `make check` and `/create-pr`.
 

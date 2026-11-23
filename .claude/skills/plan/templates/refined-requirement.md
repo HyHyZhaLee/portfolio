@@ -2,7 +2,7 @@
 
 > Living document. The backlog entry or the user's description was the starting point; this is the complete, current requirement as clarified in conversation, and it wins over the original wording. It says **what** to build; the plan says **how**. Sole author: the background refinement agent.
 
-**Ticket**: PF-NNN — {summary} · **Plans**: {links to the backend and frontend plans} · **Master plan section**: {`../portfolio-implementation-plan.md` §n or `../cv-portfolio-content-plan.md` §n} · **Status**: Draft | Refining | Confirmed · **Last updated**: {YYYY-MM-DD}
+**Ticket**: PF-NNN — {summary} · **Plan**: [PF-NNN-{title}.md](PF-NNN-{title}.md) · **Master plan section**: {`../portfolio-implementation-plan.md` §n or `../cv-portfolio-content-plan.md` §n} · **Status**: Draft | Refining | Confirmed · **Last updated**: {YYYY-MM-DD}
 
 ## 1. Problem and goal
 
