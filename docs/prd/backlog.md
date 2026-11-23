@@ -14,7 +14,8 @@ Ticket registry. A ticket is registered here before work starts. Its plan, refin
 | PF-008 | Quality gates and CI hardening: coverage gates, branch protection, Dependabot, secret scanning, optional Playwright smoke test | Chore | Implementation plan Phase 7 | Planned | — |
 | PF-009 | Polish and launch: README with architecture and decisions, Lighthouse ≥ 90, cross-browser check, uptime monitor, smoke test, links from the CV and LinkedIn | Chore | Implementation plan Phase 8 | Planned | — |
 | PF-010 | One docs folder: move the package architecture guides and plans into `docs/` (`docs/architecture/backend.md`, `docs/architecture/frontend.md`, `docs/plans/{domain}/`), one backend-first plan template for both packages, and every reference updated | Chore | Owner request, 2026-11-23 | Done (2026-11-23) | none |
+| PF-011 | Content rules follow the full-length master CV: public facts match the master CV, and the public CV PDF is that same CV without the phone (`.claude/rules/content-conventions.md`, SITE-007) | Chore | Content plan D9 (2026-11-23) | Done (2026-11-23) | none |
 
 **Type**: Feature · Fix · Chore. **Status**: Planned · In progress · Done · Dropped.
 
-Next free ID: **PF-011**.
+Next free ID: **PF-012**.
