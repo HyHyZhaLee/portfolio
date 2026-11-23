@@ -14,7 +14,7 @@ Everything here is public: indexed by search engines and readable by anyone, inc
 
 - **Never invent.** Every claim, number, date, title, and team-size statement traces to the master CV or to an item the owner approved. Mark anything uncertain `(confirm)` and list it in your hand-off instead of guessing.
 - Only reviewed text from `../portfolio-content/` goes into `frontend/src/content/`. Until it exists, use clearly fake placeholders (`"TODO: hero pitch (content pack C)"`), never drafted claims.
-- Facts, dates, and numbers match the public 2-page CV exactly. If they differ, stop and ask; do not pick one.
+- Facts, dates, and numbers match the master CV exactly. The CV is sent at full length, never shortened, and the public CV PDF is that same CV without the phone. If they differ, stop and ask; do not pick one.
 
 ## Disclosure tiers (Non-Negotiable 2)
 

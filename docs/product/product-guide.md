@@ -55,7 +55,7 @@ The list shows the owner's public GitHub repositories that are neither forks nor
 No raw IP address, full user agent, or full referrer URL is stored or logged; the referrer is kept as its host only. The site sets no tracking cookies. The footer says so in one line.
 
 ### SITE-007: Public content follows the disclosure tiers
-Every public text follows section 5. Nothing is invented, and facts match the public 2-page CV. Non-Negotiable 2.
+Every public text follows section 5. Nothing is invented, and facts match the master CV, which is also the public CV PDF (full length, without the phone). Non-Negotiable 2.
 
 ## 5. Disclosure tiers
 
