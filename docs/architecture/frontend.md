@@ -18,7 +18,7 @@ A component renders one thing. A hook encapsulates one concern: one query, one m
 
 ### 2. Reuse shared primitives first
 
-`src/components/` holds the primitives every section uses: `Section`, `Card`, `Button`, `Chip`, `Skeleton`, `StatusDot`, and `ErrorNote` (PF-003). Reach for them before writing raw markup with a new set of classes. Add a primitive only when a second caller needs it.
+`src/components/` holds the primitives every section uses: `Section`, `ChipList`, `ButtonLink`, and `StatusDot` (PF-003), then `Card`, `Skeleton`, and `ErrorNote` when their first caller needs them (PF-005 to PF-007). Reach for them before writing raw markup with a new set of classes. Add a primitive only when a second caller needs it.
 
 ### 3. Content is data
 
@@ -50,7 +50,7 @@ Forms use react-hook-form with a zod schema that mirrors the server's limits, so
 
 ### 10. Every interactive element is testable and accessible
 
-Each interactive element carries a `data-test-id` through `getTestIdProp(TestIds.{feature}.{element})`, plus an accessible name: a label, an `aria-label`, or visible text. Headings follow the page outline, images have meaningful `alt` text, focus stays visible, colour contrast meets WCAG AA in both colour schemes, and motion respects `prefers-reduced-motion`. Tests find elements by test ID or role, never by CSS class or DOM structure.
+Each interactive element carries a `data-test-id` through `getTestIdProp(TestIds.{feature}.{element})`, plus an accessible name: a label, an `aria-label`, or visible text. Headings follow the page outline, images have meaningful `alt` text, focus stays visible, colour contrast meets WCAG AA in the light colour scheme (the only one since PF-003 D9), and motion respects `prefers-reduced-motion`. Tests find elements by test ID or role, never by CSS class or DOM structure.
 
 ### 11. UI strings are translatable
 
@@ -119,7 +119,7 @@ Run this before writing a plan. Record anything that fails as a risk or a decisi
 ### Consistency
 
 - [ ] Section and feature folder shapes followed; types come from the generated schema only
-- [ ] Styling uses theme tokens; light and dark schemes both checked
+- [ ] Styling uses theme tokens; contrast checked in the light scheme (PF-003 D9)
 
 ### API alignment
 
@@ -146,19 +146,19 @@ Rows marked _built_ exist; the others are planned until the ticket named has run
 | Path | Holds | Ticket |
 |---|---|---|
 | `src/api/` | `schema.d.ts` (generated), `client.ts`, `errors.ts` | PF-002, _built_ |
-| `src/app/` | `App`, `AppProviders`, `queryClient`, `routes`, `RootLayout` | PF-002, _built_ |
-| `src/index.css` | Tailwind import and `@theme` design tokens (a minimal palette; PF-003 extends it) | PF-002, _built_ |
+| `src/app/` | `App`, `AppProviders`, `queryClient`, `routes`, `RootLayout` (header, footer, scroll restoration since PF-003), `useDocumentMeta` | PF-002, PF-003, _built_ |
+| `src/index.css` | Tailwind import, the `@theme` design tokens of the approved design (colours, fonts, type sizes, radii, animations), the `wrap` utility, and base styles | PF-002, PF-003, _built_ |
 | `src/config/test-ids.config.ts` | `TestIds`, `getTestIdProp` | PF-002, _built_ |
 | `src/i18n/en.ts` | UI strings and `t()` | PF-002, _built_ |
 | `src/test/` | setup, `renderWithProviders`, `renderRoute`, MSW server and handlers | PF-002, _built_ |
-| `src/utils/format.ts` | `formatInstant`, `formatDate`, `formatCount`, `formatPeriod` | PF-003 |
-| `src/components/` | shared primitives: `Section`, `Card`, `Button`, `Chip`, `Skeleton`, `StatusDot`, `ErrorNote` | PF-003 |
-| `src/content/` | typed static content, including `caseStudies/{slug}.ts` and `fallbackRepos.ts` (`profile.ts` holds only the name and title so far) | PF-003 |
-| `src/sections/` | Hero, About, FeaturedWork, HowIWork, Skills, Experience, OpenSource, Education, Contact, Footer | PF-003 |
-| `src/pages/` | `HomePage`, `CaseStudyPage`, `NotFoundPage`, `RouteErrorPage` (`HomePage` is a placeholder; `NotFoundPage` and `RouteErrorPage` exist since PF-002) | PF-003 |
-| `vercel.json` | SPA rewrite for `/work/:slug` | PF-003 |
+| `src/utils/format.ts` | `formatInstant`, `formatDate`, `formatCount` (periods are display strings in content, so there is no `formatPeriod`, PF-003 P4) | PF-005 |
+| `src/components/` | shared primitives: `Section`, `ChipList`, `ButtonLink`, `StatusDot`, `DownloadIcon`; `Card`, `Skeleton`, and `ErrorNote` come with their first caller | PF-003, _built_ |
+| `src/content/` | typed static content: `profile`, `site`, `featuredWork`, `howIWork`, `skills`, `experience`, `education`, `caseStudies/{slug}.ts`, and `placeholder` (placeholder copy until PF-012); `fallbackRepos.ts` arrives in PF-007 | PF-003, _built_ |
+| `src/sections/` | Header, Hero, ProofPoints, About, FeaturedWork, WorkRow, HowIWork, Skills, Experience, Education, Contact, Footer; OpenSource arrives in PF-007 | PF-003, _built_ |
+| `src/pages/` | `HomePage`, `CaseStudyPage` (resolves the slug), `CaseStudyArticle`, `GlanceAside`, `NotFoundPage`, `RouteErrorPage` | PF-002, PF-003, _built_ |
+| `vercel.json` | SPA rewrite for `/work/:slug` | PF-003, _built_ |
 | `src/features/visits/` | `useTrackPageView` and its API call | PF-005 |
 | `src/features/stats/` | the footer visit counter | PF-005 |
-| `src/features/api-status/` | the footer API status dot | PF-005 |
+| `src/features/api-status/` | the hero system panel and the footer API status dot, from one health check | PF-003, _built_ |
 | `src/features/contact/` | the contact form, its schema, and its mutation | PF-006 |
 | `src/features/projects/` | the open-source list with its fallback | PF-007 |

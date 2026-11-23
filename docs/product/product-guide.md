@@ -17,11 +17,13 @@ A personal portfolio for Will Ly, Full-stack Software Engineer, used when applyi
 | Hiring manager | A case study one click from the home page; role and scope stated honestly; the trade-offs behind decisions |
 | Engineer reviewing the code | A clean repository with a README, an architecture overview, tests, and CI |
 
-## 3. Site map _(planned)_
+## 3. Site map
+
+Rows whose ticket has not run yet are planned.
 
 | Route or section | Content | Ticket |
 |---|---|---|
-| `/` Hero | Name, title, one-line pitch (≤ 20 words), three proof chips, buttons View work · Download CV · Contact | PF-003 |
+| `/` Hero | Name, title, one-line pitch (≤ 20 words), three proof chips, buttons View work · Download CV · Contact, and a live system panel with the API and database status | PF-003 |
 | `/` About | 120–180 words in the first person | PF-003 |
 | `/` Featured work | Employer project cards, the capstone, and this site; each links to `/work/<slug>` | PF-003 |
 | `/` How I work | Five or six principles, each with one example | PF-003 |
@@ -29,8 +31,8 @@ A personal portfolio for Will Ly, Full-stack Software Engineer, used when applyi
 | `/` Experience | Timeline of roles | PF-003 |
 | `/` Open source | Live public GitHub repositories with fallback data | PF-007 |
 | `/` Education & awards | Degrees and awards, one line each | PF-003 |
-| `/` Contact | Form, LinkedIn, GitHub; no phone | PF-006 |
-| `/` Footer | Visit counter, API status dot, "View source" link, privacy note | PF-005 |
+| `/` Contact | LinkedIn and GitHub (PF-003), then the form (PF-006); no phone | PF-003, PF-006 |
+| `/` Footer | API status dot, "View source" link, privacy note (PF-003); visit counter (PF-005) | PF-003, PF-005 |
 | `/work/<slug>` | One case study, 500–800 words | PF-003 |
 | `*` | Not-found page | PF-003 |
 

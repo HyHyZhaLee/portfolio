@@ -27,7 +27,7 @@ Applies to everything under `frontend/`. The principles behind these rules are i
 
 ## UI
 
-- Style with Tailwind utility classes and the design tokens in `src/index.css` (`@theme`). No inline hex colors, no arbitrary values where a token exists, and no new CSS files without a reason. Support light and dark color schemes.
+- Style with Tailwind utility classes and the design tokens in `src/index.css` (`@theme`). No inline hex colors, no arbitrary values where a token exists, and no new CSS files without a reason. The site uses the light colour scheme only (PF-003 D9); the dark palette waits for a toggle.
 - Layout works from 360 px wide upward without horizontal scrolling.
 - Every interactive element has a `data-test-id` from `getTestIdProp(TestIds.{feature}.{element})` and an accessible name. Images have meaningful `alt` text, or `alt=""` when decorative.
 - Respect `prefers-reduced-motion`. Keep visible focus styles.
