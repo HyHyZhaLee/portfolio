@@ -19,6 +19,10 @@ spring:
     password: ${DB_PASSWORD}
     hikari:
       maximum-pool-size: 3 # 512 MB of RAM and Neon's free connection limits
+      data-source-properties:
+        # PostgreSQL's "Failing row contains ..." detail would put a contact message's personal data into an exception
+        # message and a log line (PF-006 P14, Non-Negotiable 9).
+        logServerErrorDetail: false
   jpa:
     open-in-view: false
     hibernate:
@@ -52,6 +56,12 @@ app:
     log-forwarded-for-once: ${LOG_FORWARDED_FOR_ONCE:false} # PF-004 D3: on for one deploy in PF-012, then off
   stats:
     cache-ttl: ${STATS_CACHE_TTL:60s} # how old the stats summary may be (PF-005 FR-9)
+  contact:
+    retry-enabled: ${CONTACT_RETRY_ENABLED:true} # the scheduled resend of FAILED messages (PF-006 FR-9)
+    resend: # bound outside the local profile only, which logs instead of sending (PF-006 D14)
+      api-key: ${RESEND_API_KEY:} # required outside the local profile (startup fails when empty)
+      to-email: ${CONTACT_TO_EMAIL:} # required outside the local profile: the owner's inbox
+      from-email: ${CONTACT_FROM_EMAIL:Portfolio <onboarding@resend.dev>} # an address on a verified domain later
 logging:
   pattern:
     correlation: "[%X{correlationId:-}] "

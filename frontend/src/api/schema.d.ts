@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/api/v1/contact-messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createContactMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stats/summary": {
         parameters: {
             query?: never;
@@ -40,6 +56,13 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CreateContactMessageRequest: {
+            /** Format: email */
+            email: string;
+            message: string;
+            name: string;
+            website?: string;
+        };
         RecordVisitRequest: {
             path: string;
             ref?: string;
@@ -62,6 +85,28 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    createContactMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateContactMessageRequest"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     getStatsSummary: {
         parameters: {
             query?: never;

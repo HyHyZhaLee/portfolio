@@ -13,8 +13,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;
 
 /**
- * Marks an integration test: the full application on a random port against a Testcontainers PostgreSQL, called through
- * {@code RestTestClient}. Every class uses this annotation unchanged, so they all share one Spring context. It runs in
+ * Marks an integration test: the full application on a random port against a Testcontainers PostgreSQL, with WireMock
+ * standing in for external providers ({@link WireMockSupport}), called through {@code RestTestClient}. Every class uses this annotation unchanged, so they all share one Spring context. It runs in
  * the {@code testIT} task with the {@code test} profile ({@code application-test.yml}). Dependencies arrive through the test class's constructor. Never add {@code @MockitoBean} to an
  * integration test (KNOWN-BE-008).
  */
@@ -24,7 +24,7 @@ import org.springframework.test.context.TestConstructor;
 @Tag("integration")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-@Import(TestcontainersConfiguration.class)
+@Import({TestcontainersConfiguration.class, WireMockSupport.class})
 @ActiveProfiles("test")
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 public @interface IntegrationTest {}

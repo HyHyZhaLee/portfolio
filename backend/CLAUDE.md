@@ -36,7 +36,7 @@ make up                                              # PostgreSQL in Docker
 ./backend/gradlew -p backend check                   # spotlessCheck + both tiers + branch coverage ≥ 80%
 ./backend/gradlew -p backend assemble testClasses    # compile main and test sources, run nothing
 make openapi                                         # regenerate backend/openapi/openapi.json and the frontend types
-docker build -t portfolio-backend backend            # the Render image (backend/Dockerfile); runs anywhere with DB_URL, DB_USERNAME, DB_PASSWORD, ALLOWED_ORIGINS, VISITOR_HASH_SECRET
+docker build -t portfolio-backend backend            # the Render image (backend/Dockerfile); runs anywhere with DB_URL, DB_USERNAME, DB_PASSWORD, ALLOWED_ORIGINS, VISITOR_HASH_SECRET, RESEND_API_KEY, CONTACT_TO_EMAIL
 ```
 
 ## Naming Conventions
@@ -67,7 +67,7 @@ docker build -t portfolio-backend backend            # the Render image (backend
 - **Layering.** Controller → `{Feature}QueryService` or `{Feature}CommandService` → repositories and ports. A controller binds the request, validates its shape with Bean Validation, calls one service method, and maps the result to a response record. It holds no business logic and never touches a repository.
 - **Command shape.** Validate the input, load what it acts on (throw not-found), apply business rules through the validator, then mutate through entity methods. Never interleave these steps.
 - **Transactions.** Query services are `@Transactional(readOnly = true)`. Write transactions are short and cover database work only. A command that calls the email provider or the GitHub API is orchestrated by a non-transactional command service, which calls a `{Feature}Lifecycle` bean for each transactional step (`KNOWN-BE-006`, Non-Negotiable 7).
-- **Contact outbox.** `POST /api/v1/contact-messages` saves the message as `PENDING` in one transaction, sends it through `EmailSender` with no transaction open, and records `SENT` or `FAILED` in a second transaction. A filled honeypot field stores the row as `SPAM`, answers 202 like any other message, and never sends. A `@Scheduled` job retries `FAILED` rows up to 3 attempts; it claims each row with a compare-and-set update (`UPDATE … SET attempts = attempts + 1 WHERE id = :id AND status = 'FAILED' AND attempts = :seen`), so two instances never send the same message twice.
+- **Contact outbox.** `POST /api/v1/contact-messages` saves the message as `PENDING` in one transaction, sends it through `EmailSender` with no transaction open, and records `SENT` or `FAILED` in a second transaction. A filled honeypot field stores the row as `SPAM`, answers 202 like any other message, and never sends. `ContactRetryJob` retries `FAILED` rows until a message has had 3 delivery attempts in total; it claims each row with a compare-and-set update (`UPDATE … SET status = PENDING, attempts = attempts + 1, version = version + 1 WHERE id = :id AND status = 'FAILED' AND attempts = :seen`), so two instances never send the same attempt twice, then delivers it through the same `deliver` as a new message.
 - **External services.** Features depend on a port they own: `contact` on `EmailSender`, `project` on `GitHubClient`. Only the adapter talks to the provider. Adapters use `RestClient` with explicit connect and read timeouts. Email gets a Resilience4j retry with exponential backoff; GitHub gets a circuit breaker whose fallback is the last good result, else an empty list. The `local` profile wires a sender that logs only the message ID, so no email leaves a developer machine.
 - **Errors.** `throw new ApiException(ErrorCode.X, "client-safe detail")`, or one of its factories. Add codes to `ErrorCode` with their HTTP status. Never return `null` for "not found", never put framework, SQL, or provider text in `detail`, and never add a second `@RestControllerAdvice`.
 - **Entities.** Created through static factories; state changes only through guarded methods that throw on an illegal transition. No public setters. Keys are `BIGINT GENERATED ALWAYS AS IDENTITY`. Timestamps are `Instant` mapped to `TIMESTAMPTZ` and taken from the injected `Clock`. Mutable entities (`ContactMessageEntity`) carry `@Version`; append-only ones (`PageViewEntity`) do not. Lombok is allowed on entities only.
@@ -83,19 +83,30 @@ docker build -t portfolio-backend backend            # the Render image (backend
 
 ```java
 // ContactCommandService: not transactional, so no transaction is open while the email is sent.
-public Accepted submit(CreateContactMessageRequest body, ClientInfo client) {
-    rateLimiter.check(RateLimit.CONTACT, client.rateLimitKey());          // 429 RATE_LIMITED when exhausted
-    var message = lifecycle.savePending(body, client.visitorHash());     // TX 1: PENDING, or SPAM when the honeypot is filled
+public void submit(CreateContactMessageRequest body, ClientInfo client) {
+    rateLimiter.check(RateLimit.CONTACT, client.rateLimitKey());         // 429 RATE_LIMITED when exhausted
+    final var message = lifecycle.savePending(body, client.visitorHash()); // TX 1: PENDING, or SPAM when the honeypot is filled
     if (message.isSpam()) {
-        return Accepted.of(message);                                     // same 202 as a real message; never sent
+        return;                                                         // same 202 as a real message; never sent
     }
+    deliver(message);                                                   // the visitor gets 202 either way
+}
+
+// Shared with ContactRetryJob; never throws, so an outcome-write failure is logged with the ID only.
+void deliver(ContactMessageEntity message) {
+    final var email = Email.from(message);
     try {
-        var providerId = emailSender.send(EmailSender.Email.from(message)); // network I/O, no transaction open
-        lifecycle.markSent(message.id(), providerId);                    // TX 2
-    } catch (EmailSender.DeliveryException e) {
-        lifecycle.markFailed(message.id(), e.reason());                  // TX 2; the retry job picks it up
+        final String providerId;
+        try {
+            providerId = emailSender.send(email);                       // network I/O, no transaction open
+        } catch (DeliveryException e) {
+            lifecycle.markFailed(email.messageId(), e.reason());        // TX 2; the retry job picks it up
+            return;
+        }
+        lifecycle.markSent(email.messageId(), providerId);              // TX 2
+    } catch (RuntimeException e) {
+        log.error("Contact message {} attempt {}: delivery outcome not recorded", email.messageId(), email.attempt(), e);
     }
-    return Accepted.of(message);                                         // the visitor gets 202 either way
 }
 ```
 
@@ -125,7 +136,7 @@ backend/
     │   │   └── api/                     # POST /api/v1/visits
     │   ├── stats/                       # summary query and its cache, StatsProperties (PF-005)
     │   │   └── api/                     # GET /api/v1/stats/summary
-    │   ├── contact/                     # outbox: command service, lifecycle, entity, EmailSender port + Resend adapter, retry job (planned, PF-006)
+    │   ├── contact/                     # outbox: command service, lifecycle, entity, repository, EmailSender port + Resend and logging adapters, retry job, properties (PF-006)
     │   │   └── api/                     # POST /api/v1/contact-messages
     │   └── project/                     # GitHubClient, cache, circuit breaker (planned, PF-007)
     │       └── api/                     # GET /api/v1/projects
@@ -133,7 +144,7 @@ backend/
     │   ├── application.yml · application-{local,prod}.yml
     │   └── db/migration/                # Flyway migrations
     └── test/java/com/huygialy/portfolio/
-        ├── support/                     # @IntegrationTest, TestcontainersConfiguration (built); WireMock setup with the first adapter (PF-006 or PF-007)
+        ├── support/                     # @IntegrationTest, TestcontainersConfiguration, WireMockSupport (PF-006)
         └── …                            # mirrors main
 ```
 

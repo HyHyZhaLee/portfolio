@@ -21,7 +21,7 @@ public final class CorrelationIdFilter extends OncePerRequestFilter {
 
     public static final String HEADER = "X-Correlation-Id";
     public static final String ATTRIBUTE = CorrelationIdFilter.class.getName() + ".id";
-    static final String MDC_KEY = "correlationId";
+    public static final String MDC_KEY = "correlationId";
     private static final Pattern WELL_FORMED = Pattern.compile("[A-Za-z0-9-]{1,64}");
 
     @Override

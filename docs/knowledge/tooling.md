@@ -17,10 +17,10 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Discovered in**: PF-002
 
 ### Libraries added outside the Boot BOM
-- **Rule / Behavior**: `springdoc-openapi-starter-webmvc-ui` 3.2.1 works with Spring Boot 4.2.0 (`/v3/api-docs` and Swagger UI served, OpenAPI 3.1.0 output). The Spotless Gradle plugin 8.12.0 with palantir-java-format 2.103.0 formats under Java 21 and Gradle 9.9.2. Resilience4j, Bucket4j, WireMock, and Caffeine are not checked yet; each is added with its first caller (PF-002 plan, D2).
+- **Rule / Behavior**: `springdoc-openapi-starter-webmvc-ui` 3.2.1 works with Spring Boot 4.2.0 (`/v3/api-docs` and Swagger UI served, OpenAPI 3.1.0 output). The Spotless Gradle plugin 8.12.0 with palantir-java-format 2.103.0 formats under Java 21 and Gradle 9.9.2. Bucket4j 8.22.0 and Boot-managed Caffeine arrived in PF-004. `io.github.resilience4j:resilience4j-retry` 2.4.0 (published 2026-03-14, not managed by Boot) and, test-only, `org.wiremock:wiremock-standalone` 3.13.2 (published 2025-11-14) arrived in PF-006 and pass `check` with Boot 4.2.0.
 - **Source**: `maven-metadata.xml` of each artifact on Maven Central; `backend/build.gradle.kts`
-- **Verified**: `./backend/gradlew -p backend check` and `OpenApiSnapshotIT` passing; 2026-11-22
-- **Discovered in**: PF-002
+- **Verified**: `./backend/gradlew -p backend check` and `OpenApiSnapshotIT` passing; 2026-11-22; the PF-006 versions by the `last-modified` header of each POM on Maven Central and `check`, 2026-11-23
+- **Discovered in**: PF-002, PF-006
 
 ### Boot 4 test support classes and moved packages
 - **Rule / Behavior**: Integration tests can use `org.springframework.test.web.servlet.client.RestTestClient` through `@AutoConfigureRestTestClient` (`org.springframework.boot.resttestclient.autoconfigure`, from `spring-boot-resttestclient`). `@LocalServerPort` is `org.springframework.boot.test.web.server.LocalServerPort`. The health API (`Health`, `HealthIndicator`, `Status`) moved to `org.springframework.boot.health.contributor`. Jackson 3's `ObjectMapper` and `JsonMapper` are under `tools.jackson.databind`, while annotations stay in `com.fasterxml.jackson.annotation`.
@@ -165,6 +165,36 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Source**: `./backend/gradlew -p backend …` with Gradle 9.9.2
 - **Verified**: the task log showed `> Task :testUnit UP-TO-DATE` and the unit-test result timestamps stayed old until `testUnit --rerun` was run; 2026-11-23
 - **Discovered in**: PF-005
+
+### WireMock standalone on the Boot 4 test classpath
+- **Rule / Behavior**: `org.wiremock:wiremock-standalone:3.13.2` runs inside the shared Spring Boot 4.2 integration-test context next to Tomcat, Jakarta Servlet 6.1, and Jackson 3 without classpath clashes, because the jar shades Jetty, `jakarta.servlet`, Jackson, and Apache HttpClient under `wiremock.`. A `WireMockServer` bean with `initMethod = "start"` and a `DynamicPropertyRegistrar` reading `server::baseUrl` points an adapter at it. The JDK `HttpClient` needs `HttpClient.Version.HTTP_1_1` against WireMock's plain-HTTP port, or it tries an h2c upgrade.
+- **Source**: `backend/src/test/java/com/huygialy/portfolio/support/WireMockSupport.java`
+- **Verified**: `ResendEmailSenderIT`, `ContactApiIT`, and `ContactRetryJobIT` green in `check`; 2026-11-23
+- **Discovered in**: PF-006
+
+### Resilience4j retry rethrows the last exception
+- **Rule / Behavior**: In `resilience4j-retry` 2.4.0, `Retry.executeSupplier` with `retryOnException(predicate)` retries only exceptions the predicate accepts, rethrows any other exception at once, and after `maxAttempts` rethrows the last attempt's exception itself (not a wrapper). `IntervalFunction.ofExponentialBackoff(Duration, double)` gives the waits between tries; the core module needs only `slf4j-api`.
+- **Source**: `backend/src/main/java/com/huygialy/portfolio/contact/ResendEmailSender.java`
+- **Verified**: `ResendEmailSenderIT`: 503 on every try throws `DeliveryException` `HTTP_503` after exactly 3 requests, and 400 after exactly 1; 2026-11-23
+- **Discovered in**: PF-006
+
+### Spring Framework 7.1 `RestClient` message converters
+- **Rule / Behavior**: `RestClient.Builder.messageConverters(Iterable)` is deprecated for removal in Spring Framework 7.1; `configureMessageConverters(builder -> builder.withStringConverter(...).withJsonConverter(new JacksonJsonHttpMessageConverter(jsonMapper)))` replaces it. With `JdkClientHttpRequestFactory.setReadTimeout`, a response slower than the timeout surfaces as `ResourceAccessException`, and a 4xx or 5xx from `retrieve()` as `RestClientResponseException`.
+- **Source**: `ResendEmailSender`; compiler warning `[removal]` on `assemble`
+- **Verified**: `assemble` warning, then `ResendEmailSenderIT` (a 1 s WireMock delay against a 500 ms read timeout); 2026-11-23
+- **Discovered in**: PF-006
+
+### Hibernate 7 HQL enum shorthand and nested constructor results
+- **Rule / Behavior**: Hibernate 7 accepts an unqualified enum constant when the other side is an enum attribute, in a comparison (`where m.status = FAILED`) and in an update's `set` (`set m.status = PENDING`), and a constructor expression for a nested record written with `$` (`select new com.example.Repo$RetryCandidate(m.id, m.attempts)`). A bulk `update` does not bump `@Version`; set `m.version = m.version + 1` explicitly.
+- **Source**: `backend/src/main/java/com/huygialy/portfolio/contact/ContactMessageRepository.java`
+- **Verified**: Spring Data validated both queries at startup and `ContactRetryJobIT` ran them; 2026-11-23
+- **Discovered in**: PF-006
+
+### `@ConfigurationPropertiesScan` honors `@Profile`
+- **Rule / Behavior**: A `@ConfigurationProperties` record annotated `@Profile("!local")` is not bound when the `local` profile is active, so its `@NotBlank` settings cannot fail a local start; under any other profile it is bound and validated. `spring.profiles.active` set as a property in an `ApplicationContextRunner` is enough to test it.
+- **Source**: `backend/src/main/java/com/huygialy/portfolio/contact/ResendProperties.java`
+- **Verified**: `ContactPropertiesTest`; 2026-11-23
+- **Discovered in**: PF-006
 
 ## PostgreSQL
 

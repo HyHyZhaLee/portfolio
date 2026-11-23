@@ -9,6 +9,27 @@
     "url" : "/"
   } ],
   "paths" : {
+    "/api/v1/contact-messages" : {
+      "post" : {
+        "operationId" : "createContactMessage",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateContactMessageRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "description" : "Accepted"
+          }
+        },
+        "tags" : [ "contact-controller" ]
+      }
+    },
     "/api/v1/stats/summary" : {
       "get" : {
         "operationId" : "getStatsSummary",
@@ -51,6 +72,35 @@
   },
   "components" : {
     "schemas" : {
+      "CreateContactMessageRequest" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "maxLength" : 254,
+            "minLength" : 0
+          },
+          "message" : {
+            "type" : "string",
+            "maxLength" : 2000,
+            "minLength" : 10,
+            "pattern" : "[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]*"
+          },
+          "name" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0,
+            "pattern" : "[^\\p{Cntrl}]*"
+          },
+          "website" : {
+            "type" : "string",
+            "maxLength" : 2048,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "email", "message", "name" ]
+      },
       "RecordVisitRequest" : {
         "type" : "object",
         "properties" : {
