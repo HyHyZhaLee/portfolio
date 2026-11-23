@@ -8,7 +8,7 @@ import org.springframework.test.context.DynamicPropertyRegistrar;
 
 /**
  * One WireMock server on a dynamic port that stands in for every external HTTP provider (backend guide principle 14):
- * Resend in PF-006. Integration tests inject {@link WireMockServer} through the constructor and call {@code resetAll()}
+ * Resend in PF-006 and GitHub in PF-007. Integration tests inject {@link WireMockServer} through the constructor and call {@code resetAll()}
  * before each test. An unmatched request gets WireMock's 404, so a missing stub fails loudly and nothing reaches the
  * internet.
  */
@@ -22,6 +22,9 @@ public class WireMockSupport {
 
     @Bean
     DynamicPropertyRegistrar wireMockProperties(WireMockServer wireMockServer) {
-        return registry -> registry.add("app.contact.resend.base-url", wireMockServer::baseUrl);
+        return registry -> {
+            registry.add("app.contact.resend.base-url", wireMockServer::baseUrl);
+            registry.add("app.github.base-url", wireMockServer::baseUrl);
+        };
     }
 }

@@ -1,3 +1,4 @@
 export { ApiStatusDot } from './ApiStatusDot';
 export { SystemPanel } from './SystemPanel';
-export { useApiStatus } from './useApiStatus';
+export { SLOW_AFTER_MS, useApiStatus } from './useApiStatus';
+export { useSlowAfter } from './useSlowAfter';

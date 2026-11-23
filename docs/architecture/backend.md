@@ -58,7 +58,7 @@ The backend runs on Render Free: 512 MB of RAM, 0.1 CPU, a disk that is wiped on
 
 ### 12. Configuration is typed and validated
 
-Settings bind to validated `@ConfigurationProperties` records under `app.*`; `@Value` is not used. YAML values are written as `${ENV_VAR:default}`. Secrets (`app.client.visitor-hash-secret`, the Resend key, the GitHub token) and the CORS origins (`app.cors.allowed-origins`) have no default except in `application-local.yml`, and the `prod` profile fails at startup when one is missing. `server.port` is `${PORT:8080}` because Render injects `PORT`. Time comes from the injected `Clock`, never from `Instant.now()` directly.
+Settings bind to validated `@ConfigurationProperties` records under `app.*`; `@Value` is not used. YAML values are written as `${ENV_VAR:default}`. Secrets (`app.client.visitor-hash-secret`, the Resend key) and the CORS origins (`app.cors.allowed-origins`) have no default except in `application-local.yml`, and the `prod` profile fails at startup when one is missing. The GitHub token is the exception: it is optional in every profile, because it only raises GitHub's rate limit (PF-007 D8). `server.port` is `${PORT:8080}` because Render injects `PORT`. Time comes from the injected `Clock`, never from `Instant.now()` directly.
 
 ### 13. Observable by default
 
@@ -189,7 +189,7 @@ Rows marked _built_ exist; the others are planned until the ticket named has run
 | Read totals for the footer | `StatsQueryService` (cached for `app.stats.cache-ttl`, 60 s by default), which reads page views only through `VisitQueryService.totals()` | `stats` | PF-005, _built_ |
 | Send an email | `EmailSender` port (`Email`, `DeliveryException` nested); `ResendEmailSender` outside the local profile (`RestClient` with timeouts, Resilience4j retry, `ResendProperties`), `LoggingEmailSender` in the local profile | `contact` | PF-006, _built_ |
 | Accept and deliver a contact message | `ContactCommandService` (`submit`, and `deliver` shared with the job), `ContactLifecycle` (one transaction per step), `ContactRetryJob` (compare-and-set claim), `ContactProperties` | `contact` | PF-006, _built_ |
-| List public GitHub repositories | `GitHubClient`, `ProjectQueryService` (cached 1 h, circuit breaker) | `project` | PF-007 |
+| List public GitHub repositories | `ProjectQueryService.list()` (1 h snapshot, `CircuitBreaker` bean `gitHubCircuitBreaker` from `ProjectConfig`, last good result else empty), `GitHubClient` port (`GitHubRepo`, `GitHubException` nested) with the `GitHubRestClient` adapter, `RepositoryFilter`, `GitHubProperties` | `project` | PF-007, _built_ |
 | Integration-test context | `@IntegrationTest`, `TestcontainersConfiguration` (PF-002), and `WireMockSupport` (PF-006: one `WireMockServer` bean whose base URL the adapters' `base-url` settings point at; tests call `resetAll()` before each test) | `support` (test) | PF-002, PF-006, _built_ |
 
 ## Domain-Specific Guidelines
@@ -204,4 +204,4 @@ The outbox is the design: `PENDING` → `SENT` or `FAILED`, with `SPAM` for hone
 
 ### Projects (PF-007)
 
-`GitHubClient` lists the owner's public repositories, drops forks and archived repositories, and puts the featured ones (`app.github.featured`) first. The token only raises the rate limit; the client works without it. The response is cached for 1 hour, and the circuit breaker's fallback is the last good result, else an empty list, so the endpoint answers 200 even when GitHub is down; the frontend then shows its own fallback list.
+`GitHubRestClient` reads one page of 100 of the owner's public repositories (`app.github.username`) with a 2 s connect and a 5 s read timeout, parsing with its own `JsonMapper` because Boot's is capped at 64 KB; `RepositoryFilter` drops forks, archived, and private repositories and puts the featured ones (`app.github.featured`, case-insensitive, in order) first, then the rest by last push. The token only raises the rate limit; the client works without it. `ProjectQueryService` serves a successful result for 1 hour (`app.github.cache-ttl`), refreshes it under a `ReentrantLock` (not a Caffeine loader, which would pin a virtual thread's carrier during the call on Java 21), and only successes are cached. The Resilience4j circuit breaker opens when 2 of the last 4 calls failed and stays open 10 minutes (`app.github.circuit-open-for`); its fallback is the last good result, else an empty list, so `GET /api/v1/projects` answers 200 even when GitHub is down, and the frontend then shows its own fallback list (PF-007).

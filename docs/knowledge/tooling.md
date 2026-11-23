@@ -196,6 +196,24 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Verified**: `ContactPropertiesTest`; 2026-11-23
 - **Discovered in**: PF-006
 
+### Jackson 3 fails on a missing primitive by default
+- **Rule / Behavior**: In `jackson-databind` 3.1.8, `DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES` is on by default, so reading JSON into a record with a primitive component (`boolean`, `int`) fails with `MismatchedInputException: Cannot map null into type boolean` when the JSON omits that field; a `RestClient` surfaces it as `RestClientException` ("Error while extracting response"). `JsonMapper.builder(...).disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)` reads the absent field as `false` or 0. An `Instant` field reads from an ISO-8601 string with no extra module.
+- **Source**: `backend/src/main/java/com/huygialy/portfolio/project/GitHubRestClient.java`
+- **Verified**: `ProjectApiIT` failed with that exception for repositories without a `fork` field and passed once the feature was disabled; 2026-11-23
+- **Discovered in**: PF-007
+
+### Boot's Jackson read cap applies to the injected `JsonMapper`
+- **Rule / Behavior**: `spring.jackson.factory.constraints.read.max-document-length` (65536 in `application.yml`) is applied to Boot's auto-configured `JsonMapper` bean, so an adapter that parses a provider response with the injected mapper fails on any body over the cap. A mapper built with `JsonMapper.builder(JsonFactory.builder().streamReadConstraints(StreamReadConstraints.builder().maxDocumentLength(n).build()).build())` is not affected.
+- **Source**: `backend/src/main/resources/application.yml`, `GitHubRestClient`
+- **Verified**: a throwaway integration test: the injected `JsonMapper` rejected a 70,000-character document with a length error; `ProjectApiIT` parses a GitHub body over 64 KB with the adapter's own mapper; 2026-11-23
+- **Discovered in**: PF-007
+
+### Resilience4j circuit breaker counting
+- **Rule / Behavior**: In `resilience4j-circuitbreaker` 2.4.0 with a `COUNT_BASED` window, `minimumNumberOfCalls(2)`, and `failureRateThreshold(50)`, one success followed by one failure opens the circuit, because a 50% failure rate meets the threshold. While it is open, `executeSupplier` throws `CallNotPermittedException` without calling the supplier. `reset()` returns it to `CLOSED` with empty metrics, so integration tests can share one breaker bean and reset it before each test.
+- **Source**: `backend/src/main/java/com/huygialy/portfolio/project/ProjectConfig.java`, `ProjectQueryService`
+- **Verified**: `ProjectApiIT`: after `reset()`, three API calls (a success, a 403, then one more) sent exactly two requests to WireMock; 2026-11-23
+- **Discovered in**: PF-007
+
 ## PostgreSQL
 
 ### `CHAR(n)` pads with blanks

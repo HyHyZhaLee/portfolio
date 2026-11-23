@@ -62,6 +62,11 @@ app:
       api-key: ${RESEND_API_KEY:} # required outside the local profile (startup fails when empty)
       to-email: ${CONTACT_TO_EMAIL:} # required outside the local profile: the owner's inbox
       from-email: ${CONTACT_FROM_EMAIL:Portfolio <onboarding@resend.dev>} # an address on a verified domain later
+  github: # the projects list (PF-007); base-url, timeouts, and circuit-open-for default in GitHubProperties
+    username: ${GITHUB_USERNAME:HyHyZhaLee}
+    token: ${GITHUB_TOKEN:} # optional in every profile: only raises GitHub's rate limit from 60 to 5,000 an hour (PF-007 D8)
+    featured: ${GITHUB_FEATURED:BK2023_Thesis_SmartPole,portfolio} # listed first, in this order
+    cache-ttl: ${GITHUB_CACHE_TTL:1h} # how long a successful list is served (SITE-005)
 logging:
   pattern:
     correlation: "[%X{correlationId:-}] "

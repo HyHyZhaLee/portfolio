@@ -23,7 +23,7 @@ flowchart LR
 | Backend (`backend/`) | Records visits and serves stats, accepts and delivers contact messages, lists GitHub projects, reports health | Render Free, Docker, 512 MB / 0.1 CPU | PF-002, PF-004, PF-005 |
 | Database | `page_view` table (built in PF-005) and `contact_message` table (built in PF-006), migrated by Flyway | Neon Free PostgreSQL 17 | PF-005, PF-006 |
 | Email API | Delivers contact messages to the owner's inbox over HTTPS | Free tier | PF-006 |
-| GitHub API | Source of the public repository list | Public API with a read-only token | PF-007 |
+| GitHub API | Source of the public repository list | Public API; an optional read-only token only raises the rate limit | PF-007 |
 | Uptime monitor | Pings the health endpoint so the backend rarely sleeps | Free tier | PF-009 |
 
 ## Request lifecycle (backend)

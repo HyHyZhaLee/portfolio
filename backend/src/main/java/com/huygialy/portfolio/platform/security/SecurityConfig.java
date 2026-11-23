@@ -29,7 +29,13 @@ class SecurityConfig {
 
     private static final String HEALTH_PATH = "/actuator/health";
     private static final String[] PUBLIC_GET_PATHS = {
-        HEALTH_PATH, "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/api/v1/stats/summary"
+        HEALTH_PATH,
+        "/v3/api-docs",
+        "/v3/api-docs/**",
+        "/swagger-ui.html",
+        "/swagger-ui/**",
+        "/api/v1/stats/summary",
+        "/api/v1/projects"
     };
     /** Public write endpoints; each has Bean Validation and a per-client rate limit (Non-Negotiable 4). */
     private static final String[] PUBLIC_POST_PATHS = {"/api/v1/visits", "/api/v1/contact-messages"};

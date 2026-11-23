@@ -51,7 +51,7 @@ A link may carry `?ref=<tag>` to show which application it was sent with. A tag 
 A message has a name (1–100 characters), a valid email (at most 254), and a message (10–2000 characters), with no control characters except tab and line breaks in the message. Each client address may send 3 per hour, honeypot hits included (PF-006 D4). An accepted message is stored as `PENDING`, delivered to the owner's inbox, and marked `SENT`, or marked `FAILED` and retried, with at most 3 delivery attempts in total (PF-006 D2). A message that fills the hidden honeypot field is stored as `SPAM`, never emailed, and answered exactly like a success. The visitor's name, email, and message are never logged. Non-Negotiables 4 and 9.
 
 ### SITE-005: Open-source projects
-The list shows the owner's public GitHub repositories that are neither forks nor archived, featured repositories first. It is cached for an hour. When GitHub is unavailable, the list falls back to the last good result, then to the static list in the frontend.
+The list shows the owner's public GitHub repositories that are neither forks nor archived, featured repositories first. It is cached for an hour. When GitHub is unavailable, the list falls back to the last good result, then to the static list in the frontend. Private repositories are never listed. The home page shows the first six, in a section that keeps its height whether the list is static or live, and links to the GitHub profile for the rest (PF-007 D2, D3, D7).
 
 ### SITE-006: Privacy
 No raw IP address, full user agent, or full referrer URL is stored or logged; the referrer is kept as its host only. The site sets no tracking cookies. The footer says so in one line.
