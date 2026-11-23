@@ -24,7 +24,7 @@ Rows marked _(planned)_ arrive with the ticket named.
 | `POST /api/v1/visits` (`recordVisit`) | Record a page view | 202 | PF-005 |
 | `GET /api/v1/stats/summary` (`getStatsSummary`) | Total views, unique visitors, first visit time (`since`, null before the first view) | 200 | PF-005 |
 | `POST /api/v1/contact-messages` (`createContactMessage`) | Accept a contact message for delivery (a honeypot hit gets the same 202) | 202 | PF-006 |
-| `GET /api/v1/projects` _(planned)_ | Public GitHub repositories, featured first | 200 | PF-007 |
+| `GET /api/v1/projects` (`listProjects`) | Public GitHub repositories (`{items}`), featured first; 200 from the last good result, else an empty list, when GitHub is down | 200 | PF-007 |
 | `GET /actuator/health` | Health, Render health check, keep-alive ping | 200 | PF-002 |
 
 ## Status codes

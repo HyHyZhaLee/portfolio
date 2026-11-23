@@ -20,6 +20,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listProjects"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stats/summary": {
         parameters: {
             query?: never;
@@ -63,6 +79,21 @@ export interface components {
             name: string;
             website?: string;
         };
+        ProjectListResponse: {
+            items: components["schemas"]["ProjectResponse"][];
+        };
+        ProjectResponse: {
+            description?: string | null;
+            homepage?: string | null;
+            language?: string | null;
+            name: string;
+            /** Format: int32 */
+            stars: number;
+            topics: string[];
+            /** Format: date-time */
+            updatedAt?: string | null;
+            url: string;
+        };
         RecordVisitRequest: {
             path: string;
             ref?: string;
@@ -104,6 +135,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    listProjects: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProjectListResponse"];
+                };
             };
         };
     };

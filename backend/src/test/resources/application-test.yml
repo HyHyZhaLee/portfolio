@@ -15,3 +15,10 @@ app:
       read-timeout: 500ms
       backoff: 50ms
       # base-url points at WireMock (support/WireMockSupport)
+  github:
+    username: synthetic-user
+    featured: alpha-featured,beta-featured
+    token: synthetic-test-token
+    cache-ttl: 0s # every request reaches WireMock; the last good result is still kept as the fallback
+    read-timeout: 500ms
+    # base-url points at WireMock (support/WireMockSupport)

@@ -59,6 +59,13 @@ export const TestIds = {
     footer: {
         sourceLink: 'footer-source-link',
     },
+    projects: {
+        statusText: 'projects-status-text',
+        repoLink: 'projects-repo-link',
+    },
+    openSource: {
+        profileLink: 'open-source-profile-link',
+    },
     stats: {
         counterText: 'stats-counter-text',
     },

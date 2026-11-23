@@ -36,6 +36,8 @@ dependencies {
     implementation("com.github.ben-manes.caffeine:caffeine")
     // Bounded retry with exponential backoff for the Resend adapter (PF-006 P10): the core module only, no proxies.
     implementation("io.github.resilience4j:resilience4j-retry:2.4.0")
+    // Circuit breaker around the GitHub call (PF-007 P1): the core module only, the same version as the retry.
+    implementation("io.github.resilience4j:resilience4j-circuitbreaker:2.4.0")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")

@@ -153,12 +153,12 @@ Rows marked _built_ exist; the others are planned until the ticket named has run
 | `src/test/` | setup, `renderWithProviders`, `renderRoute`, MSW server and handlers | PF-002, _built_ |
 | `src/utils/format.ts` | `formatCount` (grouped digits, fixed to English); `formatInstant` and `formatDate` wait for a caller, because the counter hides the since date (PF-005 D6); periods are display strings in content, so there is no `formatPeriod` (PF-003 P4) | PF-005, _built_ |
 | `src/components/` | shared primitives: `Section`, `ChipList`, `ButtonLink`, `StatusDot`, `DownloadIcon`, `ErrorNote` (PF-006); `Card` and `Skeleton` come with their first caller | PF-003, PF-006, _built_ |
-| `src/content/` | typed static content: `profile`, `site`, `featuredWork`, `howIWork`, `skills`, `experience`, `education`, `caseStudies/{slug}.ts`, and `placeholder` (placeholder copy until PF-012); `fallbackRepos.ts` arrives in PF-007 | PF-003, _built_ |
-| `src/sections/` | Header, Hero, ProofPoints, About, FeaturedWork, WorkRow, HowIWork, Skills, Experience, Education, Contact, Footer; OpenSource arrives in PF-007 | PF-003, _built_ |
+| `src/content/` | typed static content: `profile`, `site`, `featuredWork`, `howIWork`, `skills`, `experience`, `education`, `caseStudies/{slug}.ts`, `placeholder` (placeholder copy until PF-012), and `fallbackRepos` (six public repositories with placeholder descriptions, PF-007) | PF-003, PF-007, _built_ |
+| `src/sections/` | Header, Hero, ProofPoints, About, FeaturedWork, WorkRow, HowIWork, Skills, Experience, Education, Contact, Footer, and OpenSource (between Experience and Education, PF-007) | PF-003, PF-007, _built_ |
 | `src/pages/` | `HomePage`, `CaseStudyPage` (resolves the slug), `CaseStudyArticle`, `GlanceAside`, `NotFoundPage`, `RouteErrorPage` | PF-002, PF-003, _built_ |
 | `vercel.json` | SPA rewrite for `/work/:slug` | PF-003, _built_ |
 | `src/features/visits/` | `useTrackPageView`, its 75 s API call, and `useVisitCounted` for the system panel's note | PF-005, _built_ |
 | `src/features/stats/` | the footer visit counter (`VisitCounter`), asked for once the API is online | PF-005, _built_ |
 | `src/features/api-status/` | the hero system panel and the footer API status dot, from one health check | PF-003, _built_ |
 | `src/features/contact/` | the contact form, its schema, and its mutation | PF-006, _built_ |
-| `src/features/projects/` | the open-source list with its fallback | PF-007 |
+| `src/features/projects/` | the Open source list (`ProjectList`, `RepoCard`): six cards from `fallbackRepos`, swapped for the first six live repositories once the API is online, with the cold-start hint after 3 s | PF-007, _built_ |

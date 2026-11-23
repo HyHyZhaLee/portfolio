@@ -30,6 +30,24 @@
         "tags" : [ "contact-controller" ]
       }
     },
+    "/api/v1/projects" : {
+      "get" : {
+        "operationId" : "listProjects",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProjectListResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "project-controller" ]
+      }
+    },
     "/api/v1/stats/summary" : {
       "get" : {
         "operationId" : "getStatsSummary",
@@ -100,6 +118,53 @@
           }
         },
         "required" : [ "email", "message", "name" ]
+      },
+      "ProjectListResponse" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ProjectResponse"
+            }
+          }
+        },
+        "required" : [ "items" ]
+      },
+      "ProjectResponse" : {
+        "type" : "object",
+        "properties" : {
+          "description" : {
+            "type" : [ "string", "null" ]
+          },
+          "homepage" : {
+            "type" : [ "string", "null" ]
+          },
+          "language" : {
+            "type" : [ "string", "null" ]
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "stars" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "topics" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "updatedAt" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "name", "stars", "topics", "url" ]
       },
       "RecordVisitRequest" : {
         "type" : "object",
