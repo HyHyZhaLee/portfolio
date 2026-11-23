@@ -29,6 +29,20 @@ export const TestIds = {
     contact: {
         linkedinLink: 'contact-linkedin-link',
         githubLink: 'contact-github-link',
+        form: 'contact-form-region',
+        nameInput: 'contact-name-input',
+        emailInput: 'contact-email-input',
+        messageInput: 'contact-message-input',
+        websiteInput: 'contact-website-input',
+        submitButton: 'contact-submit-button',
+        hintText: 'contact-hint-text',
+        successRegion: 'contact-success-region',
+        anotherButton: 'contact-another-button',
+    },
+    errorNote: {
+        region: 'error-note-region',
+        codeText: 'error-note-code-text',
+        referenceText: 'error-note-reference-text',
     },
     caseStudy: {
         backLink: 'case-study-back-link',

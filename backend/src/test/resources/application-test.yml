@@ -6,3 +6,12 @@ app:
     visitor-hash-secret: integration-test-secret
   stats:
     cache-ttl: 0s # no cache, so each test sees its own inserts (PF-005 P8)
+  contact:
+    retry-enabled: false # tests call ContactRetryJob.retryFailed() directly
+    retry-batch-size: 50 # other tests' FAILED rows never push a test's own row out of the batch
+    resend:
+      api-key: re_synthetic_test_key
+      to-email: owner@example.com
+      read-timeout: 500ms
+      backoff: 50ms
+      # base-url points at WireMock (support/WireMockSupport)

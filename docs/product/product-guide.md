@@ -48,7 +48,7 @@ A page view is counted when the frontend posts it to `POST /api/v1/visits` from 
 A link may carry `?ref=<tag>` to show which application it was sent with. A tag is stored with each view of that session only when it matches `^[a-z0-9-]{1,64}$`, and the frontend removes it from the address bar after reading it.
 
 ### SITE-004: Contact messages
-A message has a name (1–100 characters), a valid email (at most 254), and a message (10–2000 characters). Each client address may send 3 per hour. An accepted message is stored as `PENDING`, delivered to the owner's inbox, and marked `SENT`, or `FAILED` and retried up to 3 attempts. A message that fills the hidden honeypot field is stored as `SPAM`, never emailed, and answered exactly like a success. Non-Negotiable 4.
+A message has a name (1–100 characters), a valid email (at most 254), and a message (10–2000 characters), with no control characters except tab and line breaks in the message. Each client address may send 3 per hour, honeypot hits included (PF-006 D4). An accepted message is stored as `PENDING`, delivered to the owner's inbox, and marked `SENT`, or marked `FAILED` and retried, with at most 3 delivery attempts in total (PF-006 D2). A message that fills the hidden honeypot field is stored as `SPAM`, never emailed, and answered exactly like a success. The visitor's name, email, and message are never logged. Non-Negotiables 4 and 9.
 
 ### SITE-005: Open-source projects
 The list shows the owner's public GitHub repositories that are neither forks nor archived, featured repositories first. It is cached for an hour. When GitHub is unavailable, the list falls back to the last good result, then to the static list in the frontend.

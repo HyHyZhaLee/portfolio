@@ -34,6 +34,8 @@ dependencies {
     // Per-visitor rate limits (PF-004 P12): token buckets held in a bounded Caffeine cache.
     implementation("com.bucket4j:bucket4j_jdk17-core:8.22.0")
     implementation("com.github.ben-manes.caffeine:caffeine")
+    // Bounded retry with exponential backoff for the Resend adapter (PF-006 P10): the core module only, no proxies.
+    implementation("io.github.resilience4j:resilience4j-retry:2.4.0")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
@@ -43,6 +45,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-postgresql")
+    // Stands in for Resend in integration tests (PF-006 P16); the standalone jar shades Jetty, Servlet, and Jackson.
+    testImplementation("org.wiremock:wiremock-standalone:3.13.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -68,7 +72,7 @@ val testUnit = tasks.register<Test>("testUnit") {
 }
 
 val testIT = tasks.register<Test>("testIT") {
-    description = "Integration tests (@IntegrationTest): Spring, Testcontainers PostgreSQL; needs Docker."
+    description = "Integration tests (@IntegrationTest): Spring, Testcontainers PostgreSQL, WireMock; needs Docker."
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     testClassesDirs = sourceSets.test.get().output.classesDirs
     classpath = sourceSets.test.get().runtimeClasspath

@@ -42,7 +42,7 @@ scripts/with-node.sh pnpm --dir frontend gen:api          # regenerate src/api/s
 - Named exports, one component per file. Components are `PascalCase.tsx`, hooks `useThing.ts`, other modules `camelCase.ts`, tests `*.test.ts(x)` next to the code they test.
 - Tailwind utility classes with the theme's tokens (`bg-surface`, `text-muted`); no inline hex colours, no `style` props for colour or spacing, and no new CSS file without a reason.
 
-## Project Structure _(PF-002 and PF-003 built everything below except the files marked with a later ticket and the `contact` and `projects` features; PF-005 built `utils/` and the `visits` and `stats` features)_
+## Project Structure _(PF-002 and PF-003 built everything below except the files marked with a later ticket and the `contact` and `projects` features; PF-005 built `utils/` and the `visits` and `stats` features; PF-006 built the `contact` feature and `ErrorNote`)_
 
 ```
 frontend/
@@ -53,7 +53,7 @@ frontend/
     ├── index.css               # Tailwind import and @theme design tokens
     ├── api/                    # schema.d.ts (generated, never edited) · client.ts · errors.ts
     ├── app/                    # providers, router, layout, useDocumentMeta
-    ├── components/             # shared primitives: Section, ChipList, ButtonLink, StatusDot, DownloadIcon; Card, Skeleton, ErrorNote with their first caller
+    ├── components/             # shared primitives: Section, ChipList, ButtonLink, StatusDot, DownloadIcon, ErrorNote (PF-006); Card, Skeleton with their first caller
     ├── config/                 # test-ids.config.ts
     ├── content/                # typed static content: profile, site, skills, experience, howIWork, education, featuredWork, caseStudies/{slug}.ts, placeholder; fallbackRepos (PF-007)
     ├── features/               # API-backed: visits, stats, contact, projects, api-status
@@ -73,9 +73,9 @@ frontend/
 - **Queries.** One hook per query, keys from the feature's factory, no retry on 4xx. Live data never replaces content the visitor is reading mid-scroll with a layout jump: reserve its space.
 - **Mutations.** Creating mutations (a visit, a contact message) never retry on their own.
 - **Visit tracking.** `useTrackPageView` in `features/visits`, called by `RootLayout`, posts one view per page load and one per route change, only in production builds (`import.meta.env.PROD`); its effect is keyed on the pathname, so anchors and query changes never count and the address-bar cleanup cannot re-trigger it (`KNOWN-FE-002`). It reads `?ref=` and keeps it in `sessionStorage`, applies `?notrack=1` (sets `localStorage.notrack = '1'`) and `?notrack=0` (removes it), then removes only those two parameters with the router's replace navigation and `preventScrollReset`, never `history.replaceState`, which would leave `useLocation` on the old address. It posts `{path, referrer, ref}`, with the referrer reduced to its origin, through its own 75 s client (`COLD_START_TIMEOUT_MS`) with `keepalive: true`, so the first view after an idle period survives a cold start and the visitor leaving. It does nothing after `?notrack=1` (`localStorage.notrack === '1'`, also kept in memory for the page load) or when `navigator.globalPrivacyControl` is true (Non-Negotiable 3), and never sets a cookie. Storage access is wrapped: when storage is blocked, the opt-out still holds for the rest of the page load and the ref tag goes with the first view only. `useVisitCounted` reads the mutation's outcome for the system panel's "counted" note.
-- **Forms.** react-hook-form with `zodResolver`. Schemas mirror the server's limits. Map `ApiError.errors` onto fields after a `VALIDATION_FAILED` response; show a friendly message for `RATE_LIMITED`. The contact form's honeypot field is visually hidden, skipped by keyboard focus, and labelled so screen readers ignore it.
+- **Forms.** react-hook-form with `zodResolver`. Schemas mirror the server's limits. Map `ApiError.errors` onto fields after a `VALIDATION_FAILED` response; show a friendly message for `RATE_LIMITED`. The contact form's `website` honeypot sits off-screen (not `display: none`) inside an `aria-hidden` wrapper, with `tabIndex={-1}` and `autoComplete="off"`, and is sent as typed (PF-006 D17); the form shows its cold-start hint for the whole pending send (PF-006 D12).
 - **Routing and SEO.** `/` is the home page, `/work/:slug` a case study whose slug must exist in `content/caseStudies/` (anything else renders the 404 page), and every route sets its own `<title>` and meta description. A page that throws while rendering is replaced by `RouteErrorPage` inside the layout (`buildRoutes` in `src/app/routes.tsx`); it never shows the error itself. `vercel.json` rewrites unknown paths to `index.html`.
-- **Errors.** Render with `ErrorNote`, which shows a short message and, for API errors, the `code` and a copyable `correlationId`. Branch on `code`, never on text.
+- **Errors.** Render with `ErrorNote` (`role="alert"`), which shows a short message and, for API errors, the `code` and the `correlationId` as selectable text, so one click selects it to copy (PF-006 D18). Branch on `code`, never on text.
 - **Test IDs.** Every interactive element: `{...getTestIdProp(TestIds.contact.submitButton)}`, which renders `data-test-id="contact-submit-button"`. Naming is `{feature}-{element}-{type}`.
 - **Performance.** Images below the fold are lazy-loaded with explicit `width` and `height`; fonts are self-hosted or preloaded; the home page stays within a Lighthouse score of 90 or more in every category.
 
@@ -92,7 +92,7 @@ frontend/
 
 - Vitest with jsdom, Testing Library, and jest-dom; the setup file configures `data-test-id` as the test ID attribute.
 - `renderWithProviders` wraps the query client and a memory router.
-- MSW handlers emulate the API: defaults in `src/test/handlers.ts` (a healthy `GET /actuator/health`, which every page renders, a 202 for `POST /api/v1/visits`, and zero totals for `GET /api/v1/stats/summary`, which the footer counter asks for once health answers), per-test overrides with `server.use(...)`. Vitest sets `VITE_API_URL` to `http://api.test`, because openapi-fetch's `new Request()` rejects a relative URL in Node. MSW 3's unhandled-request option is `onUnhandledFrame`. Cover the success, fallback, and problem-response paths of every hook, and the main interaction of every page.
+- MSW handlers emulate the API: defaults in `src/test/handlers.ts` (a healthy `GET /actuator/health`, which every page renders, a 202 for `POST /api/v1/visits`, zero totals for `GET /api/v1/stats/summary`, which the footer counter asks for once health answers, and a 202 with an `X-Correlation-Id` for `POST /api/v1/contact-messages`, which every page's contact form may send), per-test overrides with `server.use(...)`. Vitest sets `VITE_API_URL` to `http://api.test`, because openapi-fetch's `new Request()` rejects a relative URL in Node. MSW 3's unhandled-request option is `onUnhandledFrame`. Cover the success, fallback, and problem-response paths of every hook, and the main interaction of every page.
 - Content tests check shape, not wording: every case study slug referenced by a card exists, every skill link points at an existing case study, and no content string is empty.
 - Find elements by test ID or role, never by CSS class or DOM structure.
 - Branch coverage stays at or above 80%.

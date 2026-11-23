@@ -187,10 +187,10 @@ Rows marked _built_ exist; the others are planned until the ticket named has run
 | Deterministic OpenAPI output and the snapshot test | `OpenApiConfig`, `OpenApiSnapshotIT` | `platform.openapi` | PF-002, _built_ |
 | Record a page view | `VisitCommandService` (rate limit, bot drop, referrer host and ref tag reduced, one insert) | `visit` | PF-005, _built_ |
 | Read totals for the footer | `StatsQueryService` (cached for `app.stats.cache-ttl`, 60 s by default), which reads page views only through `VisitQueryService.totals()` | `stats` | PF-005, _built_ |
-| Send an email | `EmailSender` port; `ResendEmailSender` (prod), logging sender (local) | `contact` | PF-006 |
-| Accept and deliver a contact message | `ContactCommandService`, `ContactLifecycle`, `ContactRetryJob` | `contact` | PF-006 |
+| Send an email | `EmailSender` port (`Email`, `DeliveryException` nested); `ResendEmailSender` outside the local profile (`RestClient` with timeouts, Resilience4j retry, `ResendProperties`), `LoggingEmailSender` in the local profile | `contact` | PF-006, _built_ |
+| Accept and deliver a contact message | `ContactCommandService` (`submit`, and `deliver` shared with the job), `ContactLifecycle` (one transaction per step), `ContactRetryJob` (compare-and-set claim), `ContactProperties` | `contact` | PF-006, _built_ |
 | List public GitHub repositories | `GitHubClient`, `ProjectQueryService` (cached 1 h, circuit breaker) | `project` | PF-007 |
-| Integration-test context | `@IntegrationTest`, `TestcontainersConfiguration` (_built_ in PF-002); WireMock support arrives with the first adapter | `support` (test) | PF-002, PF-006 or PF-007 |
+| Integration-test context | `@IntegrationTest`, `TestcontainersConfiguration` (PF-002), and `WireMockSupport` (PF-006: one `WireMockServer` bean whose base URL the adapters' `base-url` settings point at; tests call `resetAll()` before each test) | `support` (test) | PF-002, PF-006, _built_ |
 
 ## Domain-Specific Guidelines
 
@@ -200,7 +200,7 @@ A page view is recorded only when the frontend posts it, so crawlers that do not
 
 ### Contact messages (PF-006)
 
-The outbox is the design: `PENDING` → `SENT` or `FAILED`, with `SPAM` for honeypot hits, and `FAILED` retried by `ContactRetryJob` up to 3 attempts (`app.contact.retry-enabled`). The visitor always gets 202 once the message is saved, because delivery is the owner's concern. Until the email domain is verified with Resend, mail goes only to the owner's account address, which is the only recipient anyway. Message content never appears in logs, problem bodies, or the email subject line.
+The outbox is the design: `PENDING` → `SENT` or `FAILED`, with `SPAM` for honeypot hits, and `FAILED` retried by `ContactRetryJob` every 10 minutes until a message has had 3 delivery attempts in total (`app.contact.retry-enabled`, `app.contact.max-attempts`; PF-006 D2). Within one attempt the Resend adapter makes up to 3 requests with one idempotency key; each attempt gets a new key (PF-006 D7), and a failure is stored as a reason code, never provider text. The visitor always gets 202 once the message is saved, because delivery is the owner's concern. Until the email domain is verified with Resend, mail goes only to the owner's account address, which is the only recipient anyway. Message content never appears in logs, problem bodies, or the email subject line.
 
 ### Projects (PF-007)
 
