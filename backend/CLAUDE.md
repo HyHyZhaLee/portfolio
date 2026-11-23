@@ -36,6 +36,7 @@ make up                                              # PostgreSQL in Docker
 ./backend/gradlew -p backend check                   # spotlessCheck + both tiers + branch coverage ≥ 80%
 ./backend/gradlew -p backend assemble testClasses    # compile main and test sources, run nothing
 make openapi                                         # regenerate backend/openapi/openapi.json and the frontend types
+docker build -t portfolio-backend backend            # the Render image (backend/Dockerfile); runs anywhere with DB_URL, DB_USERNAME, DB_PASSWORD, ALLOWED_ORIGINS, VISITOR_HASH_SECRET
 ```
 
 ## Naming Conventions
@@ -70,11 +71,11 @@ make openapi                                         # regenerate backend/openap
 - **External services.** Features depend on a port they own: `contact` on `EmailSender`, `project` on `GitHubClient`. Only the adapter talks to the provider. Adapters use `RestClient` with explicit connect and read timeouts. Email gets a Resilience4j retry with exponential backoff; GitHub gets a circuit breaker whose fallback is the last good result, else an empty list. The `local` profile wires a sender that logs only the message ID, so no email leaves a developer machine.
 - **Errors.** `throw new ApiException(ErrorCode.X, "client-safe detail")`, or one of its factories. Add codes to `ErrorCode` with their HTTP status. Never return `null` for "not found", never put framework, SQL, or provider text in `detail`, and never add a second `@RestControllerAdvice`.
 - **Entities.** Created through static factories; state changes only through guarded methods that throw on an illegal transition. No public setters. Keys are `BIGINT GENERATED ALWAYS AS IDENTITY`. Timestamps are `Instant` mapped to `TIMESTAMPTZ` and taken from the injected `Clock`. Mutable entities (`ContactMessageEntity`) carry `@Version`; append-only ones (`PageViewEntity`) do not. Lombok is allowed on entities only.
-- **Visitor identity.** `ClientInfoResolver` turns a request into the client IP, a parsed device type and browser, and `visitorHash = HMAC-SHA256(app.visitor-hash-secret, ip + "|" + userAgent)` as 64 hex characters. The raw IP and the full user agent never leave that resolver: not into a column, a log line, or a response (Non-Negotiable 3). Referrers are reduced to their host.
-- **Abuse resistance.** Every public `POST` has Bean Validation on its request record and a Bucket4j limit keyed by `visitorHash`: visits 30 per minute, contact messages 3 per hour. A rejected request answers 429 `RATE_LIMITED` with `Retry-After`. Bot user agents are dropped from visit counting (Non-Negotiable 4).
+- **Visitor identity.** `ClientInfoResolver` turns a request into `ClientInfo`: a parsed device type and browser family, a bot flag, a `rateLimitKey` (an HMAC of the IP alone), and `visitorHash = HMAC-SHA256(app.client.visitor-hash-secret, ip + "|" + userAgent)` as 64 hex characters, with the IP taken from the trusted proxy's `X-Forwarded-For` entry. The raw IP and the full user agent never leave that resolver: not into a column, a log line, or a response (Non-Negotiable 3). Referrers are reduced to their host.
+- **Abuse resistance.** Every public `POST` has Bean Validation on its request record and a Bucket4j limit keyed by `ClientInfo.rateLimitKey()` (an HMAC of the IP alone): visits 30 per minute, contact messages 3 per hour. A rejected request answers 429 `RATE_LIMITED` with `Retry-After`. Bot user agents are dropped from visit counting (Non-Negotiable 4).
 - **Caching.** Caffeine: `statsSummary` for 60 s and `githubRepos` for 1 h. A cache never holds personal data.
 - **Scheduled jobs.** The job is the feature's own component with an `app.{feature}.*-enabled` switch, such as `app.contact.retry-enabled`. Its `@Scheduled` method returns at once when the switch is off. Integration tests turn the switch off and call the job's work method directly. It takes its work from the current state ("what is still `FAILED`") and claims each item with a compare-and-set, never with a scheduler lock.
-- **Configuration.** Validated `@ConfigurationProperties` records under `app.*`; YAML values as `${ENV_VAR:default}`; secrets have no default outside `application-local.yml`, and the `prod` profile fails at startup when one is missing. The datasource settings have no default in `application.yml`; `application-local.yml` derives them from the `POSTGRES_*` variables that `compose.yaml` uses. `server.port: ${PORT:8080}` (Render injects `PORT`; locally `SERVER_PORT` overrides it), `server.request.header.forwarded.strategy: framework` (until PF-004 settles which proxy hop to trust), and a Hikari pool of 3.
+- **Configuration.** Validated `@ConfigurationProperties` records under `app.*`; YAML values as `${ENV_VAR:default}`; secrets have no default outside `application-local.yml`, and the `prod` profile fails at startup when one is missing. The datasource settings have no default in `application.yml`; `application-local.yml` derives them from the `POSTGRES_*` variables that `compose.yaml` uses. `server.port: ${PORT:8080}` (Render injects `PORT`; locally `SERVER_PORT` overrides it), `server.request.header.forwarded.strategy: none` (`ClientInfoResolver` reads `X-Forwarded-For` itself and trusts only `app.client.trusted-proxy-hops` from the right), and a Hikari pool of 3.
 - **Logging.** SLF4J (`LoggerFactory.getLogger`). Log identifiers and outcomes, never request bodies, IP addresses, user agents, email addresses, message text, or tokens. Business failures at WARN without a stack trace; unexpected failures at ERROR with one.
 - **Java style.** Constructor injection only. Records for DTOs and value objects. `final` locals where they are not reassigned. `Optional` only as a return type.
 
@@ -83,7 +84,7 @@ make openapi                                         # regenerate backend/openap
 ```java
 // ContactCommandService: not transactional, so no transaction is open while the email is sent.
 public Accepted submit(CreateContactMessageRequest body, ClientInfo client) {
-    rateLimiter.check(RateLimit.CONTACT, client.visitorHash());           // 429 RATE_LIMITED when exhausted
+    rateLimiter.check(RateLimit.CONTACT, client.rateLimitKey());          // 429 RATE_LIMITED when exhausted
     var message = lifecycle.savePending(body, client.visitorHash());     // TX 1: PENDING, or SPAM when the honeypot is filled
     if (message.isSpam()) {
         return Accepted.of(message);                                     // same 202 as a real message; never sent
@@ -115,11 +116,11 @@ A delivery failure is the owner's problem, not the visitor's: the message is saf
 ```
 backend/
 ├── build.gradle.kts · settings.gradle.kts · gradlew
-├── Dockerfile                           # multi-stage build; JVM flags sized for Render Free (planned, PF-004)
+├── Dockerfile · .dockerignore           # multi-stage build on pinned Temurin 21 images; JVM flags sized for Render Free
 ├── openapi/openapi.json                 # committed API contract snapshot
 └── src/
     ├── main/java/com/huygialy/portfolio/
-    │   ├── platform/                    # security (filter chain, built), openapi (built); error, web (correlation ID), ratelimit, client (ClientInfoResolver, visitor hash, bot filter) from PF-004
+    │   ├── platform/                    # error, web (correlation ID), security (chain, CORS), client (ClientInfoResolver, visitor hash, user agent, bot filter), ratelimit, openapi, ClockConfig
     │   ├── visit/                       # page views: service, entity, repository, validator (planned, PF-005)
     │   │   └── api/                     # POST /api/v1/visits
     │   ├── stats/                       # summary query and its cache

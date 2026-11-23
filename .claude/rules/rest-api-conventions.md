@@ -51,7 +51,7 @@ An upstream outage (GitHub, the email provider) is not passed to the client as a
 ## Headers and access
 
 - Public endpoints need no authentication; abuse is limited by validation and a per-visitor rate limit (Non-Negotiable 4).
-- CORS allows only the origins in `app.allowed-origins` (the Vercel production URL and its preview pattern), methods `GET` and `POST`, and no credentials.
+- CORS allows only the origins in `app.cors.allowed-origins` (the Vercel production URL, and a preview pattern if PF-012 adds one), methods `GET` and `POST` (plus `HEAD`), and no credentials; a cross-origin request from any other origin gets a plain 403 (PF-004 D5).
 - `X-Correlation-Id` is accepted when well-formed and always returned.
 
 ## Payloads

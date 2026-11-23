@@ -1,0 +1,9 @@
+# Only the Gradle wrapper, the build scripts, and src/ go into the image build.
+.gradle/
+build/
+bin/
+out/
+.idea/
+*.iml
+openapi/
+CLAUDE.md

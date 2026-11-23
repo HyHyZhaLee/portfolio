@@ -5,7 +5,11 @@ server:
   request:
     header:
       forwarded:
-        strategy: framework # resolve the client address behind Render's proxy
+        # ClientInfoResolver reads X-Forwarded-For itself and trusts only the proxy's entry (PF-004 P7); `framework`
+        # would trust the leftmost, client-supplied entry and remove the header.
+        strategy: none
+  tomcat:
+    use-relative-redirects: true # keeps Swagger UI's redirect relative behind Render's TLS proxy
 spring:
   application:
     name: portfolio
@@ -32,6 +36,16 @@ management:
   endpoint:
     health:
       show-components: always # component statuses (db UP/DOWN), never their details
+app:
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:} # required outside the local profile (startup fails when empty)
+  client:
+    visitor-hash-secret: ${VISITOR_HASH_SECRET:} # required outside the local profile
+    trusted-proxy-hops: ${TRUSTED_PROXY_HOPS:1}
+    log-forwarded-for-once: ${LOG_FORWARDED_FOR_ONCE:false} # PF-004 D3: on for one deploy in PF-012, then off
+logging:
+  pattern:
+    correlation: "[%X{correlationId:-}] "
 springdoc:
   writer-with-order-by-keys: true # deterministic snapshot
   api-docs:

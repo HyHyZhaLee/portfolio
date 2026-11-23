@@ -27,9 +27,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.1")
+    // Per-visitor rate limits (PF-004 P12): token buckets held in a bounded Caffeine cache.
+    implementation("com.bucket4j:bucket4j_jdk17-core:8.22.0")
+    implementation("com.github.ben-manes.caffeine:caffeine")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
@@ -40,6 +44,15 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+// The Docker image copies one jar with a fixed name (backend/Dockerfile); the plain jar is not needed.
+tasks.bootJar {
+    archiveFileName = "app.jar"
+}
+
+tasks.jar {
+    enabled = false
 }
 
 // Two test tiers (backend/CLAUDE.md, Testing). Both read the test source set explicitly (KNOWN-BE-002),
@@ -115,7 +128,8 @@ spotless {
     }
 }
 
-// `make backend` runs with the local profile unless SPRING_PROFILES_ACTIVE says otherwise.
-tasks.named<BootRun>("bootRun") {
+// `make backend` (bootRun) and bootTestRun run with the local profile unless SPRING_PROFILES_ACTIVE says otherwise;
+// the local profile supplies the settings that have no default elsewhere (PF-004 P6).
+tasks.withType<BootRun>().configureEach {
     systemProperty("spring.profiles.active", System.getenv("SPRING_PROFILES_ACTIVE") ?: "local")
 }

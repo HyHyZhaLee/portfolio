@@ -28,9 +28,9 @@ Applies to everything under `backend/`. The principles behind these rules are in
 
 ## Privacy and abuse (Non-Negotiables 3 and 4)
 
-- Read the client IP and user agent only through the platform's client-info resolver; it returns the visitor hash, device type, and browser family. Nothing else keeps the raw values.
+- Read the client IP and user agent only through the platform's client-info resolver; it returns the visitor hash, the rate-limit key, device type, browser family, and a bot flag. Nothing else keeps the raw values.
 - Store a referrer as its host only. Store a `ref` tag only after it matches `^[a-z0-9-]{1,64}$`.
-- Every public `POST` has Bean Validation with explicit maximum lengths and sits behind the rate-limit filter.
+- Every public `POST` has Bean Validation with explicit maximum lengths, and its command service calls `RateLimiter.check` with its `RateLimit` before doing any work.
 
 ## Persistence
 
