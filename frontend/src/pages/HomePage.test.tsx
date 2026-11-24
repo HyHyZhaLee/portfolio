@@ -26,10 +26,6 @@ function skillButton(name: string): HTMLElement {
     return button;
 }
 
-function rowStates(): (string | null)[] {
-    return screen.getAllByTestId(TestIds.work.caseStudyLink).map((link) => link.closest('li')?.getAttribute('data-state') ?? null);
-}
-
 describe('HomePage', () => {
     it('lists a skill without a case study as a plain label, not a button', () => {
         renderRoute('/');
@@ -56,7 +52,6 @@ describe('HomePage', () => {
 
         const links = screen.getAllByTestId(TestIds.work.caseStudyLink);
         expect(links.map((link) => link.getAttribute('href'))).toEqual(featuredOrder.map(caseStudyPath));
-        expect(rowStates().every((state) => state === null)).toBe(true);
     });
 
     it('shows the portrait beside the name in the hero', () => {
@@ -72,7 +67,7 @@ describe('HomePage', () => {
         expect(screen.getByTestId(TestIds.contact.githubLink)).toHaveAttribute('href', profile.links.github);
     });
 
-    it('selects a skill, lists its case studies, marks rows, clears, and moves the selection', async () => {
+    it('selects a skill, lists its case studies without marking the work rows, clears, and moves the selection', async () => {
         const user = userEvent.setup();
         renderRoute('/');
 
@@ -81,13 +76,12 @@ describe('HomePage', () => {
         const used = screen.getAllByTestId(TestIds.skills.usedInLink);
         expect(used.map((link) => link.getAttribute('href'))).toEqual(skillA.usedIn.map(caseStudyPath));
         expect(used.map((link) => link.textContent)).toEqual(skillA.usedIn.map((slug) => caseStudies[slug].title));
-        expect(rowStates()).toEqual(featuredOrder.map((slug) => (skillA.usedIn.includes(slug) ? 'match' : null)));
+        expect(document.querySelectorAll('[data-state="match"]')).toHaveLength(0);
         expect(skillButton(skillA.name)).toHaveAttribute('aria-pressed', 'true');
 
         await user.click(skillButton(skillA.name));
 
         expect(screen.queryAllByTestId(TestIds.skills.usedInLink)).toHaveLength(0);
-        expect(rowStates().every((state) => state === null)).toBe(true);
 
         await user.click(skillButton(skillA.name));
         await user.click(skillButton(skillB.name));

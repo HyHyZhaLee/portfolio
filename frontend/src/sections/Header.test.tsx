@@ -6,6 +6,7 @@ import { renderWithProviders } from '../test/renderWithProviders';
 import { Header } from './Header';
 
 const sectionLinks = [
+    { name: 'About', href: '/#about' },
     { name: 'Experience', href: '/#experience' },
     { name: 'Work', href: '/#work' },
     { name: 'How I work', href: '/#how-i-work' },
@@ -35,7 +36,7 @@ describe('Header', () => {
         expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
     });
 
-    it('opens the mobile menu with the five section links and closes it again', async () => {
+    it('opens the mobile menu with the six section links and closes it again', async () => {
         renderWithProviders(<Header />);
         const button = screen.getByTestId(TestIds.header.menuButton);
 

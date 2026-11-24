@@ -37,11 +37,13 @@ After the first swap went live, the owner asked for these changes; each was appl
 
 | Change | What shipped |
 |---|---|
-| Hero pitch | A generic 15-word pitch in the owner's direction, with the keywords ownership, production, products, and Agile |
+| Hero pitch | A generic 19-word pitch in the owner's direction, opening with "Product-minded software engineer", with the keywords end-to-end ownership of features, backend and frontend, and Agile |
 | Third proof point | The coverage claim is replaced by the owner's fact: two legacy apps (TPMA in Angular, DCA on iPad) ported to React, first build in UAT in ~4 weeks. The web-port card's outcome line now leads with the same UAT fact, already in the case study |
 | Name shown twice | The header brand reads "Portfolio" (its accessible name keeps the name); the hero keeps the name |
 | Portrait | The owner's photo, cropped to head and shoulders, 480 px WebP without metadata, in `src/assets/portrait.webp`, beside the name |
-| Section order | Experience moves right after About; the header links follow the page order |
+| Hero fits one screen | Tighter hero spacing, a 144 px portrait, a wider pitch (three lines), and every proof point on two lines, so the whole hero fits a 1440 × 800 window |
+| Section order | Experience moves right after About; the header links follow the page order and start with About |
+| Skill selection | Selecting a skill still lists its case studies under the skill group, but no longer tints the matching Featured work rows; the selection state moves into `Skills` |
 | Open source | The section, the `projects` feature, and `fallbackRepos` are removed; SITE-005 is retired. The backend endpoint stays until the owner decides; this site's case study drops its GitHub-list sentence |
 | Contact | The heading leads the left column with the note and the two profile links (each with its address); the form sits in a raised card on the right |
 

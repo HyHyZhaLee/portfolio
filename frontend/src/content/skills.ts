@@ -2,7 +2,7 @@ import type { CaseStudySlug } from './caseStudies/slugs';
 
 export interface Skill {
     name: string;
-    /** The case studies that used this skill; selecting the skill lists and highlights them (FR-8). A skill with none is listed without a link. */
+    /** The case studies that used this skill; selecting the skill lists them (FR-8). A skill with none is listed without a link. */
     usedIn: readonly CaseStudySlug[];
 }
 

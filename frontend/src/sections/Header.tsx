@@ -8,6 +8,7 @@ import { t, type MessageKey } from '../i18n/en';
 
 /** The home page anchors the navigation links to; they work from any route (PF-003 P6). */
 const navItems = [
+    { hash: '#about', label: 'nav.about' },
     { hash: '#experience', label: 'nav.experience' },
     { hash: '#work', label: 'nav.work' },
     { hash: '#how-i-work', label: 'nav.howIWork' },
