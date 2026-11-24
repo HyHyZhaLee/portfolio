@@ -6,13 +6,16 @@ on:
     paths: ["backend/**", ".github/workflows/backend.yml"]
   pull_request:
     paths: ["backend/**", ".github/workflows/backend.yml"]
+  # Redeploys production by hand, for example after a Render build failed for a reason outside the code (PF-013 D4).
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+# A newer run cancels an older one only on pull requests; runs on main queue, so deploys reach Render in commit order (PF-013 D5).
 concurrency:
   group: backend-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check:
@@ -34,3 +37,17 @@ jobs:
       # OpenApiSnapshotIT rewrites the snapshot during check, so a diff means an API change was not committed (make openapi).
       - name: OpenAPI snapshot is up to date
         run: git diff --exit-code -- openapi/openapi.json
+
+  # Production deploy, only after every check passed (PF-013 D8). The hook's ref parameter makes Render build exactly this
+  # commit, and a hook call with ref turns Render's own auto-deploy off, so this job is the only path to production.
+  # The job ends when Render accepts the deploy; Render emails the owner if the build fails and keeps the old version (D9).
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Ask Render to deploy this commit
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: curl --fail-with-body --silent --show-error --max-time 60 --request POST "${RENDER_DEPLOY_HOOK_URL}&ref=${GITHUB_SHA}"

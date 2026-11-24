@@ -72,6 +72,8 @@ E2E_ALL_BROWSERS=1 scripts/with-node.sh pnpm --dir frontend test:e2e   # the sam
 | End to end: smoke suite with the API unreachable | `pnpm --dir frontend test:e2e` (CI: `e2e.yml`) |
 | Lighthouse | Performance, accessibility, best practices, and SEO of at least 90 on the home page and a case study, measured on a production build with the API unreachable (results in [the PF-009 plan](docs/plans/site/PF-009-polish.md)) |
 
+A push to `main` deploys each app only after its own checks pass: `frontend.yml` builds and uploads the site with the Vercel CLI, and `backend.yml` asks Render to deploy the checked commit through a deploy hook.
+
 ## Documentation
 
 | Doc | What it holds |

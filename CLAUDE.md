@@ -35,7 +35,7 @@ It is under construction: `docs/prd/backlog.md` says what exists today.
 | `scripts/` | Helper scripts for people and agents (`with-node.sh`, `check-services.sh`, `free-port.sh`) | the script headers |
 | `.claude/` | Skills, path-scoped rules, the `code-reviewer` agent, launch and permission settings | this file |
 
-Local ports: backend `8080`, frontend `5173`, PostgreSQL `5432`, each overridable in `.env` (template: `.env.example`). Production: frontend on Vercel, backend on Render (Docker), database on Neon; the deployment runbook is in `../portfolio-implementation-plan.md` §8. `.local/` is machine-local and gitignored; never commit from it or quote it in committed files.
+Local ports: backend `8080`, frontend `5173`, PostgreSQL `5432`, each overridable in `.env` (template: `.env.example`). Production: frontend on Vercel, backend on Render (Docker), database on Neon; a push to `main` deploys each app only after its workflow's checks pass (PF-013); the deployment runbook is in `../portfolio-implementation-plan.md` §8. `.local/` is machine-local and gitignored; never commit from it or quote it in committed files.
 
 ## Non-Negotiables
 

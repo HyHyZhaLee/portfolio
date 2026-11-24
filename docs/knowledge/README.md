@@ -15,7 +15,7 @@ Verified facts about the tools, libraries, and hosting providers this site depen
 | File | Covers |
 |---|---|
 | [tooling.md](tooling.md) | Spring Boot 4, Gradle 9, Testcontainers 2, Jackson 3, PostgreSQL, shell and Docker, Node and frontend tooling; carried over from the owner's earlier scaffold and to be re-checked when the code lands |
-| [hosting.md](hosting.md) | Vercel behavior observed on this site's project: pnpm and Node selection, and the CLI with a Root Directory; Render and Neon entries arrive with their first deploy |
+| [hosting.md](hosting.md) | Vercel, Render, and Neon behavior observed on this site's projects: pnpm and Node selection, the Vercel CLI with a Root Directory, `VITE_` variable types, Render's Root Directory and deploy hooks, and the Neon JDBC URL |
 
 Add one file per area when needed and list it here.
 

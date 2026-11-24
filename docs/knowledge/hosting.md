@@ -21,3 +21,31 @@ Facts about Vercel, Render, and Neon observed on this site's own projects. Versi
 - **Source**: the `deploy` job in `.github/workflows/frontend.yml`; `frontend/.prettierignore`
 - **Verified**: local `vercel pull` and `vercel build --prod` with Vercel CLI 66.2.0, the dashboard commands blanked in the local `.vercel/project.json`; 2026-11-23
 - **Discovered in**: PF-013
+
+### A `VITE_` variable is a Config variable, not a Secret
+- **Rule / Behavior**: Vercel's Add Environment Variable form defaults to the Secret type, which can never be revealed after saving. For a key with the `VITE_` prefix it warns that the prefix exposes the value to the browser and offers "Change to Config". `VITE_API_URL` is the backend's public address and ends up in the browser bundle by design, so it is stored as Config (readable later), and the prefix stays because Vite only bundles `VITE_` variables.
+- **Source**: Vercel Project Settings → Environment Variables; `frontend/src/api/client.ts`
+- **Verified**: adding `VITE_API_URL` for Production; 2026-11-24
+- **Discovered in**: PF-013
+
+## Render
+
+### Root Directory `backend` builds the Dockerfile there and ignores other changes
+- **Rule / Behavior**: A web service with Language Docker and Root Directory `backend` builds `backend/Dockerfile` with `backend/` as the build context, and Render ignores commits that change nothing under `backend/` for its own auto-deploys. The first deploy of `will-ly-portfolio-api` (Free, Singapore) took 3 min 16 s from start to live, including the Gradle build in Docker.
+- **Source**: Render docs, Monorepo Support; the first deploy's Events and Logs pages
+- **Verified**: first deploy, then `GET /actuator/health` answered 200 with `db` UP; 2026-11-24
+- **Discovered in**: PF-013
+
+### A deploy hook with `ref` deploys one exact commit and turns auto-deploy off
+- **Rule / Behavior**: A `POST` (or `GET`) to the service's deploy hook URL starts a deploy. Appending `&ref=<commit SHA>` (full or short) deploys exactly that commit, answering 200 when the deploy starts and 404 when the SHA is not in the linked repository. Using `ref` turns the service's automatic deploys off, so the caller becomes the only path to production. The hook URL carries a key, so it is a secret.
+- **Source**: Render docs, Deploy Hooks and Deploying a Specific Commit; the `deploy` job in `.github/workflows/backend.yml`
+- **Verified**: Render docs read on 2026-11-24; the first run after the PF-013 merge exercises it
+- **Discovered in**: PF-013
+
+## Neon
+
+### The JDBC URL comes from the direct connection string
+- **Rule / Behavior**: Neon's Connect dialog shows a `postgresql://user:password@host/db?sslmode=require&channel_binding=require` string, with Connection pooling on by default (host ending in `-pooler`). With pooling off, the host loses `-pooler`; the backend then takes `DB_URL=jdbc:postgresql://<host>/<db>?sslmode=require`, with the user and password in `DB_USERNAME` and `DB_PASSWORD`.
+- **Source**: Neon Console → Connect; `backend/src/main/resources/application.yml`
+- **Verified**: the first Render deploy connected over the direct host and Flyway created `page_view` and `contact_message`; 2026-11-24
+- **Discovered in**: PF-013
