@@ -22,7 +22,7 @@ export interface Profile {
     proofPoints: readonly [ProofPoint, ProofPoint, ProofPoint];
     about: readonly string[];
     facts: readonly Fact[];
-    links: { github: string; linkedin: string; repository: string };
+    links: { email: string; github: string; linkedin: string; repository: string };
 }
 
 export const profile: Profile = {
@@ -46,6 +46,7 @@ export const profile: Profile = {
         { label: 'Studying', value: "Master's in Computer Science, Bach Khoa University (in progress)" },
     ],
     links: {
+        email: 'lygiahuy05022002@gmail.com',
         github: 'https://github.com/HyHyZhaLee',
         linkedin: 'https://www.linkedin.com/in/huygialy',
         repository: 'https://github.com/HyHyZhaLee/portfolio',

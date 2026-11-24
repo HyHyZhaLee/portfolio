@@ -30,7 +30,7 @@ Rows whose ticket has not run yet are planned.
 | `/` How I work | Five or six principles, each with one example | PF-003 |
 | `/` Skills | Grouped as on the CV; each skill links to the case studies that used it | PF-003 |
 | `/` Education & awards | Degrees and awards, one line each; each award opens its certificate in a dialog (PF-012, 2026-11-24) | PF-003, PF-012 |
-| `/` Contact | LinkedIn and GitHub with their addresses (PF-003), then the form in a raised card (PF-006, PF-012); no phone | PF-003, PF-006, PF-012 |
+| `/` Contact | The owner's email, LinkedIn, and GitHub with their addresses (PF-003, PF-012), then the form in a raised card of equal height (PF-006, PF-012); no phone | PF-003, PF-006, PF-012 |
 | `/` Footer | API status dot, "View source" link, privacy note (PF-003); visit counter (PF-005) | PF-003, PF-005 |
 | `/work/<slug>` | One case study, 500–800 words | PF-003 |
 | `*` | Not-found page | PF-003 |

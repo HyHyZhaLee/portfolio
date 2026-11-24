@@ -26,6 +26,7 @@ export const TestIds = {
         usedInLink: 'skills-used-in-link',
     },
     contact: {
+        emailLink: 'contact-email-link',
         linkedinLink: 'contact-linkedin-link',
         githubLink: 'contact-github-link',
         form: 'contact-form-region',

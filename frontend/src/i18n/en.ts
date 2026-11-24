@@ -45,6 +45,7 @@ const en = {
     'education.viewCertificate': 'View certificate',
     'education.closeCertificate': 'Close',
     'contact.heading': 'Contact',
+    'contact.email': 'Email',
     'contact.linkedin': 'LinkedIn',
     'contact.github': 'GitHub',
     'contact.linksLabel': 'Profiles',
