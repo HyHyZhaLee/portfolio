@@ -37,7 +37,7 @@ After the first swap went live, the owner asked for these changes; each was appl
 
 | Change | What shipped |
 |---|---|
-| Hero pitch | A new 19-word pitch built from master-CV facts (healthcare workflows, event-driven AWS integrations, React apps, tested) |
+| Hero pitch | A generic 15-word pitch in the owner's direction, with the keywords ownership, production, products, and Agile |
 | Third proof point | The coverage claim is replaced by the owner's fact: two legacy apps (TPMA in Angular, DCA on iPad) ported to React, first build in UAT in ~4 weeks. The web-port card's outcome line now leads with the same UAT fact, already in the case study |
 | Name shown twice | The header brand reads "Portfolio" (its accessible name keeps the name); the hero keeps the name |
 | Portrait | The owner's photo, cropped to head and shoulders, 480 px WebP without metadata, in `src/assets/portrait.webp`, beside the name |
