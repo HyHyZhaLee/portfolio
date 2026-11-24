@@ -6,10 +6,11 @@ FROM eclipse-temurin:21.0.13_9-jdk AS build
 WORKDIR /app
 COPY gradle/ gradle/
 COPY gradlew settings.gradle.kts build.gradle.kts ./
-# Resolve dependencies in their own layer, so a source change does not download them again.
-RUN ./gradlew --no-daemon -q dependencies > /dev/null
+# Download the Gradle distribution and every jar the build needs in their own layer, so a source change reuses it and
+# downloads nothing; the build itself then runs offline (PF-024). `dependencies` alone fetched only the POM files.
+RUN ./gradlew --no-daemon -q downloadDependencies
 COPY src/ src/
-RUN ./gradlew --no-daemon -q bootJar
+RUN ./gradlew --no-daemon -q --offline bootJar
 
 # ---- run ----
 FROM eclipse-temurin:21.0.13_9-jre

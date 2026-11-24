@@ -19,6 +19,9 @@ java {
 }
 
 repositories {
+    // Google's mirror of Maven Central first, so builds on shared machines avoid Maven Central's 429 rate limit (PF-024,
+    // see settings.gradle.kts).
+    maven("https://maven-central.storage-download.googleapis.com/maven2/")
     mavenCentral()
 }
 
@@ -55,6 +58,21 @@ dependencies {
 // The Docker image copies one jar with a fixed name (backend/Dockerfile); the plain jar is not needed.
 tasks.bootJar {
     archiveFileName = "app.jar"
+}
+
+// Downloads every jar that compiling and packaging the app needs, so the Docker image keeps them in a cached layer and
+// its bootJar step runs offline: a source change never downloads dependencies again (PF-024, backend/Dockerfile).
+tasks.register("downloadDependencies") {
+    description = "Resolves the jars bootJar needs, for the Docker dependency layer."
+    val needed = files(
+        configurations.compileClasspath,
+        configurations.annotationProcessor,
+        configurations.named("productionRuntimeClasspath"),
+    )
+    inputs.files(needed)
+    doLast {
+        logger.info("Resolved ${needed.files.size} jars")
+    }
 }
 
 tasks.jar {
