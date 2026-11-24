@@ -31,7 +31,7 @@ class StatsQueryServiceTest {
 
     @Test
     void aRecordedViewDropsTheCachedTotals() {
-        // PF-022 D5: the summary asked for right after a stored view includes it.
+        // PF-023 D5: the summary asked for right after a stored view includes it.
         final var visits = new CountingVisitQueryService();
         final var service = new StatsQueryService(visits, new StatsProperties(Duration.ofSeconds(60)));
         service.summary();

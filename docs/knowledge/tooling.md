@@ -217,8 +217,8 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 ### Boot 4.2 serves the liveness and readiness groups by default
 - **Rule / Behavior**: In Spring Boot 4.2, `management.endpoint.health.probes.enabled` defaults to `true` (its configuration metadata says so), so `/actuator/health` lists `livenessState` and `readinessState` and reports `"groups":["liveness","readiness"]`, and `/actuator/health/liveness` answers without the `db` component outside Kubernetes too. A security chain that permits only the exact `/actuator/health` path answers the group path 404 until it is added to the public rules.
 - **Source**: `spring-boot-health-4.2.0.jar` configuration metadata; `platform/security/SecurityConfig.java`; `HealthIT`
-- **Verified**: production `GET /actuator/health/liveness` answered 404 `NOT_FOUND` before PF-022; `HealthIT.livenessIsPublicAndNeverChecksTheDatabase` passes after it; 2026-11-24
-- **Discovered in**: PF-022
+- **Verified**: production `GET /actuator/health/liveness` answered 404 `NOT_FOUND` before PF-023; `HealthIT.livenessIsPublicAndNeverChecksTheDatabase` passes after it; 2026-11-24
+- **Discovered in**: PF-023
 
 ## PostgreSQL
 

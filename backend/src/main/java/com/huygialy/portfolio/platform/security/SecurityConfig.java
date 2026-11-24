@@ -28,7 +28,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 class SecurityConfig {
 
     private static final String HEALTH_PATH = "/actuator/health";
-    /** The database-free check for Render's health check and the keep-alive ping (PF-022 D7). */
+    /** The database-free check for Render's health check and the keep-alive ping (PF-023 D7). */
     private static final String LIVENESS_PATH = "/actuator/health/liveness";
 
     private static final String[] PUBLIC_GET_PATHS = {

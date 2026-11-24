@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
 
 /**
- * PF-022 D5: a stored view is announced so the footer's cached totals are dropped, and a bot view, which is never
+ * PF-023 D5: a stored view is announced so the footer's cached totals are dropped, and a bot view, which is never
  * stored, is not. Unit test with Mockito, claiming the integration-test gate's exemption: the insert itself is covered
  * by {@code VisitApiIT}.
  */

@@ -9,7 +9,7 @@ import { Header } from '../sections/Header';
 /**
  * Skip link, sticky header, the page, and the footer. `ScrollRestoration` scrolls to the hash or to the top on navigation
  * (PF-003 P6). Each route opened sends one page view from production builds (PF-005 F2), once the health check has
- * answered (PF-022 D4).
+ * answered (PF-023 D4).
  */
 export function RootLayout() {
     useTrackPageView(useApiStatus().api === 'online');

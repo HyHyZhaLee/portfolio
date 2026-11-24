@@ -6,15 +6,15 @@ export const apiStatusKeys = {
     health: () => [...apiStatusKeys.all, 'health'] as const,
 };
 
-/** The waits before the second and third attempt of a failed check: a dropped connection or a cold start can outlast one attempt (PF-022 D2). */
+/** The waits before the second and third attempt of a failed check: a dropped connection or a cold start can outlast one attempt (PF-023 D2). */
 export const HEALTH_RETRY_DELAYS_MS = [3_000, 10_000] as const;
-/** How often the check repeats while the tab is visible, and for how long after the page opened (PF-022 D3). */
+/** How often the check repeats while the tab is visible, and for how long after the page opened (PF-023 D3). */
 export const HEALTH_RECHECK_MS = 60_000;
 export const HEALTH_RECHECK_WINDOW_MS = 15 * 60_000;
 
 /**
  * The page's one health check, which is also its wake signal: `AppProviders` starts it when the app starts, and the
- * panel and the footer share it (PF-022 D1). A failed attempt is retried after 3 s and then 10 s (D2). While the tab is
+ * panel and the footer share it (PF-023 D1). A failed attempt is retried after 3 s and then 10 s (D2). While the tab is
  * visible it repeats every 60 s for the first 15 minutes, and again when the visitor returns to the tab after more than
  * 60 s; a hidden tab never re-checks, so a forgotten tab cannot keep the free-tier API and database awake (D3).
  */

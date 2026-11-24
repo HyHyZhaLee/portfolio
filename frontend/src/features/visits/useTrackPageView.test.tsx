@@ -14,7 +14,7 @@ interface VisitBody {
     ref?: string;
 }
 
-/** Whether the page's health check has answered; `RootLayout` passes the real one (PF-022 D4). */
+/** Whether the page's health check has answered; `RootLayout` passes the real one (PF-023 D4). */
 const ApiOnline = createContext(true);
 
 /** Stands in for `RootLayout`: the hook lives above the routes, so it survives navigation. */

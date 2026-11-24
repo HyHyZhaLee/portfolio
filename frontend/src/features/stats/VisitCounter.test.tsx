@@ -108,7 +108,7 @@ describe('VisitCounter', () => {
     });
 });
 
-/** The counter next to a stand-in for the beacon, which records one view when asked (PF-022 D5). */
+/** The counter next to a stand-in for the beacon, which records one view when asked (PF-023 D5). */
 function CounterWithBeacon() {
     const { mutate } = useRecordVisit();
     return (

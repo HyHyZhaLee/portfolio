@@ -15,7 +15,7 @@ function visitorsText(count: number): string {
 
 /**
  * The footer's "N visits from M visitors", asked for only once the API is online (D2), without the since date (D6), and
- * asked again after each recorded view so it includes the visitor's own (PF-022 D5).
+ * asked again after each recorded view so it includes the visitor's own (PF-023 D5).
  * The span keeps its width and one line of height while empty, so the counter appearing never shifts the footer (FR-10).
  */
 export function VisitCounter() {

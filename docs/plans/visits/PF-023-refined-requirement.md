@@ -1,8 +1,8 @@
-# PF-022 — Refined requirements
+# PF-023 — Refined requirements
 
 > Living document. The backlog entry or the user's description was the starting point; this is the complete, current requirement as clarified in conversation, and it wins over the original wording. It says **what** to build; the plan says **how**. Sole author: the background refinement agent.
 
-**Ticket**: PF-022 — Wake the backend on page load, count every visit, show the live service state · **Plan**: [PF-022-wake-and-live-status.md](PF-022-wake-and-live-status.md) · **Master plan section**: `../portfolio-implementation-plan.md` §5 (visits, cold-start handling) and §8.F (keep-alive) · **Status**: **Confirmed** · **Last updated**: 2026-11-24
+**Ticket**: PF-023 — Wake the backend on page load, count every visit, show the live service state · **Plan**: [PF-023-wake-and-live-status.md](PF-023-wake-and-live-status.md) · **Master plan section**: `../portfolio-implementation-plan.md` §5 (visits, cold-start handling) and §8.F (keep-alive) · **Status**: **Confirmed** · **Last updated**: 2026-11-24
 
 ## 1. Problem and goal
 

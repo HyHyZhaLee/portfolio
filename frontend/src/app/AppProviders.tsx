@@ -6,7 +6,7 @@ import { createQueryClient } from './queryClient';
 export function AppProviders({ children }: { children: ReactNode }) {
     const [queryClient] = useState(createQueryClient);
     // The page's one wake signal: the shared health check starts when the app starts, on every route, whichever
-    // components render (PF-022 D1). The panel and the footer read the same query, so this sends no second request.
+    // components render (PF-023 D1). The panel and the footer read the same query, so this sends no second request.
     useEffect(() => {
         void queryClient.prefetchQuery(healthQueryOptions);
     }, [queryClient]);

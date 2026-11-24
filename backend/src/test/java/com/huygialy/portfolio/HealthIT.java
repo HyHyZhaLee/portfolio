@@ -36,7 +36,7 @@ class HealthIT {
 
     @Test
     void livenessIsPublicAndNeverChecksTheDatabase() {
-        // PF-022 D7: Render's health check and the keep-alive ping use it, so they never wake the database.
+        // PF-023 D7: Render's health check and the keep-alive ping use it, so they never wake the database.
         client.get()
                 .uri("/actuator/health/liveness")
                 .exchange()

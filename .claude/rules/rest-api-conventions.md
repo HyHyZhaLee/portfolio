@@ -25,8 +25,8 @@ Rows marked _(planned)_ arrive with the ticket named.
 | `GET /api/v1/stats/summary` (`getStatsSummary`) | Total views, unique visitors, first visit time (`since`, null before the first view) | 200 | PF-005 |
 | `POST /api/v1/contact-messages` (`createContactMessage`) | Accept a contact message for delivery (a honeypot hit gets the same 202) | 202 | PF-006 |
 | `GET /api/v1/projects` (`listProjects`) | Public GitHub repositories (`{items}`), featured first; 200 from the last good result, else an empty list, when GitHub is down | 200 | PF-007 |
-| `GET /actuator/health` | Health with the database, the page's status check and wake signal | 200 | PF-002, PF-022 |
-| `GET /actuator/health/liveness` (also `HEAD`) | Liveness without the database: Render's health check and the keep-alive ping | 200 | PF-022 |
+| `GET /actuator/health` | Health with the database, the page's status check and wake signal | 200 | PF-002, PF-023 |
+| `GET /actuator/health/liveness` (also `HEAD`) | Liveness without the database: Render's health check and the keep-alive ping | 200 | PF-023 |
 
 ## Status codes
 

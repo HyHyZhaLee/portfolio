@@ -19,7 +19,7 @@ function renderPanelAndDot() {
     );
 }
 
-/** Mirrors `RootLayout`: the beacon waits for the panel's health check (PF-022 D4). */
+/** Mirrors `RootLayout`: the beacon waits for the panel's health check (PF-023 D4). */
 function TrackView() {
     useTrackPageView(useApiStatus().api === 'online');
     return null;

@@ -3,7 +3,7 @@ import { ApiError, UNEXPECTED_RESPONSE } from '../../api/errors';
 import type { Health, HealthBody, LocalPaths } from './types';
 
 // A 503 means the API answered and a component is down: its body is data, not an error (KNOWN-FE-006). One attempt
-// may wait out a cold start of the free-tier API, up to the 100 s timeout (PF-003 P7, PF-022).
+// may wait out a cold start of the free-tier API, up to the 100 s timeout (PF-003 P7, PF-023).
 const healthClient = createApiClient<LocalPaths>({ tolerateStatus: [503], timeoutMs: COLD_START_TIMEOUT_MS });
 
 function isHealthBody(value: unknown): value is HealthBody {

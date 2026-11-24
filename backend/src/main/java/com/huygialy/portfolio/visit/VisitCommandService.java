@@ -31,7 +31,7 @@ public class VisitCommandService {
     /**
      * F1: the rate limit first, for bots too (D7, 429 {@code RATE_LIMITED}); then a bot returns with nothing stored
      * (FR-7); then the referrer and the ref tag are reduced and one row is inserted (FR-6). A stored view is announced
-     * with {@link PageViewRecorded}, after the insert committed (PF-022 D5).
+     * with {@link PageViewRecorded}, after the insert committed (PF-023 D5).
      */
     public void record(RecordVisitRequest request, ClientInfo client) {
         rateLimiter.check(RateLimit.VISIT, client.rateLimitKey());

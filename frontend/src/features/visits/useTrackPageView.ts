@@ -14,7 +14,7 @@ import { readTrackingParams, referrerOrigin, rememberRef, setOptOut, storedRef, 
  *
  * A view goes out only once `apiOnline` is true, that is once the page's health check has answered: routes opened
  * before then wait in a queue and are sent in order as soon as it does, so a view reaches an awake backend instead of
- * racing its cold start. A view is still never retried, because a retry could count it twice (PF-022 D4).
+ * racing its cold start. A view is still never retried, because a retry could count it twice (PF-023 D4).
  */
 export function useTrackPageView(apiOnline: boolean): void {
     const { pathname, search, hash } = useLocation();
