@@ -1,11 +1,80 @@
+import { useId, useRef, useState } from 'react';
 import { Section } from '../components/Section';
-import { awards, degrees, type EducationItem } from '../content/education';
+import { getTestIdProp, TestIds } from '../config/test-ids.config';
+import { awards, degrees, type Certificate, type EducationItem } from '../content/education';
 import { t, type MessageKey } from '../i18n/en';
 
 const groups: readonly { heading: MessageKey; items: readonly EducationItem[] }[] = [
     { heading: 'education.degrees', items: degrees },
     { heading: 'education.awards', items: awards },
 ];
+
+/**
+ * A "View certificate" button and the modal dialog it opens. The native dialog traps focus, closes on Escape, and
+ * returns focus to the button; a click on the backdrop closes it too. The image loads only once the dialog opens.
+ */
+function CertificateViewer({ title, certificate }: { title: string; certificate: Certificate }) {
+    const dialogRef = useRef<HTMLDialogElement>(null);
+    const [open, setOpen] = useState(false);
+    const headingId = useId();
+
+    return (
+        <>
+            <button
+                type='button'
+                onClick={() => {
+                    setOpen(true);
+                    dialogRef.current?.showModal();
+                }}
+                className='mt-1.5 font-ui text-sm font-semibold text-accent underline-offset-4 hover:underline'
+                {...getTestIdProp(TestIds.education.certificateButton)}
+            >
+                {t('education.viewCertificate')}
+                <span className='sr-only'>: {title}</span>
+            </button>
+            <dialog
+                ref={dialogRef}
+                aria-labelledby={headingId}
+                onClose={() => {
+                    setOpen(false);
+                }}
+                onClick={(event) => {
+                    // The image and header fill the dialog, so a click that lands on the dialog itself is on the backdrop.
+                    if (event.target === event.currentTarget) {
+                        event.currentTarget.close();
+                    }
+                }}
+                className='m-auto w-[min(64rem,calc(100vw-2rem))] overflow-hidden rounded-panel border border-line bg-surface-raised text-ink shadow-panel backdrop:bg-ink/70'
+                {...getTestIdProp(TestIds.education.certificateDialog)}
+            >
+                <div className='flex items-center justify-between gap-4 border-b border-line px-5 py-3'>
+                    <h2 id={headingId} className='font-ui text-base font-semibold'>
+                        {title}
+                    </h2>
+                    <button
+                        type='button'
+                        onClick={() => {
+                            dialogRef.current?.close();
+                        }}
+                        className='rounded-control border border-line px-3 py-1.5 font-ui text-label font-medium hover:border-ink'
+                        {...getTestIdProp(TestIds.education.certificateClose)}
+                    >
+                        {t('education.closeCertificate')}
+                    </button>
+                </div>
+                {open && (
+                    <img
+                        src={certificate.src}
+                        alt={certificate.alt}
+                        width={certificate.width}
+                        height={certificate.height}
+                        className='block max-h-[calc(100svh-8rem)] w-full bg-surface-sunk object-contain'
+                    />
+                )}
+            </dialog>
+        </>
+    );
+}
 
 export function Education() {
     return (
@@ -19,8 +88,11 @@ export function Education() {
                                 key={item.title}
                                 className='grid gap-1 border-t border-line py-4 last:border-b md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-8'
                             >
-                                <h4 className='text-base leading-snug font-semibold'>{item.title}</h4>
-                                <p>{item.detail}</p>
+                                <h4 className='text-base leading-snug font-normal'>{item.title}</h4>
+                                <div>
+                                    <p>{item.detail}</p>
+                                    {item.certificate && <CertificateViewer title={item.title} certificate={item.certificate} />}
+                                </div>
                             </li>
                         ))}
                     </ul>
