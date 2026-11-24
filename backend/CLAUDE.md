@@ -15,6 +15,7 @@
 | API | REST under `/api/v1`, springdoc OpenAPI, RFC 9457 problem responses; public, no authentication |
 | Tests | JUnit, AssertJ, Mockito, Testcontainers 2, WireMock, JaCoCo |
 | Runtime target | Render Free: 512 MB RAM, 0.1 CPU, no persistent disk (Non-Negotiable 8) |
+| Deploy | Render web service built from `Dockerfile` (Root Directory `backend`); the `deploy` job in `.github/workflows/backend.yml` calls Render's deploy hook with the commit SHA after the checks pass, and Render's own auto-deploy is off (PF-013) |
 | Base package | `com.huygialy.portfolio` |
 
 Spring Boot 4 traps (`KNOWN-BE-003` to `005` in `docs/architecture/backend.md`): split starters, Jackson 3 runtime packages under `tools.jackson`, and Testcontainers 2 artifact and class names. When a compile error contradicts what you expected, look up the current API. Never downgrade a dependency to make old code compile.

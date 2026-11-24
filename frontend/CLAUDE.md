@@ -15,7 +15,7 @@
 | Forms | react-hook-form with zod schemas |
 | Analytics | `@vercel/analytics` (cookieless, PF-012) plus the site's own visit tracking (PF-005) |
 | Tests | Vitest, Testing Library, jest-dom, MSW |
-| Hosting | Vercel Hobby; Root Directory `frontend` |
+| Hosting | Vercel Hobby; Root Directory `frontend`; production is deployed by the `deploy` job in `.github/workflows/frontend.yml` after the checks pass, with Vercel's own Git deploys off and the install and build commands in `vercel.json` (PF-013) |
 
 ## Commands
 
@@ -48,7 +48,7 @@ scripts/with-node.sh pnpm --dir frontend gen:api          # regenerate src/api/s
 ```
 frontend/
 ├── index.html                  # default title, meta description, Open Graph tags
-├── vercel.json                 # SPA rewrite so /work/:slug loads on a hard refresh
+├── vercel.json                 # SPA rewrite for /work/:slug, pinned install and build commands, Git deploys off (PF-013)
 ├── public/                     # not created yet: og-image.png, robots.txt, sitemap.xml in PF-012; a favicon has no ticket yet
 └── src/
     ├── index.css               # Tailwind import and @theme design tokens
