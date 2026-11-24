@@ -33,7 +33,8 @@ Everything here is public: indexed by search engines and readable by anyone, inc
 - Project titles follow "Name - descriptor", for example "Clockwork - Healthcare Scheduling Platform".
 - Case studies follow the template in the content plan §6.3 (at a glance, context, problem, role and scope, what I built, deep dive, outcome), 500–800 words.
 - Diagrams are drawn fresh in Mermaid or SVG with generic labels ("Practitioner web app", "Event bus", "Queue + DLQ"); never trace an internal diagram.
-- No phone number anywhere, including the public CV PDF in `frontend/public/`. No photo, date of birth, or marital status.
+- No phone number anywhere in the site or the repository. The site publishes no CV PDF: the owner sends the CV and links the portfolio from it (PF-012). No date of birth or marital status, and no photo other than the owner-approved hero portrait (PF-012, 2026-11-24).
+- The owner's own public contact details on the site (email, LinkedIn, GitHub) are content the owner chose to publish (PF-012), not the personal data Non-Negotiable 9 protects; visitors' data stays out of the repository.
 
 ## Voice
 

@@ -20,7 +20,7 @@ export const thisSite: CaseStudy = {
     ],
     links: [{ label: 'Source on GitHub', href: 'https://github.com/HyHyZhaLee/portfolio' }],
     context: [
-        'This is the site you are reading. It is my portfolio and also a small full-stack system: a React frontend, a Spring Boot API and a PostgreSQL database. The API serves a visit counter, the contact form and a list of my public GitHub projects. I built it to show how I work, so the engineering behind the page matters as much as the page.',
+        'This is the site you are reading. It is my portfolio and also a small full-stack system: a React frontend, a Spring Boot API and a PostgreSQL database. The API serves a visit counter and the contact form. I built it to show how I work, so the engineering behind the page matters as much as the page.',
     ],
     problem: [
         'Free hosting is free for a reason. My backend runs on a free tier that goes to sleep when idle, and the first request afterwards can take about a minute. A portfolio that shows a blank page or a spinner for a minute is worse than no backend at all. The constraint was clear: use a real backend, pay nothing, and never let a recruiter wait for it.',
