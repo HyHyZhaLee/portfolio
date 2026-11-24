@@ -10,7 +10,7 @@ Applies to everything under `frontend/`. The principles behind these rules are i
 ## Structure
 
 - Static portfolio content is typed data in `src/content/`. Page sections in `src/sections/` render it; pages in `src/pages/` compose sections.
-- API-backed features get one folder each in `src/features/{feature}/` (`visits`, `stats`, `contact`, `projects`, `api-status`): `api.ts`, `queries.ts`, `types.ts`, `validation.ts` when there is a form, the components, and co-located `*.test.ts(x)` files. Other code imports a feature from its `index.ts` only.
+- API-backed features get one folder each in `src/features/{feature}/` (`visits`, `stats`, `contact`, `api-status`): `api.ts`, `queries.ts`, `types.ts`, `validation.ts` when there is a form, the components, and co-located `*.test.ts(x)` files. Other code imports a feature from its `index.ts` only.
 - Shared primitives live in `src/components/`. Reuse them first, and add a new one only when a second caller needs it.
 
 ## Data

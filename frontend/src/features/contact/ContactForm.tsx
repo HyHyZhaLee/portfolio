@@ -19,7 +19,7 @@ const FIELD_ORDER: readonly VisibleField[] = ['name', 'email', 'message'];
 
 const labelClass = 'font-ui text-label font-semibold text-ink';
 const inputClass =
-    'w-full rounded-control border border-line bg-surface px-3.5 py-3 font-ui text-base text-ink aria-invalid:border-status-wake aria-invalid:border-2';
+    'w-full rounded-control border border-line bg-surface-raised px-3.5 py-3 font-ui text-base text-ink aria-invalid:border-status-wake aria-invalid:border-2';
 const errorClass = 'font-ui text-caption text-ink';
 const buttonClass =
     'inline-flex items-center justify-center gap-2 rounded-control border-[1.5px] px-5 py-3.5 font-ui text-base leading-none font-semibold transition-colors';
