@@ -6,16 +6,11 @@ import type { CaseStudy } from '../content/caseStudies/types';
 import { t } from '../i18n/en';
 
 /**
- * One Featured work row. The title link stretches over the whole row, so the row is one click target (AC-3). A row the
- * selected skill used is tinted and gets a left bar; the other rows keep full contrast (AC-7, AC-8).
+ * One Featured work row. The title link stretches over the whole row, so the row is one click target (AC-3).
  */
-export function WorkRow({ study, highlighted }: { study: CaseStudy; highlighted: boolean }) {
+export function WorkRow({ study }: { study: CaseStudy }) {
     return (
-        <li
-            data-state={highlighted ? 'match' : undefined}
-            className='group relative -mx-3.5 grid gap-3.5 rounded-xl px-3.5 py-5.5 transition duration-200 before:absolute before:inset-x-3.5 before:top-0 before:h-px before:bg-line last:after:absolute last:after:inset-x-3.5 last:after:bottom-0 last:after:h-px last:after:bg-line hover:bg-surface-raised has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-accent data-[state=match]:bg-accent-soft md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-8'
-        >
-            {highlighted && <span aria-hidden='true' className='absolute inset-y-3 left-0 w-1 rounded-full bg-accent' />}
+        <li className='group relative -mx-3.5 grid gap-3.5 rounded-xl px-3.5 py-5.5 transition duration-200 before:absolute before:inset-x-3.5 before:top-0 before:h-px before:bg-line last:after:absolute last:after:inset-x-3.5 last:after:bottom-0 last:after:h-px last:after:bg-line hover:bg-surface-raised has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-accent md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-8'>
             <div>
                 <h4 className='text-title font-bold'>
                     <Link

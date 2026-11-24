@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import { Link } from 'react-router';
 import { Section } from '../components/Section';
 import { getTestIdProp, TestIds } from '../config/test-ids.config';
@@ -6,12 +6,6 @@ import { caseStudies } from '../content/caseStudies';
 import { caseStudyPath } from '../content/caseStudies/slugs';
 import { skillGroups, skillsIntro, type Skill } from '../content/skills';
 import { t } from '../i18n/en';
-
-interface SkillsProps {
-    selected: Skill | null;
-    /** Selects `skill`, or clears the selection when `skill` is already selected (FR-8). */
-    onToggle: (skill: Skill) => void;
-}
 
 /** ", " between items, " and " before the last, "." after it. */
 function separator(index: number, count: number): string {
@@ -25,7 +19,13 @@ function countLabel(count: number): string {
     return count === 1 ? t('skills.countOne') : t('skills.countMany', { count });
 }
 
-export function Skills({ selected, onToggle }: SkillsProps) {
+/** Selecting a skill lists the case studies that used it under its group; selecting it again clears the list (FR-8). */
+export function Skills() {
+    const [selected, setSelected] = useState<Skill | null>(null);
+    const onToggle = (skill: Skill) => {
+        setSelected((current) => (current === skill ? null : skill));
+    };
+
     return (
         <Section id='skills' heading={t('skills.heading')} intro={skillsIntro}>
             {skillGroups.map((group) => {
