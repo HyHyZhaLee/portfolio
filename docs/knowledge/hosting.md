@@ -48,6 +48,12 @@ Facts about Vercel, Render, and Neon observed on this site's own projects. Versi
 - **Verified**: one cold and one warm request at 08:02 UTC, 17 minutes after the previous request; 2026-11-24
 - **Discovered in**: PF-023
 
+### Maven Central rate-limits Render's shared build machines
+- **Rule / Behavior**: Render builds Docker images on shared machines, and Maven Central answered their jar downloads with `Received status code 429 from server: Too Many Requests` (`repo.maven.apache.org`), failing `./gradlew bootJar` in the image build. The first deploy of the day passed and the next two failed, so it depends on other traffic from the same addresses. Resolving from Google's mirror of Maven Central (`https://maven-central.storage-download.googleapis.com/maven2/`) first, and caching the jars in the image's dependency layer, avoids it.
+- **Source**: the Render build log of deploy `dep-dc2lm6brjlhs73d3tjo0`; `backend/settings.gradle.kts`, `backend/build.gradle.kts`, `backend/Dockerfile`
+- **Verified**: two failed deploys at 09:39 and 10:30 UTC; a cache-free local build then downloaded all 566 files from the mirror; 2026-11-24
+- **Discovered in**: PF-024
+
 ## Neon
 
 ### The JDBC URL comes from the direct connection string

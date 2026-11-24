@@ -160,6 +160,12 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Verified**: with the output declared, overwriting the snapshot made `make openapi` rerun `testIT` and restore an identical file, and a second run was UP-TO-DATE; 2026-11-22
 - **Discovered in**: PF-002
 
+### `gradle dependencies` downloads POM files, not jars
+- **Rule / Behavior**: `./gradlew dependencies` resolves each configuration's graph, which needs only the POM metadata, so a Docker layer that runs it holds no jars and the next step downloads them all. A task that declares the configurations as inputs (`inputs.files(files(configurations.compileClasspath, …))`) makes Gradle download the artifacts before it runs, and a later `--offline` build proves nothing is missing.
+- **Source**: `backend/build.gradle.kts` (`downloadDependencies`), `backend/Dockerfile`
+- **Verified**: the image build's `bootJar` step downloaded jars after the `dependencies` layer; with `downloadDependencies` the `--offline` `bootJar` step passes; 2026-11-24
+- **Discovered in**: PF-024
+
 ### Gradle `--rerun` applies to one task
 - **Rule / Behavior**: `--rerun` is an option of the task named just before it, not of the whole build: `gradlew testUnit testIT --rerun check` reran only `testIT` and left `testUnit` UP-TO-DATE. Put `--rerun` after each task that must run again (`testUnit --rerun testIT --rerun`).
 - **Source**: `./backend/gradlew -p backend …` with Gradle 9.9.2

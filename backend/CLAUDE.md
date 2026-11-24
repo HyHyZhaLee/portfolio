@@ -8,7 +8,7 @@
 |---|---|
 | Language | Java 21: records, sealed types, pattern matching, `var`, virtual threads |
 | Framework | Spring Boot 4.2.0 (the Spring Initializr default when PF-002 generated the package): Spring Framework 7, Spring Security 7, Hibernate 7, Jackson 3 |
-| Build | Gradle 9.9 wrapper in `backend/`, Kotlin DSL; Spotless with palantir-java-format for formatting, JaCoCo for coverage |
+| Build | Gradle 9.9 wrapper in `backend/`, Kotlin DSL; Spotless with palantir-java-format for formatting, JaCoCo for coverage; plugins and libraries resolve from Google's Maven Central mirror first, then the Plugin Portal or Maven Central (PF-024) |
 | Database | PostgreSQL 17 (Neon in production, Docker locally), Flyway migrations, JPA with `ddl-auto: validate` |
 | External services | Resend (email over HTTPS) behind the `EmailSender` port; the GitHub REST API behind `GitHubClient`; both through `RestClient` with explicit timeouts |
 | Resilience and limits | Resilience4j (retry for email, circuit breaker for GitHub), Caffeine caches, Bucket4j rate limits |
@@ -128,7 +128,7 @@ A delivery failure is the owner's problem, not the visitor's: the message is saf
 ```
 backend/
 ├── build.gradle.kts · settings.gradle.kts · gradlew
-├── Dockerfile · .dockerignore           # multi-stage build on pinned Temurin 21 images; JVM flags sized for Render Free
+├── Dockerfile · .dockerignore           # multi-stage build on pinned Temurin 21 images; jars in a cached layer, then an offline bootJar (PF-024); JVM flags sized for Render Free
 ├── openapi/openapi.json                 # committed API contract snapshot
 └── src/
     ├── main/java/com/huygialy/portfolio/
