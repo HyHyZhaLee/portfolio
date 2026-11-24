@@ -30,7 +30,7 @@ export const profile: Profile = {
     name: 'Will Ly',
     title: 'Full-stack Software Engineer',
     where: 'Ho Chi Minh City, working remotely with a U.S. healthtech team',
-    pitch: 'I take ownership from idea to production, building reliable, well-tested products across backend and frontend in fast-moving Agile teams.',
+    pitch: 'I build and ship reliable, well-tested software across backend and frontend, owning features end to end in Agile teams.',
     stack: ['Java 21', 'Spring Boot', 'TypeScript', 'React', 'PostgreSQL', 'AWS'],
     proofPoints: [
         { claim: 'Event-driven AWS integration in production', where: 'Frontera integration, v1.0.0 in May 2026', slug: 'ai-assessment-integration' },
