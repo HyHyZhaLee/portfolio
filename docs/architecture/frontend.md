@@ -22,7 +22,7 @@ A component renders one thing. A hook encapsulates one concern: one query, one m
 
 ### 3. Content is data
 
-Every word of portfolio copy lives in a typed file under `src/content/`: the profile, skills, experience, how-I-work principles, education, featured-work cards, one file per case study in `content/caseStudies/{slug}.ts`, and the fallback repository list. The types make a missing field a compile error. Only text the owner has reviewed goes in; it follows the disclosure tiers and matches the CV (Non-Negotiable 2). Sections render content and own no copy. Changing what the site says is a content change, reviewed against `.claude/rules/content-conventions.md`, not a code change.
+Every word of portfolio copy lives in a typed file under `src/content/`: the profile, skills, experience, how-I-work principles, education, featured-work cards, and one file per case study in `content/caseStudies/{slug}.ts`. The types make a missing field a compile error. Only text the owner has reviewed goes in; it follows the disclosure tiers and matches the CV (Non-Negotiable 2). Sections render content and own no copy. Changing what the site says is a content change, reviewed against `.claude/rules/content-conventions.md`, not a code change.
 
 ### 4. Static sections, API-backed features
 

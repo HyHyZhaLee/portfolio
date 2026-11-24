@@ -38,7 +38,7 @@ Rows whose ticket has not run yet are planned.
 ## 4. Product rules
 
 ### SITE-001: Content never waits for the API
-Every route renders its content from static files. API-backed parts (counter, open source, contact, status dot) show a loading state, then their data or a quiet fallback. Non-Negotiable 1.
+Every route renders its content from static files. API-backed parts (counter, contact, status dot) show a loading state, then their data or a quiet fallback. Non-Negotiable 1.
 
 ### SITE-002: What counts as a visit
 A page view is counted when the frontend posts it to `POST /api/v1/visits` from a production build. Each route the visitor opens counts as one view: the first load, the home page, and each case study; anchor jumps within a page and query changes do not count (PF-005 D1). Requests whose user agent looks like a bot are dropped. Views are not counted when the visitor has opened `?notrack=1` on that browser (the owner's devices) or when Global Privacy Control is on; opening `?notrack=0` removes the opt-out and re-enables tracking in that browser (PF-005 D5). Where the browser blocks storage, the opt-out cannot be remembered, so it lasts until the page reloads. Each client address may record at most 30 views per minute, whatever its user agent: the limit is checked before the bot filter, so bot-flagged requests count toward it too (PF-005 D7). "Unique visitors" is the number of distinct visitor hashes. Non-Negotiable 3.
@@ -56,7 +56,7 @@ The owner removed the Open source section from the home page on 2026-11-24 (PF-0
 No raw IP address, full user agent, or full referrer URL is stored or logged; the referrer is kept as its host only. The site sets no tracking cookies. The footer says so in one line.
 
 ### SITE-007: Public content follows the disclosure tiers
-Every public text follows section 5. Nothing is invented, and facts match the master CV, which is also the public CV PDF (full length, without the phone). Non-Negotiable 2.
+Every public text follows section 5. Nothing is invented, and facts match the master CV. The site does not publish the CV: the owner sends it and links the portfolio from it (PF-012). Non-Negotiable 2.
 
 ## 5. Disclosure tiers
 

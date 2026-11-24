@@ -39,5 +39,5 @@ flowchart LR
 
 - The frontend's content is static, so a sleeping or failing backend only delays the counter and the contact form (Non-Negotiable 1).
 - The first visit request doubles as a warm-up call while the visitor reads.
-- GitHub failures fall back to cached or static data; email failures are retried by a scheduled job.
+- GitHub failures fall back to the backend's last good result; email failures are retried by a scheduled job.
 - Everything is containerized and configured by environment variables, so the backend can move to another host without code changes.
