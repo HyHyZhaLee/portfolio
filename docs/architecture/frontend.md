@@ -18,7 +18,7 @@ A component renders one thing. A hook encapsulates one concern: one query, one m
 
 ### 2. Reuse shared primitives first
 
-`src/components/` holds the primitives every section uses: `Section`, `ChipList`, `ButtonLink`, and `StatusDot` (PF-003), `ErrorNote` (PF-006, first caller the contact form), then `Card` and `Skeleton` when their first caller needs them (PF-007). Reach for them before writing raw markup with a new set of classes. Add a primitive only when a second caller needs it.
+`src/components/` holds the primitives every section uses: `Section`, `ChipList`, `ButtonLink`, and `StatusDot` (PF-003), `ErrorNote` (PF-006, first caller the contact form), then `Card` and `Skeleton` when their first caller needs them (PF-007). Reach for them before writing raw markup with a new set of classes. Add a primitive only when a second caller needs it. Shared hooks follow the same rule: `useModalDialog` (PF-015) owns a native modal `<dialog>`'s open state, `showModal`, the `close` sync, and the backdrop close for both the mobile menu and the certificate viewer.
 
 ### 3. Content is data
 
@@ -52,7 +52,7 @@ Forms use react-hook-form with a zod schema that mirrors the server's limits, so
 
 ### 10. Every interactive element is testable and accessible
 
-Each interactive element carries a `data-test-id` through `getTestIdProp(TestIds.{feature}.{element})`, plus an accessible name: a label, an `aria-label`, or visible text. Headings follow the page outline, images have meaningful `alt` text, focus stays visible, colour contrast meets WCAG AA in the light colour scheme (the only one since PF-003 D9), and motion respects `prefers-reduced-motion`. Tests find elements by test ID or role, never by CSS class or DOM structure. The Playwright smoke suite in `frontend/e2e/` follows the same rule (`testIdAttribute` is `data-test-id`), runs against `vite preview` with every API call aborted, and is run by `pnpm test:e2e` and the `e2e` workflow; Vitest collects only `src/**/*.test.{ts,tsx}`.
+Each interactive element carries a `data-test-id` through `getTestIdProp(TestIds.{feature}.{element})`, plus an accessible name: a label, an `aria-label`, or visible text. Headings follow the page outline, images have meaningful `alt` text, focus stays visible, colour contrast meets WCAG AA in the light colour scheme (the only one since PF-003 D9), and motion respects `prefers-reduced-motion`. Layout works from 320 px to 2560 px without the page scrolling sideways, in the PF-015 tiers (640, 768, 1024, 1280, and scaling from 1600); on coarse pointers every standalone control has a hit area of at least 44 × 44 px (`touch-target`). Motion is CSS-first and never hides content: anything that animates opacity is guarded so that, without support, under reduced motion, or in print, the content simply shows. Tests find elements by test ID or role, never by CSS class or DOM structure. The Playwright smoke suite in `frontend/e2e/` follows the same rule (`testIdAttribute` is `data-test-id`), runs against `vite preview` with every API call aborted, and is run by `pnpm test:e2e` and the `e2e` workflow; Vitest collects only `src/**/*.test.{ts,tsx}`.
 
 ### 11. UI strings are translatable
 
@@ -132,6 +132,7 @@ Run this before writing a plan. Record anything that fails as a risk or a decisi
 
 - [ ] Loading, fallback, and error states designed for each new API-backed view
 - [ ] Every interactive element has a `data-test-id` and an accessible name
+- [ ] Checked at 320, 768, 1024, and 1366 px wide with no page-level horizontal scroll; standalone controls have a 44 px hit area on touch; nothing stays hidden without motion support
 - [ ] Every UI string is an i18n key; every route sets its title and meta description
 
 ### Fallback, privacy, disclosure

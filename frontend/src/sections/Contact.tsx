@@ -34,9 +34,9 @@ function ExternalIcon() {
  */
 export function Contact() {
     return (
-        <section id='contact' aria-labelledby='contact-heading' className='border-t border-line py-16 lg:py-22'>
-            <div className='wrap grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16'>
-                <div className='flex flex-col gap-7 lg:justify-between'>
+        <section id='contact' aria-labelledby='contact-heading' className='border-t border-line py-10 sm:py-16 lg:py-22'>
+            <div className='wrap grid gap-8 sm:gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16'>
+                <div className='reveal flex flex-col gap-7 lg:justify-between'>
                     <div>
                         <h2 id='contact-heading' className='text-section font-bold'>
                             {t('contact.heading')}
@@ -57,7 +57,7 @@ export function Contact() {
                         ))}
                     </ul>
                 </div>
-                <div className='rounded-panel border border-line bg-surface-raised p-5 shadow-panel sm:p-7'>
+                <div className='reveal rounded-panel border border-line bg-surface-raised p-5 shadow-panel sm:p-7'>
                     <Suspense fallback={<div aria-hidden className='min-h-[28rem]' />}>
                         <ContactForm />
                     </Suspense>

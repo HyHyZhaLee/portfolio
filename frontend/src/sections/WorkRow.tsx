@@ -5,12 +5,21 @@ import { caseStudyPath } from '../content/caseStudies/slugs';
 import type { CaseStudy } from '../content/caseStudies/types';
 import { t } from '../i18n/en';
 
+/** A small decorative chevron after the title, standing in for the details label below 640px. */
+function ChevronIcon() {
+    return (
+        <svg aria-hidden='true' viewBox='0 0 16 16' className='ml-1.5 inline-block size-4 align-[-0.1em] text-accent sm:hidden'>
+            <path d='m6 3 5 5-5 5' fill='none' stroke='currentColor' strokeWidth='1.75' strokeLinecap='round' strokeLinejoin='round' />
+        </svg>
+    );
+}
+
 /**
  * One Featured work row. The title link stretches over the whole row, so the row is one click target (AC-3).
  */
 export function WorkRow({ study }: { study: CaseStudy }) {
     return (
-        <li className='group relative -mx-3.5 grid gap-3.5 rounded-xl px-3.5 py-5.5 transition duration-200 before:absolute before:inset-x-3.5 before:top-0 before:h-px before:bg-line last:after:absolute last:after:inset-x-3.5 last:after:bottom-0 last:after:h-px last:after:bg-line hover:bg-surface-raised has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-accent md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-8'>
+        <li className='reveal group relative -mx-3.5 grid gap-3.5 rounded-xl px-3.5 py-4 transition-colors duration-200 sm:py-5.5 before:absolute before:inset-x-3.5 before:top-0 before:h-px before:bg-line last:after:absolute last:after:inset-x-3.5 last:after:bottom-0 last:after:h-px last:after:bg-line hover:bg-surface-raised has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-accent md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-8'>
             <div>
                 <h4 className='text-title font-bold'>
                     <Link
@@ -20,6 +29,7 @@ export function WorkRow({ study }: { study: CaseStudy }) {
                     >
                         {study.title}
                     </Link>
+                    <ChevronIcon />
                 </h4>
                 <p className='mt-1.5 font-ui text-sm leading-snug text-muted'>{study.role}</p>
             </div>
@@ -31,7 +41,7 @@ export function WorkRow({ study }: { study: CaseStudy }) {
                 </p>
                 <div className='mt-3.5 flex flex-wrap items-center justify-between gap-3'>
                     <ChipList items={study.chips} />
-                    <span aria-hidden='true' className='font-ui text-sm font-semibold text-accent underline-offset-4 group-hover:underline'>
+                    <span aria-hidden='true' className='hidden font-ui text-sm font-semibold sm:inline text-accent underline-offset-4 group-hover:underline'>
                         {t('work.viewDetails')}
                     </span>
                 </div>

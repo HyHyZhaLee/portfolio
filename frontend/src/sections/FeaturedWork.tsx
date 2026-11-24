@@ -8,9 +8,11 @@ export function FeaturedWork() {
     return (
         <Section id='work' heading={t('work.heading')} intro={featuredWorkIntro}>
             {featuredWork.map((group) => (
-                <div key={group.heading} className='not-first:mt-13'>
-                    <h3 className='text-xl font-bold'>{group.heading}</h3>
-                    <p className='mt-1 font-ui text-label text-muted'>{group.subheading}</p>
+                <div key={group.heading} className='not-first:mt-10 sm:not-first:mt-13'>
+                    <div className='reveal'>
+                        <h3 className='text-xl font-bold'>{group.heading}</h3>
+                        <p className='mt-1 font-ui text-label text-muted'>{group.subheading}</p>
+                    </div>
                     <ul className='mt-4.5'>
                         {group.slugs.map((slug) => (
                             <WorkRow key={slug} study={caseStudies[slug]} />

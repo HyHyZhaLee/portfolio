@@ -8,6 +8,8 @@ export const TestIds = {
         homeLink: 'header-home-link',
         navLink: 'header-nav-link',
         menuButton: 'header-menu-button',
+        menuDialog: 'header-menu-dialog',
+        closeButton: 'header-close-button',
     },
     home: {
         heading: 'home-title-heading',
@@ -48,6 +50,7 @@ export const TestIds = {
         backLink: 'case-study-back-link',
         nextLink: 'case-study-next-link',
         glanceLink: 'case-study-glance-link',
+        glanceToggle: 'case-study-glance-toggle',
         diagram: 'case-study-diagram-figure',
         diagramScroll: 'case-study-diagram-scroll-region',
         diagramStep: 'case-study-diagram-step-button',

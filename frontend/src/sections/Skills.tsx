@@ -31,14 +31,17 @@ export function Skills() {
             {skillGroups.map((group) => {
                 const groupSelection = selected !== null && group.skills.includes(selected) ? selected : null;
                 return (
-                    <div key={group.name} className='grid gap-3 border-t border-line py-4.5 last-of-type:border-b md:grid-cols-[11rem_minmax(0,1fr)] md:gap-6'>
+                    <div
+                        key={group.name}
+                        className='reveal grid gap-3 border-t border-line py-4 sm:py-4.5 last-of-type:border-b md:grid-cols-[11rem_minmax(0,1fr)] md:gap-6'
+                    >
                         <h3 className='pt-1.5 text-base font-semibold'>{group.name}</h3>
                         <div className='min-w-0'>
-                            <ul className='flex flex-wrap gap-1.5'>
+                            <ul className='flex flex-wrap gap-1.5 pointer-coarse:gap-2.5'>
                                 {group.skills.map((skill) => (
                                     <li key={skill.name}>
                                         {skill.usedIn.length === 0 ? (
-                                            <span className='inline-flex items-center rounded-full border border-line bg-surface-raised px-3 py-2 text-sm leading-none font-medium text-ink'>
+                                            <span className='inline-flex items-center rounded-2xl border border-line bg-surface-raised px-3 py-2 text-left text-sm leading-none font-medium text-ink'>
                                                 {skill.name}
                                             </span>
                                         ) : (
@@ -48,7 +51,7 @@ export function Skills() {
                                                 onClick={() => {
                                                     onToggle(skill);
                                                 }}
-                                                className='group inline-flex items-center gap-2 rounded-full border border-line bg-surface-raised px-3 py-2 text-sm leading-none font-medium text-ink hover:border-ink aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-accent-ink'
+                                                className='group touch-target inline-flex items-center gap-2 rounded-2xl text-left border border-line bg-surface-raised px-3 py-2 text-sm leading-none font-medium text-ink hover:border-ink aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-accent-ink'
                                                 {...getTestIdProp(TestIds.skills.skillButton)}
                                             >
                                                 <span>{skill.name}</span>

@@ -1,5 +1,6 @@
-import { useId, useRef, useState } from 'react';
+import { useId } from 'react';
 import { Section } from '../components/Section';
+import { useModalDialog } from '../components/useModalDialog';
 import { getTestIdProp, TestIds } from '../config/test-ids.config';
 import { awards, degrees, type Certificate, type EducationItem } from '../content/education';
 import { t, type MessageKey } from '../i18n/en';
@@ -14,36 +15,24 @@ const groups: readonly { heading: MessageKey; items: readonly EducationItem[] }[
  * returns focus to the button; a click on the backdrop closes it too. The image loads only once the dialog opens.
  */
 function CertificateViewer({ title, certificate }: { title: string; certificate: Certificate }) {
-    const dialogRef = useRef<HTMLDialogElement>(null);
-    const [open, setOpen] = useState(false);
+    const { isOpen, open, close, dialogRef, dialogProps } = useModalDialog();
     const headingId = useId();
 
     return (
         <>
             <button
                 type='button'
-                onClick={() => {
-                    setOpen(true);
-                    dialogRef.current?.showModal();
-                }}
-                className='mt-1.5 font-ui text-sm font-semibold text-accent underline-offset-4 hover:underline'
+                onClick={open}
+                className='touch-target mt-1.5 font-ui text-sm font-semibold text-accent underline-offset-4 hover:underline'
                 {...getTestIdProp(TestIds.education.certificateButton)}
             >
                 {t('education.viewCertificate')}
                 <span className='sr-only'>: {title}</span>
             </button>
             <dialog
-                ref={dialogRef}
                 aria-labelledby={headingId}
-                onClose={() => {
-                    setOpen(false);
-                }}
-                onClick={(event) => {
-                    // The image and header fill the dialog, so a click that lands on the dialog itself is on the backdrop.
-                    if (event.target === event.currentTarget) {
-                        event.currentTarget.close();
-                    }
-                }}
+                ref={dialogRef}
+                {...dialogProps}
                 className='m-auto w-[min(64rem,calc(100vw-2rem))] overflow-hidden rounded-panel border border-line bg-surface-raised text-ink shadow-panel backdrop:bg-ink/70'
                 {...getTestIdProp(TestIds.education.certificateDialog)}
             >
@@ -53,16 +42,14 @@ function CertificateViewer({ title, certificate }: { title: string; certificate:
                     </h2>
                     <button
                         type='button'
-                        onClick={() => {
-                            dialogRef.current?.close();
-                        }}
+                        onClick={close}
                         className='rounded-control border border-line px-3 py-1.5 font-ui text-label font-medium hover:border-ink'
                         {...getTestIdProp(TestIds.education.certificateClose)}
                     >
                         {t('education.closeCertificate')}
                     </button>
                 </div>
-                {open && (
+                {isOpen && (
                     <img
                         src={certificate.src}
                         alt={certificate.alt}
@@ -86,7 +73,7 @@ export function Education() {
                         {group.items.map((item) => (
                             <li
                                 key={item.title}
-                                className='grid gap-1 border-t border-line py-4 last:border-b md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-8'
+                                className='reveal grid gap-1 border-t border-line py-4 last:border-b md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-8'
                             >
                                 <h4 className='text-base leading-snug font-normal'>{item.title}</h4>
                                 <div>

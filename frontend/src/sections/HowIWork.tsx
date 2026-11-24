@@ -18,9 +18,9 @@ function spanClass(index: number, count: number): string {
 export function HowIWork() {
     return (
         <Section id='how-i-work' heading={t('howIWork.heading')} intro={howIWorkIntro}>
-            <div className='grid gap-8 md:grid-cols-2 xl:grid-cols-6'>
+            <div className='grid gap-6 sm:gap-8 md:grid-cols-2 xl:grid-cols-6'>
                 {principles.map((principle, index) => (
-                    <article key={principle.title} className={spanClass(index, principles.length)}>
+                    <article key={principle.title} className={`reveal ${spanClass(index, principles.length)}`}>
                         <h3 className='text-title font-bold'>{principle.title}</h3>
                         {principle.body && <p className='mt-2'>{principle.body}</p>}
                         {principle.example && <p className='mt-3 border-l-2 border-line pl-3.5 font-ui text-sm leading-snug text-muted'>{principle.example}</p>}

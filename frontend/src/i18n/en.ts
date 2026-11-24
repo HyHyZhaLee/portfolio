@@ -17,7 +17,8 @@ const en = {
     'nav.skills': 'Skills',
     'nav.experience': 'Experience',
     'nav.contact': 'Contact',
-    'nav.menu': 'Menu',
+    'nav.openMenu': 'Open menu',
+    'nav.closeMenu': 'Close menu',
     'nav.brand': 'Portfolio',
     'nav.home': '{name} portfolio, home',
 
@@ -116,6 +117,8 @@ const en = {
 
     'caseStudy.back': 'All work',
     'caseStudy.glance': 'At a glance',
+    'caseStudy.glanceMore': 'More details',
+    'caseStudy.glanceLess': 'Fewer details',
     'caseStudy.role': 'Role',
     'caseStudy.period': 'Period',
     'caseStudy.team': 'Team',
