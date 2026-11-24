@@ -1,44 +1,48 @@
-import { todo, todoHref } from '../placeholder';
 import type { CaseStudy } from './types';
 
 export const postgresRlsMultiTenancy: CaseStudy = {
     slug: 'postgres-rls-multi-tenancy',
-    title: todo('postgres-rls-multi-tenancy title', 6),
-    metaDescription: todo('postgres-rls-multi-tenancy meta description', 25),
-    angle: todo('postgres-rls-multi-tenancy angle', 24),
-    role: todo('postgres-rls-multi-tenancy role', 8),
-    problemLine: todo('postgres-rls-multi-tenancy problem line', 13),
-    outcomeLine: todo('postgres-rls-multi-tenancy outcome line', 9),
-    chips: [todo('postgres-rls-multi-tenancy chip 1'), todo('postgres-rls-multi-tenancy chip 2'), todo('postgres-rls-multi-tenancy chip 3')],
-    period: todo('postgres-rls-multi-tenancy period'),
-    team: todo('postgres-rls-multi-tenancy team', 10),
-    stack: [
-        todo('postgres-rls-multi-tenancy stack 1'),
-        todo('postgres-rls-multi-tenancy stack 2'),
-        todo('postgres-rls-multi-tenancy stack 3'),
-        todo('postgres-rls-multi-tenancy stack 4'),
+    title: 'TPMA Multi-tenancy - PostgreSQL Row-Level Security',
+    metaDescription:
+        'How I implemented database-enforced tenant isolation with PostgreSQL Row-Level Security and a Sequelize connection hook, so each provider organization can only read and write its own records.',
+    angle: 'Making the database itself enforce tenant isolation.',
+    role: "Implemented under the tech lead's shared-schema strategy",
+    problemLine: "Several provider organizations share one database, so each one's clinical records must stay invisible to the others.",
+    outcomeLine: 'Tenant ownership on ~90 tables; shipped to production with TPMA/DCA 1.0.0 in July 2026.',
+    chips: ['PostgreSQL Row-Level Security', 'Node.js and Express', 'Sequelize'],
+    period: '02/2026 – 03/2026',
+    team: "Implemented under the tech lead's shared-schema strategy; a teammate finished the production rollout.",
+    stack: ['Node.js', 'TypeScript', 'Express', 'Sequelize', 'PostgreSQL'],
+    outcomes: [
+        'RLS policies deployed to UAT so each organization sees only its own records.',
+        'Tenant ownership added to ~90 tables, with the first 20 backfilled and triggers that reject records saved for the wrong tenant.',
+        'Shipped to production with the TPMA/DCA 1.0.0 release in July 2026.',
     ],
-    outcomes: [todo('postgres-rls-multi-tenancy outcome 1', 7), todo('postgres-rls-multi-tenancy outcome 2', 7)],
-    links: [{ label: todo('postgres-rls-multi-tenancy link 1 label'), href: todoHref('postgres-rls-multi-tenancy-link-1') }],
-    context: [todo('postgres-rls-multi-tenancy context', 70)],
-    problem: [todo('postgres-rls-multi-tenancy problem', 70)],
-    roleAndScope: [todo('postgres-rls-multi-tenancy role and scope', 40)],
+    links: [],
+    context: [
+        "TPMA/DCA 2.0 is the treatment-planning and session data-collection system for ABA-therapy providers. It serves several provider organizations, called tenants, from one shared PostgreSQL database. Each tenant's clinical records must stay invisible to the others.",
+    ],
+    problem: [
+        'If isolation depends on every developer remembering a tenant filter in every query, one forgotten filter becomes a data leak. With 90-odd tables and many endpoints, that is a real risk. The tech lead chose a shared schema protected by Row-Level Security (RLS), so the database enforces the rule even when application code gets it wrong. My job was to make that strategy work.',
+    ],
+    roleAndScope: [
+        "I implemented tenant isolation under the tech lead's shared-schema strategy and deployed it to UAT. The strategy itself was the tech lead's. I do not claim the original design. After I handed it over, a teammate finished the production rollout.",
+    ],
     built: [
-        todo('postgres-rls-multi-tenancy built item 1', 20),
-        todo('postgres-rls-multi-tenancy built item 2', 20),
-        todo('postgres-rls-multi-tenancy built item 3', 20),
+        'Row-Level Security policies. Each organization can only read and write its own records.',
+        'Reversible migrations. They added tenant ownership to ~90 tables and backfilled the first 20, with database triggers that reject records saved for the wrong tenant.',
+        "A Sequelize connection hook. In the Node.js/Express API, it applies the signed-in user's tenant to every database request.",
+        'A controlled bypass for background jobs. A dedicated PostgreSQL role is allowed to skip tenant isolation.',
+        'A feature-flag kill switch for the rollout, and a tenant-aware Salesforce appointment import.',
     ],
     deepDive: {
-        topic: todo('postgres-rls-multi-tenancy deep dive topic', 7),
-        paragraphs: [todo('postgres-rls-multi-tenancy deep dive paragraph 1', 80), todo('postgres-rls-multi-tenancy deep dive paragraph 2', 60)],
+        topic: 'A deliberate bypass for background jobs',
+        paragraphs: [
+            'Background jobs have no signed-in user, so they use the bypass role. That is a deliberate hole, so it is a single named role instead of scattered exceptions.',
+        ],
     },
-    outcome: [todo('postgres-rls-multi-tenancy outcome', 40)],
-    learned: [todo('postgres-rls-multi-tenancy lessons', 40)],
-    tech: [
-        todo('postgres-rls-multi-tenancy tech 1'),
-        todo('postgres-rls-multi-tenancy tech 2'),
-        todo('postgres-rls-multi-tenancy tech 3'),
-        todo('postgres-rls-multi-tenancy tech 4'),
-        todo('postgres-rls-multi-tenancy tech 5'),
+    outcome: [
+        'The first version was built and deployed to UAT, then handed over. It shipped to production in July 2026 with the TPMA/DCA 1.0.0 release, alongside the web port.',
     ],
+    tech: ['Node.js', 'TypeScript', 'Express', 'Sequelize', 'PostgreSQL', 'Row-Level Security', 'PL/pgSQL triggers'],
 };

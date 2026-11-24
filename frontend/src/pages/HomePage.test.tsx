@@ -11,7 +11,8 @@ import { skillGroups } from '../content/skills';
 import { server } from '../test/server';
 import { renderRoute } from '../test/renderWithProviders';
 
-const allSkills = skillGroups.flatMap((group) => group.skills);
+// A skill with no case study renders as a plain label, not a button.
+const allSkills = skillGroups.flatMap((group) => group.skills).filter((skill) => skill.usedIn.length > 0);
 const multiSlugSkills = allSkills.filter((skill) => skill.usedIn.length >= 2);
 const [skillA, skillB] = multiSlugSkills;
 if (!skillA || !skillB) throw new Error('content needs two skills used in at least two case studies');
@@ -30,6 +31,17 @@ function rowStates(): (string | null)[] {
 }
 
 describe('HomePage', () => {
+    it('lists a skill without a case study as a plain label, not a button', () => {
+        renderRoute('/');
+
+        const unlinked = skillGroups.flatMap((group) => group.skills).filter((skill) => skill.usedIn.length === 0);
+        expect(unlinked.length).toBeGreaterThan(0);
+        for (const skill of unlinked) {
+            expect(screen.getByText(skill.name)).toBeInTheDocument();
+            expect(screen.getByText(skill.name).closest('button')).toBeNull();
+        }
+    });
+
     it('renders every section at once while the health check fails', () => {
         server.use(http.get('*/actuator/health', () => HttpResponse.error()));
         renderRoute('/');

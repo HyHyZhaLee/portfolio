@@ -1,5 +1,4 @@
 import type { CaseStudySlug } from './caseStudies/slugs';
-import { todo } from './placeholder';
 
 export interface WorkGroup {
     heading: string;
@@ -7,18 +6,19 @@ export interface WorkGroup {
     slugs: readonly CaseStudySlug[];
 }
 
-export const featuredWorkIntro = todo('featured work intro', 16);
+export const featuredWorkIntro =
+    'Five projects from my work at Xolv, then two of my own. Each card opens a case study with the problem, my role and the outcome.';
 
 /** Featured work: the employer's case studies first, then personal projects, in content plan §6.4 order (FR-4). */
 export const featuredWork: readonly WorkGroup[] = [
     {
-        heading: todo('work group 1 heading'),
-        subheading: todo('work group 1 subheading', 8),
+        heading: 'At Xolv',
+        subheading: 'Five studies from healthcare products I worked on',
         slugs: ['ai-assessment-integration', 'scheduling-platform', 'legacy-app-web-port', 'postgres-rls-multi-tenancy', 'client-intake-platform'],
     },
     {
-        heading: todo('work group 2 heading'),
-        subheading: todo('work group 2 subheading', 8),
+        heading: 'My own projects',
+        subheading: 'This site and a university capstone',
         slugs: ['this-site', 'smart-pole'],
     },
 ];

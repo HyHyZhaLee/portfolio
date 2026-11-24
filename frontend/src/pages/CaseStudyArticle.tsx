@@ -25,9 +25,9 @@ export function CaseStudyArticle({ study }: { study: CaseStudy }) {
         { heading: t('caseStudy.problem'), paragraphs: study.problem },
         { heading: t('caseStudy.roleAndScope'), paragraphs: study.roleAndScope },
         { heading: t('caseStudy.built'), points: study.built },
-        { heading: t('caseStudy.deepDive', { topic: study.deepDive.topic }), paragraphs: study.deepDive.paragraphs },
+        ...(study.deepDive ? [{ heading: t('caseStudy.deepDive', { topic: study.deepDive.topic }), paragraphs: study.deepDive.paragraphs }] : []),
         { heading: t('caseStudy.outcome'), paragraphs: study.outcome },
-        { heading: t('caseStudy.learned'), paragraphs: study.learned },
+        ...(study.learned ? [{ heading: t('caseStudy.learned'), paragraphs: study.learned }] : []),
     ];
 
     return (

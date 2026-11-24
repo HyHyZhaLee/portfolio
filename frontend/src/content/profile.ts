@@ -1,5 +1,4 @@
 import type { CaseStudySlug } from './caseStudies/slugs';
-import { todo, todoHref } from './placeholder';
 
 /** A hero claim backed by the case study it links to. */
 export interface ProofPoint {
@@ -13,10 +12,7 @@ export interface Fact {
     value: string;
 }
 
-/**
- * Who the site is about. The name, the title, and the GitHub URLs are real (product guide §2, content plan D6); every
- * other block is a placeholder until PF-012 swaps in the reviewed content pack.
- */
+/** Who the site is about: the owner-reviewed copy for the hero, the About section, and the contact links (PF-012). */
 export interface Profile {
     name: string;
     title: string;
@@ -33,23 +29,26 @@ export interface Profile {
 export const profile: Profile = {
     name: 'Will Ly',
     title: 'Full-stack Software Engineer',
-    where: todo('where line', 12),
-    pitch: todo('hero pitch', 18),
-    stack: [todo('stack 1'), todo('stack 2'), todo('stack 3'), todo('stack 4'), todo('stack 5')],
+    where: 'Ho Chi Minh City, working remotely with a U.S. healthtech team',
+    pitch: 'I build backend services, integrations and web apps for healthcare products, with a focus on reliability and testing.',
+    stack: ['Java 21', 'Spring Boot', 'TypeScript', 'React', 'PostgreSQL', 'AWS'],
     proofPoints: [
-        { claim: todo('proof point 1', 7), where: todo('proof 1 source'), slug: 'ai-assessment-integration' },
-        { claim: todo('proof point 2', 7), where: todo('proof 2 source'), slug: 'postgres-rls-multi-tenancy' },
-        { claim: todo('proof point 3', 7), where: todo('proof 3 source'), slug: 'legacy-app-web-port' },
+        { claim: 'Event-driven AWS integration in production', where: 'Frontera integration, v1.0.0 in May 2026', slug: 'ai-assessment-integration' },
+        { claim: 'PostgreSQL Row-Level Security tenant isolation', where: 'TPMA multi-tenancy, in production July 2026', slug: 'postgres-rls-multi-tenancy' },
+        { claim: 'Test coverage ~20% → 82%', where: 'TPMA/DCA web port, with an 80% CI gate', slug: 'legacy-app-web-port' },
     ],
-    about: [todo('about paragraph 1', 50), todo('about paragraph 2', 55), todo('about paragraph 3', 40)],
+    about: [
+        "I'm a full-stack software engineer at Xolv, a U.S. healthtech company. I build backend services, system integrations and web applications for products that clinicians and families use, across three healthcare products. What I care about most is reliability: tests that run in CI, and fixing a problem at its root instead of patching the symptom.",
+        "I use AI coding assistants such as Claude Code to move faster, and I review and verify every change. I'm also pursuing a Master's in Computer Science at Bach Khoa University.",
+    ],
     facts: [
-        { label: todo('fact 1 label'), value: todo('fact 1', 6) },
-        { label: todo('fact 2 label'), value: todo('fact 2', 8) },
-        { label: todo('fact 3 label'), value: todo('fact 3', 12) },
+        { label: 'Based in', value: 'Ho Chi Minh City, Vietnam' },
+        { label: 'Languages', value: 'English (professional working proficiency), Vietnamese (native)' },
+        { label: 'Studying', value: "Master's in Computer Science, Bach Khoa University (in progress)" },
     ],
     links: {
         github: 'https://github.com/HyHyZhaLee',
-        linkedin: todoHref('linkedin'),
+        linkedin: 'https://www.linkedin.com/in/huygialy',
         repository: 'https://github.com/HyHyZhaLee/portfolio',
     },
     cvPath: '/cv.pdf',

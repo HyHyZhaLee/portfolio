@@ -17,6 +17,22 @@ function emptyStringPaths(value: unknown, path: string): string[] {
     return [];
 }
 
+const allContent = {
+    caseStudies,
+    featuredWorkIntro,
+    featuredWork,
+    howIWorkIntro,
+    principles,
+    skillsIntro,
+    skillGroups,
+    roles,
+    degrees,
+    awards,
+    profile,
+    site,
+    fallbackRepos,
+};
+
 describe('content shape', () => {
     it('references only known slugs', () => {
         const referenced = [
@@ -48,7 +64,7 @@ describe('content shape', () => {
 
     it('has the planned counts of proof points, principles, and roles', () => {
         expect(profile.proofPoints).toHaveLength(3);
-        expect(principles).toHaveLength(6);
+        expect(principles).toHaveLength(5);
         expect(roles).toHaveLength(3);
         expect(roles.filter((role) => role.current)).toHaveLength(1);
     });
@@ -62,22 +78,13 @@ describe('content shape', () => {
     });
 
     it('has no empty or whitespace-only content string', () => {
-        const content = {
-            caseStudies,
-            featuredWorkIntro,
-            featuredWork,
-            howIWorkIntro,
-            principles,
-            skillsIntro,
-            skillGroups,
-            roles,
-            degrees,
-            awards,
-            profile,
-            site,
-            fallbackRepos,
-        };
+        expect(emptyStringPaths(allContent, 'content')).toEqual([]);
+    });
 
-        expect(emptyStringPaths(content, 'content')).toEqual([]);
+    it('has no leftover placeholder text or placeholder link (PF-012)', () => {
+        const serialized = JSON.stringify(allContent);
+
+        expect(serialized).not.toContain('TODO:');
+        expect(serialized).not.toContain('#todo-');
     });
 });
