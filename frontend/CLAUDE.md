@@ -31,6 +31,7 @@ scripts/with-node.sh pnpm --dir frontend check:format     # Prettier; a separate
 scripts/with-node.sh pnpm --dir frontend format
 scripts/with-node.sh pnpm --dir frontend test --run       # add a file path to run one test file
 scripts/with-node.sh pnpm --dir frontend coverage         # branch coverage ≥ 80%
+scripts/with-node.sh pnpm --dir frontend test:e2e         # Playwright smoke suite against the production build, no backend (PF-008); first run: exec playwright install chromium
 scripts/with-node.sh pnpm --dir frontend gen:api          # regenerate src/api/schema.d.ts from the OpenAPI snapshot
 ```
 

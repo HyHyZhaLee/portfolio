@@ -321,3 +321,9 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Source**: `frontend/src/features/visits/useTrackPageView.ts`; `frontend/eslint.config.js`
 - **Verified**: `check:lint` (`--max-warnings 0`) and `check:type` pass; 2026-11-23
 - **Discovered in**: PF-005
+
+### Playwright smoke suite against `vite preview`
+- **Rule / Behavior**: The repository marks elements with `data-test-id`, so `playwright.config.ts` sets `use.testIdAttribute: 'data-test-id'`; without it `getByTestId` times out. `vite preview` has no proxy, so an unmocked `/api/` call would receive `index.html`: abort `/api/` and `/actuator/` requests with `page.route`. Keep Playwright output inside `node_modules` (`outputDir: ./node_modules/.tmp/test-results`) so Prettier, ESLint, and git ignore it, and set `include-hidden-files: true` when uploading that folder because `actions/upload-artifact` skips dot folders. Limit Vitest's `include` to `src/**/*.test.{ts,tsx}` so it never collects `e2e/`.
+- **Source**: `frontend/playwright.config.ts`, `frontend/e2e/smoke.spec.ts`, `.github/workflows/e2e.yml`
+- **Verified**: four tests passed against the production build in about 2 s with Chromium headless shell 159 and `@playwright/test` 1.65.1; the first run failed on `getByTestId` until the attribute was set; 2026-11-24
+- **Discovered in**: PF-008
