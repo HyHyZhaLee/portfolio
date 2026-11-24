@@ -42,6 +42,7 @@ After the first swap went live, the owner asked for these changes; each was appl
 | Name shown twice | The header brand reads "Portfolio" (its accessible name keeps the name); the hero keeps the name |
 | Portrait | The owner's photo, cropped to head and shoulders, 480 px WebP without metadata, in `src/assets/portrait.webp`, beside the name |
 | How I work fits one screen | A six-track grid: three principles in the first row and the last two stretched across the second, so no cell is empty and the section fits a 1440 × 800 window; the spans adapt if the principle count changes |
+| About facts | Languages reads "English, Vietnamese (native)", without the proficiency label |
 | Hero fits one screen | Tighter hero spacing, a 144 px portrait, a wider pitch (three lines), and every proof point on two lines, so the whole hero fits a 1440 × 800 window |
 | Section order | Experience moves right after About; the header links follow the page order and start with About |
 | Skill selection | Selecting a skill still lists its case studies under the skill group, but no longer tints the matching Featured work rows; the selection state moves into `Skills` |
