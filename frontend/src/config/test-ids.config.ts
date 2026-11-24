@@ -7,7 +7,6 @@ export const TestIds = {
     header: {
         homeLink: 'header-home-link',
         navLink: 'header-nav-link',
-        cvLink: 'header-cv-link',
         menuButton: 'header-menu-button',
     },
     home: {
@@ -15,7 +14,6 @@ export const TestIds = {
     },
     hero: {
         workLink: 'hero-work-link',
-        cvLink: 'hero-cv-link',
         contactLink: 'hero-contact-link',
         portrait: 'hero-portrait-image',
         proofLink: 'hero-proof-link',

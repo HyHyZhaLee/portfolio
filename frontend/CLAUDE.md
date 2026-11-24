@@ -49,12 +49,12 @@ scripts/with-node.sh pnpm --dir frontend gen:api          # regenerate src/api/s
 frontend/
 ├── index.html                  # default title, meta description, Open Graph tags
 ├── vercel.json                 # SPA rewrite so /work/:slug loads on a hard refresh
-├── public/                     # not created yet: og-image.png, cv.pdf (public variant), robots.txt, sitemap.xml in PF-012; a favicon has no ticket yet
+├── public/                     # not created yet: og-image.png, robots.txt, sitemap.xml in PF-012; a favicon has no ticket yet
 └── src/
     ├── index.css               # Tailwind import and @theme design tokens
     ├── api/                    # schema.d.ts (generated, never edited) · client.ts · errors.ts
     ├── app/                    # providers, router, layout, useDocumentMeta
-    ├── components/             # shared primitives: Section, ChipList, ButtonLink, StatusDot, DownloadIcon, ErrorNote (PF-006); Card, Skeleton with their first caller
+    ├── components/             # shared primitives: Section, ChipList, ButtonLink, StatusDot, ErrorNote (PF-006); Card, Skeleton with their first caller
     ├── config/                 # test-ids.config.ts
     ├── content/                # typed static content: profile, site, skills, experience, howIWork, education, featuredWork, caseStudies/{slug}.ts
     ├── features/               # API-backed: visits, stats, contact, api-status

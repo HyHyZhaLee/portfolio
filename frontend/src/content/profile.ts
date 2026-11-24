@@ -23,7 +23,6 @@ export interface Profile {
     about: readonly string[];
     facts: readonly Fact[];
     links: { github: string; linkedin: string; repository: string };
-    cvPath: string;
 }
 
 export const profile: Profile = {
@@ -51,5 +50,4 @@ export const profile: Profile = {
         linkedin: 'https://www.linkedin.com/in/huygialy',
         repository: 'https://github.com/HyHyZhaLee/portfolio',
     },
-    cvPath: '/cv.pdf',
 };

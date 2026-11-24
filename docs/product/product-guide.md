@@ -13,7 +13,7 @@ A personal portfolio for Will Ly, Full-stack Software Engineer, used when applyi
 
 | Reader | Needs |
 |---|---|
-| Recruiter | Within 10 seconds on a laptop, without scrolling: who (name, "Full-stack Software Engineer"), what stack, three proof points, and two actions (Download CV, Contact) |
+| Recruiter | Within 10 seconds on a laptop, without scrolling: who (name, "Full-stack Software Engineer"), what stack, three proof points, and two actions (View work, Contact) |
 | Hiring manager | A case study one click from the home page; role and scope stated honestly; the trade-offs behind decisions |
 | Engineer reviewing the code | A clean repository with a README, an architecture overview, tests, and CI |
 
@@ -23,7 +23,7 @@ Rows whose ticket has not run yet are planned.
 
 | Route or section | Content | Ticket |
 |---|---|---|
-| `/` Hero | Portrait, name, title, one-line pitch (≤ 20 words), three proof chips, buttons View work · Download CV · Contact, and a live system panel with the API and database status; the header brand reads "Portfolio" so the name appears once (PF-012, 2026-11-24) | PF-003, PF-012 |
+| `/` Hero | Portrait, name, title, one-line pitch (≤ 20 words), three proof chips, buttons View work · Contact (the Download CV button was dropped on 2026-11-24: the owner links the portfolio from the CV instead), and a live system panel with the API and database status; the header brand reads "Portfolio" so the name appears once (PF-012, 2026-11-24) | PF-003, PF-012 |
 | `/` About | 120–180 words in the first person | PF-003 |
 | `/` Experience | Timeline of roles, right after About (PF-012, 2026-11-24) | PF-003, PF-012 |
 | `/` Featured work | Employer project cards, the capstone, and this site; each links to `/work/<slug>` | PF-003 |

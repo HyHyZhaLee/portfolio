@@ -152,7 +152,7 @@ Rows marked _built_ exist; the others are planned until the ticket named has run
 | `src/i18n/en.ts` | UI strings and `t()` | PF-002, _built_ |
 | `src/test/` | setup, `renderWithProviders`, `renderRoute`, MSW server and handlers | PF-002, _built_ |
 | `src/utils/format.ts` | `formatCount` (grouped digits, fixed to English); `formatInstant` and `formatDate` wait for a caller, because the counter hides the since date (PF-005 D6); periods are display strings in content, so there is no `formatPeriod` (PF-003 P4) | PF-005, _built_ |
-| `src/components/` | shared primitives: `Section`, `ChipList`, `ButtonLink`, `StatusDot`, `DownloadIcon`, `ErrorNote` (PF-006); `Card` and `Skeleton` come with their first caller | PF-003, PF-006, _built_ |
+| `src/components/` | shared primitives: `Section`, `ChipList`, `ButtonLink`, `StatusDot`, `ErrorNote` (PF-006); `Card` and `Skeleton` come with their first caller | PF-003, PF-006, _built_ |
 | `src/content/` | typed static content: `profile`, `site`, `featuredWork`, `howIWork`, `skills`, `experience`, `education`, `caseStudies/{slug}.ts` (the reviewed copy since PF-012) | PF-003, PF-012, _built_ |
 | `src/sections/` | Header, Hero, ProofPoints, About, FeaturedWork, WorkRow, HowIWork, Skills, Experience, Education, Contact, Footer; OpenSource was removed in PF-012 | PF-003, PF-012, _built_ |
 | `src/pages/` | `HomePage`, `CaseStudyPage` (resolves the slug), `CaseStudyArticle`, `GlanceAside`, `NotFoundPage`, `RouteErrorPage` | PF-002, PF-003, _built_ |
