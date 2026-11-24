@@ -24,6 +24,8 @@ A component renders one thing. A hook encapsulates one concern: one query, one m
 
 Every word of portfolio copy lives in a typed file under `src/content/`: the profile, skills, experience, how-I-work principles, education, featured-work cards, and one file per case study in `content/caseStudies/{slug}.ts`. The types make a missing field a compile error. Only text the owner has reviewed goes in; it follows the disclosure tiers and matches the CV (Non-Negotiable 2). Sections render content and own no copy. Changing what the site says is a content change, reviewed against `.claude/rules/content-conventions.md`, not a code change.
 
+**Diagrams** (PF-022): a case study's architecture diagram is data too: zones, nodes, edges, and steps with hand-placed coordinates in `content/diagrams/{slug}.ts`, drawn as inline SVG by the kit in `components/diagram/`. A study without a diagram file renders as before, so a Tier B diagram is added only once the owner approves it. AWS services use the official AWS Architecture Icons, unmodified; everything else uses the shared line glyphs in `components/diagram/glyphs.tsx`, which the hero panel uses too.
+
 ### 4. Static sections, API-backed features
 
 A section in `src/sections/` is presentational and works with no network at all. A feature in `src/features/{feature}/` talks to the API and holds `api.ts` (typed calls), `queries.ts` (TanStack Query hooks and the query-key factory), `types.ts`, `validation.ts` (zod schemas, when there is a form), components, and co-located tests. A feature exposes what others may use through its `index.ts`, and other code imports only from there. The features are `visits`, `stats`, `contact`, `projects`, and `api-status`.

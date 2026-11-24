@@ -48,6 +48,12 @@ export const TestIds = {
         backLink: 'case-study-back-link',
         nextLink: 'case-study-next-link',
         glanceLink: 'case-study-glance-link',
+        diagram: 'case-study-diagram-figure',
+        diagramScroll: 'case-study-diagram-scroll-region',
+        diagramStep: 'case-study-diagram-step-button',
+        diagramLegend: 'case-study-diagram-legend-list',
+        diagramNode: 'case-study-diagram-node-group',
+        diagramEdge: 'case-study-diagram-edge-group',
     },
     apiStatus: {
         panel: 'api-status-panel-region',

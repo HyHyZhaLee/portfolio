@@ -32,7 +32,7 @@ export function WorkRow({ study }: { study: CaseStudy }) {
                 <div className='mt-3.5 flex flex-wrap items-center justify-between gap-3'>
                     <ChipList items={study.chips} />
                     <span aria-hidden='true' className='font-ui text-sm font-semibold text-accent underline-offset-4 group-hover:underline'>
-                        {t('work.readCaseStudy')}
+                        {t('work.viewDetails')}
                     </span>
                 </div>
             </div>

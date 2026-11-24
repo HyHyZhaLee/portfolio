@@ -49,14 +49,14 @@ scripts/with-node.sh pnpm --dir frontend gen:api          # regenerate src/api/s
 frontend/
 ├── index.html                  # default title, meta description, Open Graph tags
 ├── vercel.json                 # SPA rewrite for /work/:slug, pinned install and build commands, Git deploys off (PF-013)
-├── public/                     # not created yet: og-image.png, robots.txt, sitemap.xml in PF-012; a favicon has no ticket yet
+├── public/                     # favicon.svg (WL monogram) and apple-touch-icon.png (PF-025); og-image.png, robots.txt, sitemap.xml are PF-012 items not created yet
 └── src/
     ├── index.css               # Tailwind import and @theme design tokens
     ├── api/                    # schema.d.ts (generated, never edited) · client.ts · errors.ts
     ├── app/                    # providers, router, layout, useDocumentMeta
-    ├── components/             # shared primitives: Section, ChipList, ButtonLink, StatusDot, ErrorNote (PF-006); Card, Skeleton with their first caller
+    ├── components/             # shared primitives: Section, ChipList, ButtonLink, StatusDot, ErrorNote (PF-006); diagram/ (PF-022): the architecture-diagram kit and the shared line glyphs; Card, Skeleton with their first caller
     ├── config/                 # test-ids.config.ts
-    ├── content/                # typed static content: profile, site, skills, experience, howIWork, education, featuredWork, caseStudies/{slug}.ts
+    ├── content/                # typed static content: profile, site, skills, experience, howIWork, education, featuredWork, caseStudies/{slug}.ts, diagrams/{slug}.ts (PF-022)
     ├── features/               # API-backed: visits, stats, contact, api-status
     ├── pages/                  # HomePage, CaseStudyPage, CaseStudyArticle, GlanceAside, NotFoundPage, RouteErrorPage
     ├── sections/               # Header, Hero, ProofPoints, About, FeaturedWork, WorkRow, HowIWork, Skills, Experience, Education, Contact, Footer

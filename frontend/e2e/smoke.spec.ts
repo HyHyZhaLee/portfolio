@@ -52,3 +52,23 @@ test('the contact form shows field errors for invalid input', async ({ page }) =
     await expect(page.getByText('Write between 10 and 2,000 characters.')).toBeVisible();
     await expect(page.getByTestId('contact-name-input')).toHaveAttribute('aria-invalid', 'true');
 });
+
+// PF-022: the architecture figure is static content, so it renders with the API unreachable and fits a phone screen.
+test('a case study with a diagram shows its figure and steps with the API unreachable', async ({ page }) => {
+    await page.goto('/work/ai-assessment-integration');
+    await expect(page.getByTestId('case-study-diagram-figure')).toBeVisible();
+    await expect(page.getByTestId('case-study-diagram-step-button').first()).toBeVisible();
+});
+
+test('at 360 px wide the diagram scrolls inside its frame and the page does not scroll sideways', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 740 });
+    await page.goto('/work/ai-assessment-integration');
+    await expect(page.getByTestId('case-study-diagram-figure')).toBeVisible();
+    // String expressions: the e2e TypeScript config has no DOM types.
+    const pageFits = await page.evaluate<boolean>('document.documentElement.scrollWidth <= window.innerWidth');
+    expect(pageFits).toBe(true);
+    const frameScrolls = await page.evaluate<boolean>(
+        '(() => { const frame = document.querySelector(\'[data-test-id="case-study-diagram-scroll-region"]\'); return frame !== null && frame.scrollWidth > frame.clientWidth; })()',
+    );
+    expect(frameScrolls).toBe(true);
+});

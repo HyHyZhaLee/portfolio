@@ -2,10 +2,12 @@ import { Link } from 'react-router';
 import { caseStudyMeta } from '../app/routeMeta';
 import { useDocumentMeta } from '../app/useDocumentMeta';
 import { ChipList } from '../components/ChipList';
+import { ArchitectureFigure } from '../components/diagram/ArchitectureFigure';
 import { getTestIdProp, TestIds } from '../config/test-ids.config';
 import { caseStudies } from '../content/caseStudies';
 import { caseStudyPath } from '../content/caseStudies/slugs';
 import type { CaseStudy } from '../content/caseStudies/types';
+import { getDiagram } from '../content/diagrams';
 import { nextInFeaturedOrder } from '../content/featuredWork';
 import { t } from '../i18n/en';
 import { GlanceAside } from './GlanceAside';
@@ -16,10 +18,11 @@ interface Block {
     points?: readonly string[];
 }
 
-/** One case study in the order of content plan §6.3, with its own title and meta description (FR-5, FR-6). */
+/** One case study in the order of content plan §6.3, with its own title and meta description (FR-5, FR-6), and its architecture diagram as the lead figure when it has one (PF-022). */
 export function CaseStudyArticle({ study }: { study: CaseStudy }) {
     useDocumentMeta(caseStudyMeta(study));
     const next = caseStudies[nextInFeaturedOrder(study.slug)];
+    const diagram = getDiagram(study.slug);
     const blocks: Block[] = [
         { heading: t('caseStudy.context'), paragraphs: study.context },
         { heading: t('caseStudy.problem'), paragraphs: study.problem },
@@ -43,11 +46,17 @@ export function CaseStudyArticle({ study }: { study: CaseStudy }) {
                     </svg>
                     {t('caseStudy.back')}
                 </Link>
-                <h1 id='case-study-title' className='mt-5 max-w-[21ch] text-case font-extrabold'>
+                <h1 id='case-study-title' className='mt-5 text-case font-extrabold text-balance'>
                     {study.title}
                 </h1>
-                <p className='mt-4 max-w-[46ch] text-lead'>{study.angle}</p>
+                <p className='mt-4 text-lead text-balance'>{study.angle}</p>
             </div>
+            {diagram && (
+                <div className='wrap pb-12'>
+                    {/* Keyed by study: moving to the next case study starts its diagram with no step pinned or previewed. */}
+                    <ArchitectureFigure key={study.slug} diagram={diagram} />
+                </div>
+            )}
             <div className='wrap grid gap-10 pb-20 lg:grid-cols-[17rem_minmax(0,42rem)] lg:gap-18'>
                 <GlanceAside study={study} />
                 <div className='min-w-0'>

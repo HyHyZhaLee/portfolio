@@ -13,7 +13,7 @@ export const roles: readonly Role[] = [
         title: 'Software Engineer',
         period: '08/2025 – Present',
         summary:
-            'Full-stack engineer on three products of a U.S. healthtech company that builds software for people with autism and intellectual and developmental disabilities, and for the clinicians, providers and families who support them. I work remotely on FAST (client intake), MyBrightLink (treatment plans, session data and clinical reports) and Clockwork (appointment scheduling). The five case studies above come from this role.',
+            'Full-stack engineer on three products of a U.S. healthtech company that builds software for people with autism and intellectual and developmental disabilities, and for the clinicians, providers and families who support them. I work remotely on FAST (client intake), MyBrightLink (treatment plans, session data and clinical reports) and Clockwork (appointment scheduling). The five projects above come from this role.',
         current: true,
     },
     {

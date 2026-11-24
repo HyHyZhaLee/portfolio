@@ -19,6 +19,9 @@
     --color-status-wake: #b7770a;
     --color-status-down: #c0392b;
     --color-status-idle: #87918e;
+    /* Architecture diagram flows (PF-022 P6): return is dashed and failure dotted, so colour is never the only cue. */
+    --color-flow-return: #0d7569;
+    --color-flow-failure: #b8322a;
 
     --font-ui: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
     --font-read: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
