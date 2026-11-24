@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
     await page.route(/\/(api|actuator)\//, (route) => route.abort('connectionrefused'));
 });
 
-const sections = ['about', 'work', 'how-i-work', 'skills', 'experience', 'open-source', 'education', 'contact'];
+const sections = ['about', 'experience', 'work', 'how-i-work', 'skills', 'education', 'contact'];
 
 test('the home page renders every section with the API unreachable', async ({ page }) => {
     await page.goto('/');

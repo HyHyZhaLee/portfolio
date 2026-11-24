@@ -22,7 +22,7 @@ Applies to everything under `frontend/`. The principles behind these rules are i
 ## The page never waits for the API (Non-Negotiable 1)
 
 - No route or section blocks rendering on a request. Static content renders first; API-backed parts fill in.
-- Every API-backed view handles loading, fallback, and error states. A slow first response (the backend waking up) shows a short hint after about 3 seconds. A failed or absent response falls back to static data (`fallbackRepos`) or hides the element quietly (the visit counter); it never shows a broken section.
+- Every API-backed view handles loading, fallback, and error states. A slow first response (the backend waking up) shows a short hint after about 3 seconds. A failed or absent response falls back to static content or a neutral state (the system panel) or hides the element quietly (the visit counter); it never shows a broken section.
 - The visit beacon is fire-and-forget and runs only in production builds; it honors `?notrack=1` and Global Privacy Control (Non-Negotiable 3).
 
 ## UI

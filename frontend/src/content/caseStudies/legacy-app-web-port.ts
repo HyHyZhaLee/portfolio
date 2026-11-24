@@ -8,7 +8,7 @@ export const legacyAppWebPort: CaseStudy = {
     angle: "Replacing an offline iPad app with a web module without losing a clinician's input.",
     role: 'One of five developers; largest contributor to the data-collection module',
     problemLine: "An offline-first iPad app for session data collection had to move to the web without overwriting a clinician's unsaved input.",
-    outcomeLine: 'Web unit-test coverage rose from ~20% to 82%, with an 80% gate in GitLab CI.',
+    outcomeLine: 'First web build in UAT in ~4 weeks; in production in July 2026.',
     chips: ['React and TypeScript', 'Node.js and Express', 'PostgreSQL'],
     period: '01/2026 – 06/2026',
     team: 'One of five developers.',

@@ -23,15 +23,14 @@ Rows whose ticket has not run yet are planned.
 
 | Route or section | Content | Ticket |
 |---|---|---|
-| `/` Hero | Name, title, one-line pitch (≤ 20 words), three proof chips, buttons View work · Download CV · Contact, and a live system panel with the API and database status | PF-003 |
+| `/` Hero | Portrait, name, title, one-line pitch (≤ 20 words), three proof chips, buttons View work · Download CV · Contact, and a live system panel with the API and database status; the header brand reads "Portfolio" so the name appears once (PF-012, 2026-11-24) | PF-003, PF-012 |
 | `/` About | 120–180 words in the first person | PF-003 |
+| `/` Experience | Timeline of roles, right after About (PF-012, 2026-11-24) | PF-003, PF-012 |
 | `/` Featured work | Employer project cards, the capstone, and this site; each links to `/work/<slug>` | PF-003 |
 | `/` How I work | Five or six principles, each with one example | PF-003 |
 | `/` Skills | Grouped as on the CV; each skill links to the case studies that used it | PF-003 |
-| `/` Experience | Timeline of roles | PF-003 |
-| `/` Open source | Live public GitHub repositories with fallback data | PF-007 |
 | `/` Education & awards | Degrees and awards, one line each | PF-003 |
-| `/` Contact | LinkedIn and GitHub (PF-003), then the form (PF-006); no phone | PF-003, PF-006 |
+| `/` Contact | LinkedIn and GitHub with their addresses (PF-003), then the form in a raised card (PF-006, PF-012); no phone | PF-003, PF-006, PF-012 |
 | `/` Footer | API status dot, "View source" link, privacy note (PF-003); visit counter (PF-005) | PF-003, PF-005 |
 | `/work/<slug>` | One case study, 500–800 words | PF-003 |
 | `*` | Not-found page | PF-003 |
@@ -50,8 +49,8 @@ A link may carry `?ref=<tag>` to show which application it was sent with. A tag 
 ### SITE-004: Contact messages
 A message has a name (1–100 characters), a valid email (at most 254), and a message (10–2000 characters), with no control characters except tab and line breaks in the message. Each client address may send 3 per hour, honeypot hits included (PF-006 D4). An accepted message is stored as `PENDING`, delivered to the owner's inbox, and marked `SENT`, or marked `FAILED` and retried, with at most 3 delivery attempts in total (PF-006 D2). A message that fills the hidden honeypot field is stored as `SPAM`, never emailed, and answered exactly like a success. The visitor's name, email, and message are never logged. Non-Negotiables 4 and 9.
 
-### SITE-005: Open-source projects
-The list shows the owner's public GitHub repositories that are neither forks nor archived, featured repositories first. It is cached for an hour. When GitHub is unavailable, the list falls back to the last good result, then to the static list in the frontend. Private repositories are never listed. The home page shows the first six, in a section that keeps its height whether the list is static or live, and links to the GitHub profile for the rest (PF-007 D2, D3, D7).
+### SITE-005: Open-source projects (retired 2026-11-24)
+The owner removed the Open source section from the home page on 2026-11-24 (PF-012). The backend endpoint `GET /api/v1/projects` (PF-007) still exists, but no page calls it. The rule as it stood: the list shows the owner's public GitHub repositories that are neither forks nor archived, featured repositories first. It is cached for an hour. When GitHub is unavailable, the list falls back to the last good result, then to the static list in the frontend. Private repositories are never listed. The home page shows the first six, in a section that keeps its height whether the list is static or live, and links to the GitHub profile for the rest (PF-007 D2, D3, D7).
 
 ### SITE-006: Privacy
 No raw IP address, full user agent, or full referrer URL is stored or logged; the referrer is kept as its host only. The site sets no tracking cookies. The footer says so in one line.

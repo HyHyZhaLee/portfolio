@@ -3,7 +3,6 @@ import { caseStudies } from './caseStudies';
 import { caseStudySlugs, isCaseStudySlug } from './caseStudies/slugs';
 import { degrees, awards } from './education';
 import { roles } from './experience';
-import { fallbackRepos } from './fallbackRepos';
 import { featuredOrder, featuredWork, featuredWorkIntro } from './featuredWork';
 import { howIWorkIntro, principles } from './howIWork';
 import { profile } from './profile';
@@ -30,7 +29,6 @@ const allContent = {
     awards,
     profile,
     site,
-    fallbackRepos,
 };
 
 describe('content shape', () => {
@@ -67,14 +65,6 @@ describe('content shape', () => {
         expect(principles).toHaveLength(5);
         expect(roles).toHaveLength(3);
         expect(roles.filter((role) => role.current)).toHaveLength(1);
-    });
-
-    it('lists six fallback repositories with unique names under the GitHub profile (PF-007 D3)', () => {
-        expect(fallbackRepos).toHaveLength(6);
-        expect(new Set(fallbackRepos.map((repo) => repo.name)).size).toBe(6);
-        for (const repo of fallbackRepos) {
-            expect(repo.url).toBe(`${profile.links.github}/${repo.name}`);
-        }
     });
 
     it('has no empty or whitespace-only content string', () => {

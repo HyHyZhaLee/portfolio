@@ -8,10 +8,10 @@ import { t, type MessageKey } from '../i18n/en';
 
 /** The home page anchors the navigation links to; they work from any route (PF-003 P6). */
 const navItems = [
+    { hash: '#experience', label: 'nav.experience' },
     { hash: '#work', label: 'nav.work' },
     { hash: '#how-i-work', label: 'nav.howIWork' },
     { hash: '#skills', label: 'nav.skills' },
-    { hash: '#experience', label: 'nav.experience' },
     { hash: '#contact', label: 'nav.contact' },
 ] as const satisfies readonly { hash: string; label: MessageKey }[];
 
@@ -26,8 +26,13 @@ export function Header() {
     return (
         <header className='sticky top-0 z-20 border-b border-line bg-surface/92 backdrop-blur-sm'>
             <div className='wrap flex h-16 items-center justify-between gap-4'>
-                <Link to='/' className='font-ui text-lg font-extrabold tracking-tight text-ink no-underline' {...getTestIdProp(TestIds.header.homeLink)}>
-                    {profile.name}
+                <Link
+                    to='/'
+                    aria-label={t('nav.home', { name: profile.name })}
+                    className='font-ui text-lg font-extrabold tracking-tight text-ink no-underline'
+                    {...getTestIdProp(TestIds.header.homeLink)}
+                >
+                    {t('nav.brand')}
                 </Link>
                 <nav aria-label={t('nav.label')} className='hidden items-center gap-6 lg:flex'>
                     {navItems.map((item) => (

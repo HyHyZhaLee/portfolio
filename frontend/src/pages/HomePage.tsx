@@ -9,7 +9,6 @@ import { Experience } from '../sections/Experience';
 import { FeaturedWork } from '../sections/FeaturedWork';
 import { Hero } from '../sections/Hero';
 import { HowIWork } from '../sections/HowIWork';
-import { OpenSource } from '../sections/OpenSource';
 import { Skills } from '../sections/Skills';
 
 /** Every section renders from content at once; only the hero panel and the footer dot wait for the API (FR-1). */
@@ -25,11 +24,10 @@ export function HomePage() {
         <>
             <Hero />
             <About />
+            <Experience />
             <FeaturedWork highlighted={selectedSkill ? new Set(selectedSkill.usedIn) : null} />
             <HowIWork />
             <Skills selected={selectedSkill} onToggle={toggleSkill} />
-            <Experience />
-            <OpenSource />
             <Education />
             <Contact />
         </>

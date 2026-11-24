@@ -17,7 +17,7 @@ const multiSlugSkills = allSkills.filter((skill) => skill.usedIn.length >= 2);
 const [skillA, skillB] = multiSlugSkills;
 if (!skillA || !skillB) throw new Error('content needs two skills used in at least two case studies');
 
-const sectionHeadings = ['About', 'Featured work', 'How I work', 'Skills', 'Experience', 'Open source', 'Education', 'Contact'];
+const sectionHeadings = ['About', 'Experience', 'Featured work', 'How I work', 'Skills', 'Education', 'Contact'];
 
 function skillButton(name: string): HTMLElement {
     const index = allSkills.findIndex((skill) => skill.name === name);
@@ -57,6 +57,12 @@ describe('HomePage', () => {
         const links = screen.getAllByTestId(TestIds.work.caseStudyLink);
         expect(links.map((link) => link.getAttribute('href'))).toEqual(featuredOrder.map(caseStudyPath));
         expect(rowStates().every((state) => state === null)).toBe(true);
+    });
+
+    it('shows the portrait beside the name in the hero', () => {
+        renderRoute('/');
+
+        expect(screen.getByTestId(TestIds.hero.portrait)).toHaveAccessibleName(`Portrait of ${profile.name}`);
     });
 
     it('links the contact profiles', () => {
