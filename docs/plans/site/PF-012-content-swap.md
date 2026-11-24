@@ -45,6 +45,7 @@ After the first swap went live, the owner asked for these changes; each was appl
 | Section order | Experience moves right after About; the header links follow the page order and start with About |
 | Skill selection | Selecting a skill still lists its case studies under the skill group, but no longer tints the matching Featured work rows; the selection state moves into `Skills` |
 | Open source | The section, the `projects` feature, and `fallbackRepos` are removed; SITE-005 is retired. The backend endpoint stays until the owner decides; this site's case study drops its GitHub-list sentence |
+| Education | Degree and award names are no longer bold; each award has a "View certificate" button that opens the owner's certificate (WebP in `src/assets/certificates/`, no metadata; the Bach Khoa Innovation photo is cropped to the certificate) in a native modal dialog that loads the image only when opened |
 | Contact | The heading leads the left column with the note and the two profile links (each with its address); the form sits in a raised card on the right |
 
 ## Content table

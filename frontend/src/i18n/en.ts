@@ -45,6 +45,8 @@ const en = {
     'education.heading': 'Education',
     'education.degrees': 'Degrees',
     'education.awards': 'Awards',
+    'education.viewCertificate': 'View certificate',
+    'education.closeCertificate': 'Close',
     'contact.heading': 'Contact',
     'contact.linkedin': 'LinkedIn',
     'contact.github': 'GitHub',

@@ -57,6 +57,11 @@ export const TestIds = {
         footerState: 'api-status-footer-state',
         howBuiltLink: 'api-status-how-built-link',
     },
+    education: {
+        certificateButton: 'education-certificate-button',
+        certificateDialog: 'education-certificate-dialog',
+        certificateClose: 'education-certificate-close-button',
+    },
     footer: {
         sourceLink: 'footer-source-link',
     },
