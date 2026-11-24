@@ -5,6 +5,7 @@ import com.huygialy.portfolio.platform.ratelimit.RateLimit;
 import com.huygialy.portfolio.platform.ratelimit.RateLimiter;
 import com.huygialy.portfolio.visit.api.RecordVisitRequest;
 import java.time.Clock;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,16 +18,20 @@ public class VisitCommandService {
     private final RateLimiter rateLimiter;
     private final PageViewRepository repository;
     private final Clock clock;
+    private final ApplicationEventPublisher events;
 
-    public VisitCommandService(RateLimiter rateLimiter, PageViewRepository repository, Clock clock) {
+    public VisitCommandService(
+            RateLimiter rateLimiter, PageViewRepository repository, Clock clock, ApplicationEventPublisher events) {
         this.rateLimiter = rateLimiter;
         this.repository = repository;
         this.clock = clock;
+        this.events = events;
     }
 
     /**
      * F1: the rate limit first, for bots too (D7, 429 {@code RATE_LIMITED}); then a bot returns with nothing stored
-     * (FR-7); then the referrer and the ref tag are reduced and one row is inserted (FR-6).
+     * (FR-7); then the referrer and the ref tag are reduced and one row is inserted (FR-6). A stored view is announced
+     * with {@link PageViewRecorded}, after the insert committed (PF-023 D5).
      */
     public void record(RecordVisitRequest request, ClientInfo client) {
         rateLimiter.check(RateLimit.VISIT, client.rateLimitKey());
@@ -35,6 +40,7 @@ public class VisitCommandService {
         }
         final var referrerHost = VisitValidator.referrerHost(request.referrer());
         final var refTag = VisitValidator.refTag(request.ref());
+        final var viewedAt = clock.instant();
         repository.save(PageViewEntity.record(
                 request.path(),
                 referrerHost.orElse(null),
@@ -42,6 +48,7 @@ public class VisitCommandService {
                 client.visitorHash(),
                 client.deviceType(),
                 client.browser(),
-                clock.instant()));
+                viewedAt));
+        events.publishEvent(new PageViewRecorded(viewedAt));
     }
 }

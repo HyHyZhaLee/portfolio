@@ -8,7 +8,7 @@ export interface ContactReceipt {
     correlationId: string | undefined;
 }
 
-// A message sent while the free-tier API sleeps may wait out a cold start, up to the 75 s timeout (PF-006 P18).
+// A message sent while the free-tier API sleeps may wait out a cold start, up to the 100 s timeout (PF-006 P18, PF-023).
 const contactClient = createApiClient({ timeoutMs: COLD_START_TIMEOUT_MS });
 
 /**

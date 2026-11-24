@@ -3,9 +3,10 @@ import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TestIds } from '../../config/test-ids.config';
 import { renderWithProviders } from '../../test/renderWithProviders';
+import { exhaustHealthRetries } from '../../test/healthRetries';
 import { server } from '../../test/server';
 import { useTrackPageView } from '../visits';
-import { ApiStatusDot, SystemPanel } from '.';
+import { ApiStatusDot, SystemPanel, useApiStatus } from '.';
 
 const COUNTED = 'Your visit was counted anonymously.';
 
@@ -18,8 +19,9 @@ function renderPanelAndDot() {
     );
 }
 
+/** Mirrors `RootLayout`: the beacon waits for the panel's health check (PF-023 D4). */
 function TrackView() {
-    useTrackPageView();
+    useTrackPageView(useApiStatus().api === 'online');
     return null;
 }
 
@@ -35,6 +37,7 @@ function renderPanelWithBeacon() {
 describe('SystemPanel and ApiStatusDot', () => {
     afterEach(() => {
         vi.unstubAllEnvs();
+        vi.useRealTimers();
     });
 
     it('shows online and connected, and the footer dot says API online, for a healthy backend', async () => {
@@ -48,9 +51,11 @@ describe('SystemPanel and ApiStatusDot', () => {
     });
 
     it('shows unreachable and unknown, and the footer dot says API unreachable, when the API cannot be reached', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: true });
         server.use(http.get('*/actuator/health', () => HttpResponse.error()));
 
         renderPanelAndDot();
+        await exhaustHealthRetries();
 
         await waitFor(() => expect(screen.getByTestId(TestIds.apiStatus.apiState)).toHaveTextContent('Unreachable'));
         expect(screen.getByTestId(TestIds.apiStatus.databaseState)).toHaveTextContent('Unknown');

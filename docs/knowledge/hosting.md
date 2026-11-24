@@ -42,6 +42,12 @@ Facts about Vercel, Render, and Neon observed on this site's own projects. Versi
 - **Verified**: Render docs read on 2026-11-24; the first run after the PF-013 merge exercises it
 - **Discovered in**: PF-013
 
+### A sleeping Free web service took 78.8 s to answer
+- **Rule / Behavior**: After 15 minutes without requests, `will-ly-portfolio-api` (Free, Singapore, Spring Boot in Docker) slept. The next `GET /actuator/health` connected in 0.18 s, but Render held it until the service had started and answered after 78.8 s with 200; the next request took 0.31 s. The request is held, not refused, so a client timeout must be longer than the cold start: the site's 75 s timeout failed every first request after a sleep, and PF-023 raised it to 100 s.
+- **Source**: `curl -w` timing of the health endpoint; `frontend/src/api/client.ts` (`COLD_START_TIMEOUT_MS`)
+- **Verified**: one cold and one warm request at 08:02 UTC, 17 minutes after the previous request; 2026-11-24
+- **Discovered in**: PF-023
+
 ## Neon
 
 ### The JDBC URL comes from the direct connection string

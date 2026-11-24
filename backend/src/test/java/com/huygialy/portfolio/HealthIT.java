@@ -35,6 +35,22 @@ class HealthIT {
     }
 
     @Test
+    void livenessIsPublicAndNeverChecksTheDatabase() {
+        // PF-023 D7: Render's health check and the keep-alive ping use it, so they never wake the database.
+        client.get()
+                .uri("/actuator/health/liveness")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.status")
+                .isEqualTo("UP")
+                .jsonPath("$.components.db")
+                .doesNotExist();
+        client.head().uri("/actuator/health/liveness").exchange().expectStatus().isOk();
+    }
+
+    @Test
     void pathsOutsideThePublicListAnswerNotFound() {
         client.get()
                 .uri("/actuator/env")

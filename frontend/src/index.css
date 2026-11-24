@@ -17,6 +17,7 @@
     --color-accent-ink: #ffffff;
     --color-status-ok: #17855a;
     --color-status-wake: #b7770a;
+    --color-status-down: #c0392b;
     --color-status-idle: #87918e;
 
     --font-ui: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
