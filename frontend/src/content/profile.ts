@@ -42,7 +42,7 @@ export const profile: Profile = {
     ],
     facts: [
         { label: 'Based in', value: 'Ho Chi Minh City, Vietnam' },
-        { label: 'Languages', value: 'English (professional working proficiency), Vietnamese (native)' },
+        { label: 'Languages', value: 'English, Vietnamese (native)' },
         { label: 'Studying', value: "Master's in Computer Science, Bach Khoa University (in progress)" },
     ],
     links: {
