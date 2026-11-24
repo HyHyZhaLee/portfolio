@@ -7,6 +7,7 @@ import { caseStudyPath, caseStudySlugs, type CaseStudySlug } from '../content/ca
 import type { CaseStudy } from '../content/caseStudies/types';
 import { diagrams } from '../content/diagrams';
 import { featuredOrder } from '../content/featuredWork';
+import { t } from '../i18n/en';
 import { renderRoute, renderWithProviders } from '../test/renderWithProviders';
 import { CaseStudyArticle } from './CaseStudyArticle';
 
@@ -118,5 +119,26 @@ describe('CaseStudyPage', () => {
 
         expect(router.state.location.pathname).toBe('/');
         expect(router.state.location.hash).toBe('#work');
+    });
+
+    it('folds the glance details behind a toggle that controls the region holding the stack and outcomes (PF-015 FR-5)', async () => {
+        renderRoute(caseStudyPath(firstSlug));
+        const toggle = screen.getByTestId(TestIds.caseStudy.glanceToggle);
+        const region = document.getElementById(toggle.getAttribute('aria-controls') ?? '');
+        if (!region) throw new Error('aria-controls points at no element');
+        expect(toggle).toHaveAttribute('aria-expanded', 'false');
+        expect(toggle).toHaveTextContent(t('caseStudy.glanceMore'));
+        expect(region).toHaveTextContent(t('caseStudy.stack'));
+        expect(region).toHaveTextContent(t('caseStudy.outcomes'));
+
+        await userEvent.click(toggle);
+
+        expect(toggle).toHaveAttribute('aria-expanded', 'true');
+        expect(toggle).toHaveTextContent(t('caseStudy.glanceLess'));
+
+        await userEvent.click(toggle);
+
+        expect(toggle).toHaveAttribute('aria-expanded', 'false');
+        expect(toggle).toHaveTextContent(t('caseStudy.glanceMore'));
     });
 });

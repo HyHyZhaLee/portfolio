@@ -53,13 +53,13 @@ frontend/
 └── src/
     ├── index.css               # Tailwind import and @theme design tokens
     ├── api/                    # schema.d.ts (generated, never edited) · client.ts · errors.ts
-    ├── app/                    # providers, router, layout, useDocumentMeta
-    ├── components/             # shared primitives: Section, ChipList, ButtonLink, StatusDot, ErrorNote (PF-006); diagram/ (PF-022): the architecture-diagram kit and the shared line glyphs; Card, Skeleton with their first caller
+    ├── app/                    # providers, router, layout, useDocumentMeta, useActiveSection (PF-015)
+    ├── components/             # shared primitives: Section, ChipList, ButtonLink, StatusDot, ErrorNote (PF-006), the useModalDialog hook (PF-015); diagram/ (PF-022): the architecture-diagram kit and the shared line glyphs; Card, Skeleton with their first caller
     ├── config/                 # test-ids.config.ts
     ├── content/                # typed static content: profile, site, skills, experience, howIWork, education, featuredWork, caseStudies/{slug}.ts, diagrams/{slug}.ts (PF-022)
     ├── features/               # API-backed: visits, stats, contact, api-status
     ├── pages/                  # HomePage, CaseStudyPage, CaseStudyArticle, GlanceAside, NotFoundPage, RouteErrorPage
-    ├── sections/               # Header, Hero, ProofPoints, About, FeaturedWork, WorkRow, HowIWork, Skills, Experience, Education, Contact, Footer
+    ├── sections/               # Header, MobileMenu and navItems (PF-015), Hero, ProofPoints, About, FeaturedWork, WorkRow, HowIWork, Skills, Experience, Education, Contact, Footer
     ├── i18n/                   # en.ts and t() for UI strings
     ├── test/                   # setup, renderWithProviders, MSW handlers
     └── utils/                  # format.ts with formatCount (PF-005)
@@ -78,6 +78,7 @@ frontend/
 - **Routing and SEO.** `/` is the home page, `/work/:slug` a case study whose slug must exist in `content/caseStudies/` (anything else renders the 404 page), and every route sets its own `<title>` and meta description. A page that throws while rendering is replaced by `RouteErrorPage` inside the layout (`buildRoutes` in `src/app/routes.tsx`); it never shows the error itself. `vercel.json` rewrites unknown paths to `index.html`.
 - **Errors.** Render with `ErrorNote` (`role="alert"`), which shows a short message and, for API errors, the `code` and the `correlationId` as selectable text, so one click selects it to copy (PF-006 D18). Branch on `code`, never on text.
 - **Test IDs.** Every interactive element: `{...getTestIdProp(TestIds.contact.submitButton)}`, which renders `data-test-id="contact-submit-button"`. Naming is `{feature}-{element}-{type}`.
+- **Responsive tiers and motion (PF-015).** One component tree adapts through Tailwind variants: phones under 640px (icon menu, 80px portrait, tighter spacing, folded At a glance), 768px (one-column hero, the system panel as a four-step strip), 1024px (inline nav, two-column hero, headings above content), 1280px (sticky heading rail), and from 1600px the root font size grows to 125% at 2560px, so the rem-based layout scales as one. Short screens (`short:`, height ≤ 30rem) get a 48px header. Below 1024px the header menu is a native modal `<dialog>` (`MobileMenu` on `useModalDialog`, the `menu-sheet` utility for its transition); `html:has(dialog[open])` stops the page scrolling behind any modal. Standalone small controls take the `touch-target` utility, a 44px invisible hit area on coarse pointers; running-text links do not. Motion is CSS-first and can never hide content: the `reveal` utility fades units shorter than a screen in on scroll only where scroll-driven animations exist and motion is welcome, and `useActiveSection` marks the header link of the section in view with `aria-current="location"` on `/` only. `e2e/responsive.spec.ts` checks the tiers in Chromium.
 - **Performance.** Images below the fold are lazy-loaded with explicit `width` and `height`; fonts are self-hosted or preloaded; the home page stays within a Lighthouse score of 90 or more in every category.
 
 ## Formatting Values

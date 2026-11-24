@@ -1,80 +1,51 @@
-import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
+import { useActiveSection } from '../app/useActiveSection';
 import { getTestIdProp, TestIds } from '../config/test-ids.config';
 import { profile } from '../content/profile';
-import { t, type MessageKey } from '../i18n/en';
+import { t } from '../i18n/en';
+import { MobileMenu } from './MobileMenu';
+import { navItems } from './navItems';
 
-/** The home page anchors the navigation links to; they work from any route (PF-003 P6). */
-const navItems = [
-    { hash: '#about', label: 'nav.about' },
-    { hash: '#experience', label: 'nav.experience' },
-    { hash: '#work', label: 'nav.work' },
-    { hash: '#how-i-work', label: 'nav.howIWork' },
-    { hash: '#skills', label: 'nav.skills' },
-    { hash: '#contact', label: 'nav.contact' },
-] as const satisfies readonly { hash: string; label: MessageKey }[];
+const navIds = navItems.map((item) => item.id);
 
-const MOBILE_NAV_ID = 'mobile-nav';
-
+/**
+ * The site header, fixed to the top: the brand, the section links from 1024px, and the menu below it. Fixed rather than
+ * sticky, because Chromium scrolls the page each time focus lands on a sticky element inside the scroll-padding band, so
+ * tabbing through the links made the page jump (PF-015). The spacer keeps its place in the flow.
+ */
 export function Header() {
-    const [menuOpen, setMenuOpen] = useState(false);
-    const closeMenu = () => {
-        setMenuOpen(false);
-    };
+    const { pathname } = useLocation();
+    const active = useActiveSection(navIds, pathname === '/');
 
     return (
-        <header className='sticky top-0 z-20 border-b border-line bg-surface/92 backdrop-blur-sm'>
-            <div className='wrap flex h-16 items-center justify-between gap-4'>
-                <Link
-                    to='/'
-                    aria-label={t('nav.home', { name: profile.name })}
-                    className='font-ui text-lg font-extrabold tracking-tight text-ink no-underline'
-                    {...getTestIdProp(TestIds.header.homeLink)}
-                >
-                    {t('nav.brand')}
-                </Link>
-                <nav aria-label={t('nav.label')} className='hidden items-center gap-6 lg:flex'>
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.hash}
-                            to={{ pathname: '/', hash: item.hash }}
-                            className='text-label font-medium text-ink no-underline hover:text-accent'
-                            {...getTestIdProp(TestIds.header.navLink)}
-                        >
-                            {t(item.label)}
-                        </Link>
-                    ))}
-                </nav>
-                <button
-                    type='button'
-                    aria-expanded={menuOpen}
-                    aria-controls={menuOpen ? MOBILE_NAV_ID : undefined}
-                    onClick={() => {
-                        setMenuOpen((open) => !open);
-                    }}
-                    className='rounded-control border border-line px-3 py-1.5 text-label font-medium text-ink lg:hidden'
-                    {...getTestIdProp(TestIds.header.menuButton)}
-                >
-                    {t('nav.menu')}
-                </button>
-            </div>
-            {menuOpen && (
-                <div className='wrap lg:hidden'>
-                    <nav id={MOBILE_NAV_ID} aria-label={t('nav.mobileLabel')} className='border-t border-line pt-2 pb-4'>
+        <>
+            <div aria-hidden='true' className='box-content h-16 border-b border-transparent short:h-12' />
+            <header className='fixed inset-x-0 top-0 z-20 border-b border-line bg-surface/92 backdrop-blur-sm print:absolute'>
+                <div className='wrap flex h-16 items-center justify-between gap-4 short:h-12'>
+                    <Link
+                        to='/'
+                        aria-label={t('nav.home', { name: profile.name })}
+                        className='touch-target font-ui text-lg font-extrabold tracking-tight text-ink no-underline'
+                        {...getTestIdProp(TestIds.header.homeLink)}
+                    >
+                        {t('nav.brand')}
+                    </Link>
+                    <nav aria-label={t('nav.label')} className='hidden items-center gap-6 lg:flex'>
                         {navItems.map((item) => (
                             <Link
-                                key={item.hash}
-                                to={{ pathname: '/', hash: item.hash }}
-                                onClick={closeMenu}
-                                className='block border-b border-line py-2.5 font-medium text-ink no-underline'
+                                key={item.id}
+                                to={{ pathname: '/', hash: `#${item.id}` }}
+                                aria-current={active === item.id ? 'location' : undefined}
+                                className='touch-target text-label font-medium text-ink no-underline underline-offset-8 hover:text-accent aria-[current=location]:text-accent aria-[current=location]:underline'
                                 {...getTestIdProp(TestIds.header.navLink)}
                             >
                                 {t(item.label)}
                             </Link>
                         ))}
                     </nav>
+                    <MobileMenu active={active} />
                 </div>
-            )}
-        </header>
+            </header>
+        </>
     );
 }

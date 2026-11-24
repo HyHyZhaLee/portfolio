@@ -375,3 +375,21 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Source**: `frontend/e2e/smoke.spec.ts`, `frontend/tsconfig.node.json`
 - **Verified**: `check:type` failed, then passed with the string form; the smoke test passes at 360 px; 2026-11-24
 - **Discovered in**: PF-022
+
+### Tailwind CSS 4 `@utility` with nested at-rules
+- **Rule / Behavior**: An `@utility` body can nest `@media`, `@supports`, `@starting-style`, and `&` selectors (such as `&::after` or `&[open]::backdrop`), and the build keeps them nested correctly; a custom `@utility` is emitted only once a class name using it appears in a scanned file, so check the generated CSS with the class in use. The minifier rewrites `animation-range: entry 0% entry 100%` as the equivalent `animation-range: entry`, and keeps `animation-timeline` after the `animation` shorthand, which would otherwise reset it.
+- **Source**: `frontend/src/index.css` (`touch-target`, `reveal`, `menu-sheet`)
+- **Verified**: `pnpm build` with a temporary scanned file naming the classes, then the emitted CSS inspected; 2026-11-24
+- **Discovered in**: PF-015
+
+### React hooks lint: refs in spread props and resetting state in effects
+- **Rule / Behavior**: `react-hooks/refs` rejects spreading an object that holds a ref onto an element (`<dialog {...props}>` where `props.ref` is a ref object), so a hook returns the ref on its own (`dialogRef`) next to the spread props. `react-hooks/set-state-in-effect` rejects a reset such as `setActive(null)` in an effect's disabled branch; derive the value at return instead (`return enabled ? active : null`).
+- **Source**: `frontend/src/components/useModalDialog.ts`, `frontend/src/app/useActiveSection.ts`
+- **Verified**: `eslint` failed on the first form and passed on the second; 2026-11-24
+- **Discovered in**: PF-015
+
+### Chromium focus scrolling and a sticky header inside `scroll-padding-top`
+- **Rule / Behavior**: With `html { scroll-padding-top: 5rem }` and a `position: sticky; top: 0` header that is shorter than the padding, Chromium treats each focused header link as outside the visible area and scrolls the page to reveal it; because the header is sticky, it never counts as revealed, so every Tab through the header jumps the page (about 392 px per press at 1366×768). A `position: fixed` header with a spacer of its height keeps the same layout and is never scrolled for focus, and `scroll-padding-top` can stay for anchors and focused content.
+- **Source**: `frontend/src/sections/Header.tsx`, `frontend/src/index.css`
+- **Verified**: Playwright Chromium, Tab from mid-page through the header: `scrollY` fell 4794, 4402, 4010 … on `main` and on the sticky build, and stayed at 4794 with the fixed header; anchors still landed 80 px down; 2026-11-25
+- **Discovered in**: PF-015

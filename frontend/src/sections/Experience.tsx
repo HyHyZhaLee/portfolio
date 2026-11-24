@@ -6,9 +6,9 @@ import { t } from '../i18n/en';
 export function Experience() {
     return (
         <Section id='experience' heading={t('experience.heading')}>
-            <ol className='relative grid gap-9 pl-6 before:absolute before:top-2 before:bottom-2 before:left-1.25 before:w-0.5 before:bg-line'>
+            <ol className='relative grid gap-7 pl-6 sm:gap-9 before:absolute before:top-2 before:bottom-2 before:left-1.25 before:w-0.5 before:bg-line'>
                 {roles.map((role) => (
-                    <li key={role.organization} className='relative'>
+                    <li key={role.organization} className='reveal relative'>
                         <span
                             aria-hidden='true'
                             className={`absolute top-1.5 -left-6 size-3 rounded-full border-2 ${role.current ? 'border-accent bg-accent' : 'border-ink bg-surface'}`}

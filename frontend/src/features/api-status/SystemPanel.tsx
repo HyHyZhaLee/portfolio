@@ -83,23 +83,34 @@ export function SystemPanel() {
             className='rounded-panel border border-line bg-surface-raised px-5 pt-5 pb-4.5 shadow-panel'
             {...getTestIdProp(TestIds.apiStatus.panel)}
         >
-            <div className='flex items-baseline justify-between gap-4'>
+            <div className='flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5'>
                 <p id='system-title' className='font-ui font-semibold'>
                     {t('apiStatus.title')}
                 </p>
-                <p className='font-ui text-caption text-muted'>{t('apiStatus.subtitle')}</p>
+                <p className='font-ui text-caption whitespace-nowrap text-muted'>{t('apiStatus.subtitle')}</p>
             </div>
             <div className='relative mt-4'>
-                <ol>
+                <ol className='md:max-lg:grid md:max-lg:grid-cols-4 md:max-lg:gap-2'>
                     {rows.map((row, index) => (
-                        <li key={row.key} className='relative grid h-18 grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-3'>
-                            {index < rows.length - 1 && <span aria-hidden='true' className='absolute top-14 left-5 h-8 w-0.5 -translate-x-1/2 bg-line' />}
-                            <span aria-hidden='true' className='grid size-10 place-items-center rounded-control border border-line bg-surface-sunk text-ink'>
+                        <li
+                            key={row.key}
+                            className='relative grid h-18 grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-3 md:max-lg:h-36 md:max-lg:grid-cols-1 md:max-lg:grid-rows-[2.5rem_4rem_auto] md:max-lg:justify-items-center md:max-lg:gap-2 md:max-lg:text-center'
+                        >
+                            {index < rows.length - 1 && (
+                                <span
+                                    aria-hidden='true'
+                                    className='absolute top-14 left-5 h-8 w-0.5 -translate-x-1/2 bg-line md:max-lg:top-5 md:max-lg:left-1/2 md:max-lg:h-0.5 md:max-lg:w-[calc(100%+0.5rem)] md:max-lg:translate-x-0 md:max-lg:-translate-y-1/2'
+                                />
+                            )}
+                            <span
+                                aria-hidden='true'
+                                className='relative grid size-10 place-items-center rounded-control border border-line bg-surface-sunk text-ink'
+                            >
                                 {row.icon}
                             </span>
-                            <div>
+                            <div className='md:max-lg:self-start'>
                                 <p className='font-ui text-label leading-tight font-semibold'>{t(row.name)}</p>
-                                <p className='font-ui text-caption text-muted'>{t(row.what)}</p>
+                                <p className='font-ui text-caption text-pretty text-muted'>{t(row.what)}</p>
                             </div>
                             <span
                                 className='inline-flex items-center gap-1.5 font-ui text-caption font-semibold whitespace-nowrap text-ink'
@@ -113,16 +124,16 @@ export function SystemPanel() {
                 </ol>
                 <span
                     aria-hidden='true'
-                    className='pointer-events-none absolute top-8 left-4 size-2 rounded-full bg-accent opacity-0 motion-safe:animate-travel motion-reduce:hidden'
+                    className='pointer-events-none absolute top-8 left-4 size-2 rounded-full bg-accent opacity-0 motion-safe:animate-travel motion-reduce:hidden md:max-lg:hidden'
                 />
             </div>
-            <p aria-live='polite' className='mt-3.5 min-h-14 border-t border-line pt-3.5 font-ui text-sm leading-snug text-muted'>
+            <p aria-live='polite' className='mt-3.5 min-h-14 border-t border-line pt-3.5 font-ui text-sm leading-snug text-pretty text-muted'>
                 {t(noteFor(status))}
                 {showCounted && <> {t('apiStatus.note.counted')}</>}
                 {answered && (
                     <>
                         {' '}
-                        <Link to={caseStudyPath('this-site')} className='font-semibold' {...getTestIdProp(TestIds.apiStatus.howBuiltLink)}>
+                        <Link to={caseStudyPath('this-site')} className='font-semibold whitespace-nowrap' {...getTestIdProp(TestIds.apiStatus.howBuiltLink)}>
                             {t('apiStatus.howBuilt')}
                         </Link>
                     </>

@@ -35,10 +35,10 @@ export function CaseStudyArticle({ study }: { study: CaseStudy }) {
 
     return (
         <article aria-labelledby='case-study-title'>
-            <div className='wrap pt-9 pb-10'>
+            <div className='wrap pt-6 pb-8 sm:pt-9 sm:pb-10'>
                 <Link
                     to={{ pathname: '/', hash: '#work' }}
-                    className='inline-flex items-center gap-1.5 font-ui text-label font-semibold'
+                    className='touch-target inline-flex items-center gap-1.5 font-ui text-label font-semibold'
                     {...getTestIdProp(TestIds.caseStudy.backLink)}
                 >
                     <svg viewBox='0 0 20 20' fill='none' stroke='currentColor' strokeWidth='1.8' aria-hidden='true' className='size-4'>
@@ -46,18 +46,18 @@ export function CaseStudyArticle({ study }: { study: CaseStudy }) {
                     </svg>
                     {t('caseStudy.back')}
                 </Link>
-                <h1 id='case-study-title' className='mt-5 text-case font-extrabold text-balance'>
+                <h1 id='case-study-title' className='mt-4 text-case sm:mt-5 font-extrabold text-balance'>
                     {study.title}
                 </h1>
-                <p className='mt-4 text-lead text-balance'>{study.angle}</p>
+                <p className='mt-3 text-lead sm:mt-4 text-balance'>{study.angle}</p>
             </div>
             {diagram && (
-                <div className='wrap pb-12'>
+                <div className='wrap pb-8 sm:pb-12'>
                     {/* Keyed by study: moving to the next case study starts its diagram with no step pinned or previewed. */}
                     <ArchitectureFigure key={study.slug} diagram={diagram} />
                 </div>
             )}
-            <div className='wrap grid gap-10 pb-20 lg:grid-cols-[17rem_minmax(0,42rem)] lg:gap-18'>
+            <div className='wrap grid gap-6 pb-14 sm:gap-10 sm:pb-20 lg:grid-cols-[17rem_minmax(0,42rem)] lg:gap-18'>
                 <GlanceAside study={study} />
                 <div className='min-w-0'>
                     {blocks.map((block) => (
@@ -90,10 +90,20 @@ export function CaseStudyArticle({ study }: { study: CaseStudy }) {
                         <span className='font-ui text-sm text-muted'>{t('caseStudy.next')}</span>
                         <Link
                             to={caseStudyPath(next.slug)}
-                            className='font-ui text-xl font-bold text-ink no-underline hover:text-accent'
+                            className='group touch-target w-fit font-ui text-xl font-bold text-ink no-underline hover:text-accent'
                             {...getTestIdProp(TestIds.caseStudy.nextLink)}
                         >
                             {next.title}
+                            <svg
+                                viewBox='0 0 20 20'
+                                fill='none'
+                                stroke='currentColor'
+                                strokeWidth='1.8'
+                                aria-hidden='true'
+                                className='ml-1.5 inline size-4.5 align-[-0.1em] motion-safe:transition-transform group-hover:translate-x-0.5'
+                            >
+                                <path d='M7.5 4.5L13 10l-5.5 5.5' strokeLinecap='round' strokeLinejoin='round' />
+                            </svg>
                         </Link>
                     </div>
                 </div>

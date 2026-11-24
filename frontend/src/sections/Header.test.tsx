@@ -1,22 +1,70 @@
-import { screen, within } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TestIds } from '../config/test-ids.config';
 import { renderWithProviders } from '../test/renderWithProviders';
 import { Header } from './Header';
 
-const sectionLinks = [
-    { name: 'About', href: '/#about' },
-    { name: 'Experience', href: '/#experience' },
-    { name: 'Work', href: '/#work' },
-    { name: 'How I work', href: '/#how-i-work' },
-    { name: 'Skills', href: '/#skills' },
-    { name: 'Contact', href: '/#contact' },
+const sections = [
+    { id: 'about', name: 'About' },
+    { id: 'experience', name: 'Experience' },
+    { id: 'work', name: 'Work' },
+    { id: 'how-i-work', name: 'How I work' },
+    { id: 'skills', name: 'Skills' },
+    { id: 'contact', name: 'Contact' },
 ];
 
-function mobileNav(): HTMLElement | null {
-    return screen.queryByRole('navigation', { name: 'Main menu' });
+const menuButton = () => screen.getByTestId(TestIds.header.menuButton);
+const dialog = () => screen.getByTestId(TestIds.header.menuDialog);
+const inlineLinks = () => within(screen.getByRole('navigation', { name: 'Main' })).getAllByTestId(TestIds.header.navLink);
+const menuLinks = () => within(dialog()).getAllByTestId(TestIds.header.navLink);
+const linkNamed = (links: HTMLElement[], name: string): HTMLElement => {
+    const link = links.find((item) => item.textContent === name);
+    if (!link) throw new Error(`no ${name} link`);
+    return link;
+};
+
+type ObserverCallback = (entries: { target: Element; isIntersecting: boolean }[]) => void;
+
+let observerCallback: ObserverCallback | undefined;
+const observed: Element[] = [];
+
+class FakeIntersectionObserver {
+    constructor(callback: ObserverCallback) {
+        observerCallback = callback;
+    }
+    observe(element: Element) {
+        observed.push(element);
+    }
+    disconnect() {
+        observed.length = 0;
+    }
 }
+
+function report(id: string, isIntersecting: boolean) {
+    const target = observed.find((element) => element.id === id);
+    if (!target || !observerCallback) throw new Error(`${id} is not observed`);
+    const callback = observerCallback;
+    act(() => {
+        callback([{ target, isIntersecting }]);
+    });
+}
+
+function stubObserverWithSections() {
+    vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver);
+    for (const { id } of sections) {
+        const element = document.createElement('section');
+        element.id = id;
+        document.body.append(element);
+    }
+}
+
+afterEach(() => {
+    vi.unstubAllGlobals();
+    observerCallback = undefined;
+    observed.length = 0;
+    for (const { id } of sections) document.getElementById(id)?.remove();
+});
 
 describe('Header', () => {
     it('shows "Portfolio" as the home link, with the name for screen readers, since the hero carries the name', () => {
@@ -28,40 +76,94 @@ describe('Header', () => {
         expect(home).toHaveAttribute('href', '/');
     });
 
-    it('starts with the mobile menu closed', () => {
+    it('renders an inline nav with the six section links and an accessible name, and the same links in the menu', () => {
         renderWithProviders(<Header />);
 
-        expect(screen.getByTestId(TestIds.header.menuButton)).toHaveAttribute('aria-expanded', 'false');
-        expect(mobileNav()).not.toBeInTheDocument();
-        expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
+        expect(inlineLinks().map((link) => link.getAttribute('href'))).toEqual(sections.map(({ id }) => `/#${id}`));
+        expect(menuLinks()).toHaveLength(6);
+        expect(screen.getAllByTestId(TestIds.header.navLink)).toHaveLength(12);
     });
 
-    it('opens the mobile menu with the six section links and closes it again', async () => {
+    it('opens the menu dialog with the six section links and wires the button to it', async () => {
         renderWithProviders(<Header />);
-        const button = screen.getByTestId(TestIds.header.menuButton);
+        expect(menuButton()).toHaveAttribute('aria-expanded', 'false');
+        expect(dialog()).not.toHaveAttribute('open');
 
-        await userEvent.click(button);
+        await userEvent.click(menuButton());
 
-        expect(button).toHaveAttribute('aria-expanded', 'true');
-        const nav = within(screen.getByRole('navigation', { name: 'Main menu' }));
-        for (const { name, href } of sectionLinks) {
-            expect(nav.getByRole('link', { name })).toHaveAttribute('href', href);
+        expect(dialog()).toHaveAttribute('open');
+        expect(menuButton()).toHaveAttribute('aria-expanded', 'true');
+        expect(menuButton()).toHaveAttribute('aria-haspopup', 'dialog');
+        expect(menuButton()).toHaveAttribute('aria-controls', dialog().id);
+        expect(menuLinks().map((link) => link.getAttribute('href'))).toEqual(sections.map(({ id }) => `/#${id}`));
+    });
+
+    it.each([
+        ['the close button', () => screen.getByTestId(TestIds.header.closeButton)],
+        ['a link inside it', () => linkNamed(menuLinks(), 'Skills')],
+        ['the dialog element itself (the backdrop)', () => dialog()],
+    ])('closes the menu from %s', async (_label, target) => {
+        renderWithProviders(<Header />);
+        await userEvent.click(menuButton());
+        expect(dialog()).toHaveAttribute('open');
+
+        await userEvent.click(target());
+
+        expect(dialog()).not.toHaveAttribute('open');
+        expect(menuButton()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('closes the menu when the viewport grows to the inline nav width', async () => {
+        let onChange: ((event: { matches: boolean }) => void) | undefined;
+        vi.stubGlobal('matchMedia', () => ({
+            addEventListener: (_type: string, listener: typeof onChange) => {
+                onChange = listener;
+            },
+            removeEventListener: () => undefined,
+        }));
+        renderWithProviders(<Header />);
+        await userEvent.click(menuButton());
+        const listener = onChange;
+        if (!listener) throw new Error('no change listener registered');
+
+        act(() => {
+            listener({ matches: true });
+        });
+
+        expect(dialog()).not.toHaveAttribute('open');
+        expect(menuButton()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('marks the section in view as the current location in the inline nav and the menu', () => {
+        stubObserverWithSections();
+        renderWithProviders(<Header />);
+
+        report('work', true);
+        for (const links of [inlineLinks(), menuLinks()]) {
+            for (const link of links) {
+                if (link.textContent === 'Work') expect(link).toHaveAttribute('aria-current', 'location');
+                else expect(link).not.toHaveAttribute('aria-current');
+            }
         }
 
-        await userEvent.click(button);
-
-        expect(button).toHaveAttribute('aria-expanded', 'false');
-        expect(mobileNav()).not.toBeInTheDocument();
+        report('work', false);
+        report('skills', true);
+        expect(linkNamed(inlineLinks(), 'Skills')).toHaveAttribute('aria-current', 'location');
+        expect(linkNamed(menuLinks(), 'Skills')).toHaveAttribute('aria-current', 'location');
+        expect(linkNamed(inlineLinks(), 'Work')).not.toHaveAttribute('aria-current');
     });
 
-    it('closes the mobile menu when a link inside it is clicked', async () => {
+    it('marks no link on a case study page', () => {
+        stubObserverWithSections();
+        renderWithProviders(<Header />, { route: '/work/legacy-app-web-port' });
+
+        expect(observerCallback).toBeUndefined();
+        for (const link of screen.getAllByTestId(TestIds.header.navLink)) expect(link).not.toHaveAttribute('aria-current');
+    });
+
+    it('marks no link where IntersectionObserver is missing', () => {
         renderWithProviders(<Header />);
-        const button = screen.getByTestId(TestIds.header.menuButton);
-        await userEvent.click(button);
 
-        await userEvent.click(within(screen.getByRole('navigation', { name: 'Main menu' })).getByRole('link', { name: 'Skills' }));
-
-        expect(mobileNav()).not.toBeInTheDocument();
-        expect(button).toHaveAttribute('aria-expanded', 'false');
+        for (const link of screen.getAllByTestId(TestIds.header.navLink)) expect(link).not.toHaveAttribute('aria-current');
     });
 });

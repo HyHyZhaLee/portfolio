@@ -28,7 +28,7 @@ Applies to everything under `frontend/`. The principles behind these rules are i
 ## UI
 
 - Style with Tailwind utility classes and the design tokens in `src/index.css` (`@theme`). No inline hex colors, no arbitrary values where a token exists, and no new CSS files without a reason. The site uses the light colour scheme only (PF-003 D9); the dark palette waits for a toggle.
-- Layout works from 360 px wide upward without horizontal scrolling.
+- Layout works from 320 px wide upward without horizontal scrolling (PF-015 tiers: 640, 768, 1024, 1280, scaling from 1600). Standalone small controls get `touch-target`; animations use `reveal` or stay CSS-first so nothing is hidden without motion support.
 - Every interactive element has a `data-test-id` from `getTestIdProp(TestIds.{feature}.{element})` and an accessible name. Images have meaningful `alt` text, or `alt=""` when decorative.
 - Respect `prefers-reduced-motion`. Keep visible focus styles.
 - UI strings (buttons, labels, form errors, status messages) come from `t('key')`. Long-form portfolio copy comes from `src/content/`. JSX has no literal user-facing strings other than punctuation.

@@ -1,3 +1,4 @@
+import { useId, useState } from 'react';
 import { ChipList } from '../components/ChipList';
 import { getTestIdProp, TestIds } from '../config/test-ids.config';
 import type { CaseStudy } from '../content/caseStudies/types';
@@ -6,8 +7,11 @@ import { t } from '../i18n/en';
 const termClass = 'font-ui text-caption text-muted';
 const valueClass = 'mt-0.5 font-ui text-label leading-snug font-medium';
 
-/** "At a glance": role, period, team, stack, up to three outcomes, and links; sticky beside the article on desktop. */
+/** "At a glance": role, period, team, stack, up to three outcomes, and links; sticky beside the article on desktop. Below `lg` the stack, outcomes, and links fold behind a toggle (PF-015 FR-5). */
 export function GlanceAside({ study }: { study: CaseStudy }) {
+    const [expanded, setExpanded] = useState(false);
+    const regionId = useId();
+
     return (
         <aside
             aria-labelledby='glance-heading'
@@ -29,35 +33,61 @@ export function GlanceAside({ study }: { study: CaseStudy }) {
                     <dt className={termClass}>{t('caseStudy.team')}</dt>
                     <dd className={valueClass}>{study.team}</dd>
                 </div>
-                <div>
-                    <dt className={termClass}>{t('caseStudy.stack')}</dt>
-                    <dd className='mt-1.5'>
-                        <ChipList items={study.stack} />
-                    </dd>
-                </div>
-                <div>
-                    <dt className={termClass}>{t('caseStudy.outcomes')}</dt>
-                    <dd>
-                        <ul className='mt-1 grid gap-2'>
-                            {study.outcomes.map((outcome) => (
-                                <li key={outcome} className='flex items-baseline gap-2 font-ui text-label leading-snug font-medium'>
-                                    <span aria-hidden='true' className='size-2 flex-none rounded-xs bg-status-ok' />
-                                    {outcome}
-                                </li>
-                            ))}
-                        </ul>
-                    </dd>
-                </div>
             </dl>
-            {study.links.length > 0 && (
-                <div className='grid gap-1.5 border-t border-line pt-3.5 font-ui text-label font-semibold'>
-                    {study.links.map((link) => (
-                        <a key={link.href} href={link.href} {...getTestIdProp(TestIds.caseStudy.glanceLink)}>
-                            {link.label}
-                        </a>
-                    ))}
-                </div>
-            )}
+            <button
+                type='button'
+                aria-expanded={expanded}
+                aria-controls={regionId}
+                onClick={() => {
+                    setExpanded((open) => !open);
+                }}
+                className='touch-target inline-flex items-center gap-1.5 justify-self-start font-ui text-label font-semibold text-accent lg:hidden'
+                {...getTestIdProp(TestIds.caseStudy.glanceToggle)}
+            >
+                {expanded ? t('caseStudy.glanceLess') : t('caseStudy.glanceMore')}
+                <svg
+                    viewBox='0 0 20 20'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='1.8'
+                    aria-hidden='true'
+                    className={`size-4 motion-safe:transition-transform ${expanded ? 'rotate-180' : ''}`}
+                >
+                    <path d='M5 7.5l5 5 5-5' strokeLinecap='round' strokeLinejoin='round' />
+                </svg>
+            </button>
+            <div id={regionId} className={`${expanded ? 'grid' : 'hidden'} content-start gap-4 lg:grid`}>
+                <dl className='grid gap-3.5'>
+                    <div>
+                        <dt className={termClass}>{t('caseStudy.stack')}</dt>
+                        <dd className='mt-1.5'>
+                            <ChipList items={study.stack} />
+                        </dd>
+                    </div>
+                    <div>
+                        <dt className={termClass}>{t('caseStudy.outcomes')}</dt>
+                        <dd>
+                            <ul className='mt-1 grid gap-2'>
+                                {study.outcomes.map((outcome) => (
+                                    <li key={outcome} className='flex items-baseline gap-2 font-ui text-label leading-snug font-medium'>
+                                        <span aria-hidden='true' className='size-2 flex-none rounded-xs bg-status-ok' />
+                                        {outcome}
+                                    </li>
+                                ))}
+                            </ul>
+                        </dd>
+                    </div>
+                </dl>
+                {study.links.length > 0 && (
+                    <div className='grid gap-1.5 border-t border-line pt-3.5 font-ui text-label font-semibold'>
+                        {study.links.map((link) => (
+                            <a key={link.href} href={link.href} className='touch-target w-fit' {...getTestIdProp(TestIds.caseStudy.glanceLink)}>
+                                {link.label}
+                            </a>
+                        ))}
+                    </div>
+                )}
+            </div>
         </aside>
     );
 }
