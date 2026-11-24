@@ -4,10 +4,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TestIds } from '../config/test-ids.config';
 import { caseStudies } from '../content/caseStudies';
 import { caseStudyPath, caseStudySlugs } from '../content/caseStudies/slugs';
+import type { CaseStudy } from '../content/caseStudies/types';
 import { featuredOrder } from '../content/featuredWork';
-import { renderRoute } from '../test/renderWithProviders';
+import { renderRoute, renderWithProviders } from '../test/renderWithProviders';
+import { CaseStudyArticle } from './CaseStudyArticle';
 
-const staticHeadings = ['At a glance', 'Context', 'The problem', 'My role and scope', 'What I built', 'Outcome', 'What I learned', 'Tech used'];
+const staticHeadings = ['At a glance', 'Context', 'The problem', 'My role and scope', 'What I built', 'Outcome', 'Tech used'];
 
 const firstSlug = featuredOrder[0];
 const secondSlug = featuredOrder[1];
@@ -24,12 +26,23 @@ describe('CaseStudyPage', () => {
         renderRoute(caseStudyPath(slug));
 
         expect(screen.getByRole('heading', { level: 1, name: study.title })).toBeInTheDocument();
-        for (const heading of [...staticHeadings, `Deep dive: ${study.deepDive.topic}`]) {
+        const optional = [study.deepDive && `Deep dive: ${study.deepDive.topic}`, study.learned && 'What I learned'].filter((heading) => heading !== undefined);
+        for (const heading of [...staticHeadings, ...optional]) {
             expect(screen.getByRole('heading', { level: 2, name: heading })).toBeInTheDocument();
         }
         expect(document.title).toBe(`${study.title} | Will Ly`);
         expect(document.querySelector('meta[name="description"]')).toHaveAttribute('content', study.metaDescription);
-        expect(screen.getAllByTestId(TestIds.caseStudy.glanceLink).map((link) => link.getAttribute('href'))).toEqual(study.links.map((link) => link.href));
+        expect(screen.queryAllByTestId(TestIds.caseStudy.glanceLink).map((link) => link.getAttribute('href'))).toEqual(study.links.map((link) => link.href));
+    });
+
+    it('skips the deep-dive and lessons sections when a study has none', () => {
+        const rest: CaseStudy = { ...caseStudies[firstSlug], deepDive: undefined, learned: undefined };
+        renderWithProviders(<CaseStudyArticle study={rest} />);
+
+        expect(screen.getByRole('heading', { level: 1, name: rest.title })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { level: 2, name: 'Outcome' })).toBeInTheDocument();
+        expect(screen.queryByRole('heading', { level: 2, name: /^Deep dive/ })).not.toBeInTheDocument();
+        expect(screen.queryByRole('heading', { level: 2, name: 'What I learned' })).not.toBeInTheDocument();
     });
 
     it('renders the 404 page for an unknown case study', () => {

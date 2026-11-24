@@ -31,8 +31,10 @@ export interface CaseStudy {
     problem: readonly string[];
     roleAndScope: readonly string[];
     built: readonly string[];
-    deepDive: { topic: string; paragraphs: readonly string[] };
+    /** Absent when the study has no published deep-dive paragraph; the page then skips the section. */
+    deepDive?: { topic: string; paragraphs: readonly string[] };
     outcome: readonly string[];
-    learned: readonly string[];
+    /** Absent when the study has no published lesson; the page then skips the section. */
+    learned?: readonly string[];
     tech: readonly string[];
 }

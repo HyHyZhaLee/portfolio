@@ -37,21 +37,27 @@ export function Skills({ selected, onToggle }: SkillsProps) {
                             <ul className='flex flex-wrap gap-1.5'>
                                 {group.skills.map((skill) => (
                                     <li key={skill.name}>
-                                        <button
-                                            type='button'
-                                            aria-pressed={skill === selected}
-                                            onClick={() => {
-                                                onToggle(skill);
-                                            }}
-                                            className='group inline-flex items-center gap-2 rounded-full border border-line bg-surface-raised px-3 py-2 text-sm leading-none font-medium text-ink hover:border-ink aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-accent-ink'
-                                            {...getTestIdProp(TestIds.skills.skillButton)}
-                                        >
-                                            <span>{skill.name}</span>
-                                            <span aria-hidden='true' className='text-xs text-muted group-aria-pressed:text-accent-ink'>
-                                                {skill.usedIn.length}
+                                        {skill.usedIn.length === 0 ? (
+                                            <span className='inline-flex items-center rounded-full border border-line bg-surface-raised px-3 py-2 text-sm leading-none font-medium text-ink'>
+                                                {skill.name}
                                             </span>
-                                            <span className='sr-only'>, {countLabel(skill.usedIn.length)}</span>
-                                        </button>
+                                        ) : (
+                                            <button
+                                                type='button'
+                                                aria-pressed={skill === selected}
+                                                onClick={() => {
+                                                    onToggle(skill);
+                                                }}
+                                                className='group inline-flex items-center gap-2 rounded-full border border-line bg-surface-raised px-3 py-2 text-sm leading-none font-medium text-ink hover:border-ink aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-accent-ink'
+                                                {...getTestIdProp(TestIds.skills.skillButton)}
+                                            >
+                                                <span>{skill.name}</span>
+                                                <span aria-hidden='true' className='text-xs text-muted group-aria-pressed:text-accent-ink'>
+                                                    {skill.usedIn.length}
+                                                </span>
+                                                <span className='sr-only'>, {countLabel(skill.usedIn.length)}</span>
+                                            </button>
+                                        )}
                                     </li>
                                 ))}
                             </ul>

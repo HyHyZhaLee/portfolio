@@ -56,7 +56,7 @@ frontend/
     ├── app/                    # providers, router, layout, useDocumentMeta
     ├── components/             # shared primitives: Section, ChipList, ButtonLink, StatusDot, DownloadIcon, ErrorNote (PF-006); Card, Skeleton with their first caller
     ├── config/                 # test-ids.config.ts
-    ├── content/                # typed static content: profile, site, skills, experience, howIWork, education, featuredWork, caseStudies/{slug}.ts, placeholder; fallbackRepos (PF-007)
+    ├── content/                # typed static content: profile, site, skills, experience, howIWork, education, featuredWork, caseStudies/{slug}.ts; fallbackRepos (PF-007)
     ├── features/               # API-backed: visits, stats, contact, projects, api-status
     ├── pages/                  # HomePage, CaseStudyPage, CaseStudyArticle, GlanceAside, NotFoundPage, RouteErrorPage
     ├── sections/               # Header, Hero, ProofPoints, About, FeaturedWork, WorkRow, HowIWork, Skills, Experience, Education, Contact, Footer; OpenSource (PF-007)
