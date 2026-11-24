@@ -27,6 +27,8 @@ export default defineConfig(({ mode }) => {
             proxy: Object.fromEntries(proxiedPaths.map((path) => [path, { target: backendUrl }])),
         },
         test: {
+            // Playwright specs in e2e/ run with `pnpm test:e2e`, not here.
+            include: ['src/**/*.test.{ts,tsx}'],
             environment: 'jsdom',
             // An absolute API origin: in Node, openapi-fetch's \`new Request()\` rejects the relative paths browsers resolve.
             env: { VITE_API_URL: 'http://api.test' },

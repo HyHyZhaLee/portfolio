@@ -50,7 +50,7 @@ Forms use react-hook-form with a zod schema that mirrors the server's limits, so
 
 ### 10. Every interactive element is testable and accessible
 
-Each interactive element carries a `data-test-id` through `getTestIdProp(TestIds.{feature}.{element})`, plus an accessible name: a label, an `aria-label`, or visible text. Headings follow the page outline, images have meaningful `alt` text, focus stays visible, colour contrast meets WCAG AA in the light colour scheme (the only one since PF-003 D9), and motion respects `prefers-reduced-motion`. Tests find elements by test ID or role, never by CSS class or DOM structure.
+Each interactive element carries a `data-test-id` through `getTestIdProp(TestIds.{feature}.{element})`, plus an accessible name: a label, an `aria-label`, or visible text. Headings follow the page outline, images have meaningful `alt` text, focus stays visible, colour contrast meets WCAG AA in the light colour scheme (the only one since PF-003 D9), and motion respects `prefers-reduced-motion`. Tests find elements by test ID or role, never by CSS class or DOM structure. The Playwright smoke suite in `frontend/e2e/` follows the same rule (`testIdAttribute` is `data-test-id`), runs against `vite preview` with every API call aborted, and is run by `pnpm test:e2e` and the `e2e` workflow; Vitest collects only `src/**/*.test.{ts,tsx}`.
 
 ### 11. UI strings are translatable
 
