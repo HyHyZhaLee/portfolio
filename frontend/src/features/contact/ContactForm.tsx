@@ -124,45 +124,47 @@ export function ContactForm() {
             <h3 id='contact-form-heading' className='text-title font-semibold'>
                 {t('contact.form.heading')}
             </h3>
-            <div className='grid gap-1.5'>
-                <label htmlFor='contact-name' className={labelClass}>
-                    {t('contact.form.name')}
-                </label>
-                <input
-                    id='contact-name'
-                    type='text'
-                    autoComplete='name'
-                    aria-invalid={errors.name ? true : undefined}
-                    aria-describedby={describedBy('name')}
-                    className={inputClass}
-                    {...register('name')}
-                    {...getTestIdProp(TestIds.contact.nameInput)}
-                />
-                {errors.name && (
-                    <p id='contact-name-error' className={errorClass}>
-                        {errors.name.message}
-                    </p>
-                )}
-            </div>
-            <div className='grid gap-1.5'>
-                <label htmlFor='contact-email' className={labelClass}>
-                    {t('contact.form.email')}
-                </label>
-                <input
-                    id='contact-email'
-                    type='email'
-                    autoComplete='email'
-                    aria-invalid={errors.email ? true : undefined}
-                    aria-describedby={describedBy('email')}
-                    className={inputClass}
-                    {...register('email')}
-                    {...getTestIdProp(TestIds.contact.emailInput)}
-                />
-                {errors.email && (
-                    <p id='contact-email-error' className={errorClass}>
-                        {errors.email.message}
-                    </p>
-                )}
+            <div className='grid gap-5 sm:grid-cols-2'>
+                <div className='grid gap-1.5'>
+                    <label htmlFor='contact-name' className={labelClass}>
+                        {t('contact.form.name')}
+                    </label>
+                    <input
+                        id='contact-name'
+                        type='text'
+                        autoComplete='name'
+                        aria-invalid={errors.name ? true : undefined}
+                        aria-describedby={describedBy('name')}
+                        className={inputClass}
+                        {...register('name')}
+                        {...getTestIdProp(TestIds.contact.nameInput)}
+                    />
+                    {errors.name && (
+                        <p id='contact-name-error' className={errorClass}>
+                            {errors.name.message}
+                        </p>
+                    )}
+                </div>
+                <div className='grid gap-1.5'>
+                    <label htmlFor='contact-email' className={labelClass}>
+                        {t('contact.form.email')}
+                    </label>
+                    <input
+                        id='contact-email'
+                        type='email'
+                        autoComplete='email'
+                        aria-invalid={errors.email ? true : undefined}
+                        aria-describedby={describedBy('email')}
+                        className={inputClass}
+                        {...register('email')}
+                        {...getTestIdProp(TestIds.contact.emailInput)}
+                    />
+                    {errors.email && (
+                        <p id='contact-email-error' className={errorClass}>
+                            {errors.email.message}
+                        </p>
+                    )}
+                </div>
             </div>
             <div className='grid gap-1.5'>
                 <label htmlFor='contact-message' className={labelClass}>
@@ -170,7 +172,7 @@ export function ContactForm() {
                 </label>
                 <textarea
                     id='contact-message'
-                    rows={6}
+                    rows={5}
                     aria-invalid={errors.message ? true : undefined}
                     aria-describedby={describedBy('message')}
                     className={`${inputClass} resize-y`}

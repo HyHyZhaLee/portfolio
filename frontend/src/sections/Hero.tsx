@@ -1,7 +1,6 @@
 import portrait from '../assets/portrait.webp';
 import { ButtonLink } from '../components/ButtonLink';
 import { ChipList } from '../components/ChipList';
-import { DownloadIcon } from '../components/DownloadIcon';
 import { getTestIdProp, TestIds } from '../config/test-ids.config';
 import { profile } from '../content/profile';
 import { SystemPanel } from '../features/api-status';
@@ -38,10 +37,6 @@ export function Hero() {
                     <div className='mt-6 flex flex-wrap items-center gap-2.5'>
                         <ButtonLink variant='primary' to={{ pathname: '/', hash: '#work' }} {...getTestIdProp(TestIds.hero.workLink)}>
                             {t('hero.viewWork')}
-                        </ButtonLink>
-                        <ButtonLink href={profile.cvPath} {...getTestIdProp(TestIds.hero.cvLink)}>
-                            <DownloadIcon />
-                            {t('hero.downloadCv')}
                         </ButtonLink>
                         <ButtonLink variant='quiet' to={{ pathname: '/', hash: '#contact' }} {...getTestIdProp(TestIds.hero.contactLink)}>
                             {t('hero.contact')}

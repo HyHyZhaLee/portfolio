@@ -13,7 +13,7 @@ A personal portfolio for Will Ly, Full-stack Software Engineer, used when applyi
 
 | Reader | Needs |
 |---|---|
-| Recruiter | Within 10 seconds on a laptop, without scrolling: who (name, "Full-stack Software Engineer"), what stack, three proof points, and two actions (Download CV, Contact) |
+| Recruiter | Within 10 seconds on a laptop, without scrolling: who (name, "Full-stack Software Engineer"), what stack, three proof points, and two actions (View work, Contact) |
 | Hiring manager | A case study one click from the home page; role and scope stated honestly; the trade-offs behind decisions |
 | Engineer reviewing the code | A clean repository with a README, an architecture overview, tests, and CI |
 
@@ -23,14 +23,14 @@ Rows whose ticket has not run yet are planned.
 
 | Route or section | Content | Ticket |
 |---|---|---|
-| `/` Hero | Portrait, name, title, one-line pitch (≤ 20 words), three proof chips, buttons View work · Download CV · Contact, and a live system panel with the API and database status; the header brand reads "Portfolio" so the name appears once (PF-012, 2026-11-24) | PF-003, PF-012 |
+| `/` Hero | Portrait, name, title, one-line pitch (≤ 20 words), three proof chips, buttons View work · Contact (the Download CV button was dropped on 2026-11-24: the owner links the portfolio from the CV instead), and a live system panel with the API and database status; the header brand reads "Portfolio" so the name appears once (PF-012, 2026-11-24) | PF-003, PF-012 |
 | `/` About | 120–180 words in the first person | PF-003 |
 | `/` Experience | Timeline of roles, right after About (PF-012, 2026-11-24) | PF-003, PF-012 |
 | `/` Featured work | Employer project cards, the capstone, and this site; each links to `/work/<slug>` | PF-003 |
 | `/` How I work | Five or six principles, each with one example | PF-003 |
 | `/` Skills | Grouped as on the CV; each skill links to the case studies that used it | PF-003 |
 | `/` Education & awards | Degrees and awards, one line each; each award opens its certificate in a dialog (PF-012, 2026-11-24) | PF-003, PF-012 |
-| `/` Contact | LinkedIn and GitHub with their addresses (PF-003), then the form in a raised card (PF-006, PF-012); no phone | PF-003, PF-006, PF-012 |
+| `/` Contact | The owner's email, LinkedIn, and GitHub with their addresses (PF-003, PF-012), then the form in a raised card of equal height (PF-006, PF-012); no phone | PF-003, PF-006, PF-012 |
 | `/` Footer | API status dot, "View source" link, privacy note (PF-003); visit counter (PF-005) | PF-003, PF-005 |
 | `/work/<slug>` | One case study, 500–800 words | PF-003 |
 | `*` | Not-found page | PF-003 |

@@ -22,15 +22,14 @@ describe('routes', () => {
         expect(screen.getByTestId(TestIds.app.skipLink)).toHaveAttribute('href', '#main-content');
     });
 
-    it('renders the header, the hero proof links, the CV links, and the home title', () => {
+    it('renders the header, the hero proof links, and the home title, with no CV download', () => {
         renderRoute('/');
 
         expect(screen.getByTestId(TestIds.header.homeLink)).toBeInTheDocument();
         const proofLinks = screen.getAllByTestId(TestIds.hero.proofLink);
         expect(proofLinks.map((link) => link.getAttribute('href'))).toEqual(profile.proofPoints.map((point) => caseStudyPath(point.slug)));
         expect(proofLinks).toHaveLength(3);
-        expect(screen.getByTestId(TestIds.header.cvLink)).toHaveAttribute('href', '/cv.pdf');
-        expect(screen.getByTestId(TestIds.hero.cvLink)).toHaveAttribute('href', '/cv.pdf');
+        expect(document.querySelector('a[href="/cv.pdf"]')).toBeNull();
         expect(document.title).toBe('Will Ly - Full-stack Software Engineer');
     });
 

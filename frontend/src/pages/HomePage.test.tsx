@@ -63,6 +63,7 @@ describe('HomePage', () => {
     it('links the contact profiles', () => {
         renderRoute('/');
 
+        expect(screen.getByTestId(TestIds.contact.emailLink)).toHaveAttribute('href', `mailto:${profile.links.email}`);
         expect(screen.getByTestId(TestIds.contact.linkedinLink)).toHaveAttribute('href', profile.links.linkedin);
         expect(screen.getByTestId(TestIds.contact.githubLink)).toHaveAttribute('href', profile.links.github);
     });

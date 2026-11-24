@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { ButtonLink } from '../components/ButtonLink';
-import { DownloadIcon } from '../components/DownloadIcon';
 import { getTestIdProp, TestIds } from '../config/test-ids.config';
 import { profile } from '../content/profile';
 import { t, type MessageKey } from '../i18n/en';
@@ -47,10 +45,6 @@ export function Header() {
                         </Link>
                     ))}
                 </nav>
-                <ButtonLink href={profile.cvPath} size='small' className='max-lg:hidden' {...getTestIdProp(TestIds.header.cvLink)}>
-                    <DownloadIcon />
-                    {t('nav.downloadCv')}
-                </ButtonLink>
                 <button
                     type='button'
                     aria-expanded={menuOpen}
@@ -78,14 +72,6 @@ export function Header() {
                                 {t(item.label)}
                             </Link>
                         ))}
-                        <a
-                            href={profile.cvPath}
-                            onClick={closeMenu}
-                            className='block border-b border-line py-2.5 font-medium text-ink no-underline'
-                            {...getTestIdProp(TestIds.header.cvLink)}
-                        >
-                            {t('nav.downloadCvPdf')}
-                        </a>
                     </nav>
                 </div>
             )}
