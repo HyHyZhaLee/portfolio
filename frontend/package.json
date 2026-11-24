@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && vite build --ssr src/app/routeMeta.ts --outDir node_modules/.tmp/ssr && node scripts/prerender.mjs",
     "preview": "vite preview",
     "check:type": "tsc -b",
     "check:lint": "eslint . --max-warnings 0",

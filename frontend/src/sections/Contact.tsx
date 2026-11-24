@@ -1,9 +1,12 @@
+import { lazy, Suspense } from 'react';
 import { Section } from '../components/Section';
 import { getTestIdProp, TestIds } from '../config/test-ids.config';
 import { profile } from '../content/profile';
 import { site } from '../content/site';
-import { ContactForm } from '../features/contact';
 import { t } from '../i18n/en';
+
+// The form (react-hook-form and zod) loads as its own chunk so it stays off the critical path of the first paint (PF-009).
+const ContactForm = lazy(() => import('../features/contact').then((module) => ({ default: module.ContactForm })));
 
 const linkClass =
     'flex items-center gap-3 rounded-xl border border-line bg-surface-raised px-4 py-3.5 font-ui font-semibold text-ink no-underline hover:border-ink';
@@ -32,7 +35,9 @@ export function Contact() {
                         </li>
                     </ul>
                 </div>
-                <ContactForm />
+                <Suspense fallback={<div aria-hidden className='min-h-[28rem]' />}>
+                    <ContactForm />
+                </Suspense>
             </div>
         </Section>
     );

@@ -327,3 +327,21 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Source**: `frontend/playwright.config.ts`, `frontend/e2e/smoke.spec.ts`, `.github/workflows/e2e.yml`
 - **Verified**: four tests passed against the production build in about 2 s with Chromium headless shell 159 and `@playwright/test` 1.65.1; the first run failed on `getByTestId` until the attribute was set; 2026-11-24
 - **Discovered in**: PF-008
+
+### Per-route prerendered HTML and `vite preview`
+- **Rule / Behavior**: `vite build --ssr src/app/routeMeta.ts --outDir node_modules/.tmp/ssr` bundles a TypeScript module that Node 24 then imports as plain ESM, so a build script can reuse the app's content modules with no new dependency. `vite preview` serves a prerendered `dist/work/<slug>/index.html` only at the trailing-slash URL; `/work/<slug>` falls through to the SPA `index.html` (Vercel serves both). Node's regex `replace` needs a function replacement when the text contains `$`.
+- **Source**: `frontend/scripts/prerender.mjs`, `frontend/src/app/routeMeta.ts`, `frontend/e2e/smoke.spec.ts`
+- **Verified**: `pnpm build` wrote seven files; the smoke test passed in Chromium and WebKit; 2026-11-24
+- **Discovered in**: PF-009
+
+### Lighthouse 13.5.0 against `vite preview`
+- **Rule / Behavior**: `CHROME_PATH` pointed at Playwright's `Google Chrome for Testing` binary (`~/Library/Caches/ms-playwright/chromium-*/chrome-mac-arm64/`) with `--chrome-flags="--headless=new --no-sandbox"` runs `pnpm dlx lighthouse@13.5.0`; `--preset=desktop` selects desktop, and the default is mobile with simulated slow 4G. A server started with a plain background `&` inside a short command can die before the run, so start it as its own background task. Lighthouse 13 adds an "agentic-browsing" category (`llms-txt`, an agent schema) next to the four classic ones. Splitting the contact form (react-hook-form, zod) into a `React.lazy` chunk cut the entry bundle from 164 kB to 127 kB gzip and raised the mobile performance score from 88 to 90 to 92.
+- **Source**: `docs/plans/site/PF-009-polish.md` (Results)
+- **Verified**: four runs before and four after; 2026-11-24
+- **Discovered in**: PF-009
+
+### Playwright Firefox on this macOS machine
+- **Rule / Behavior**: `playwright install firefox webkit` downloads Firefox 159 and WebKit 27.2. WebKit runs the smoke suite; the Firefox binary exits with "Could not find profile folder" even when launched by hand with a fresh `-profile` directory, so its results are unavailable here. `E2E_ALL_BROWSERS=1` adds both projects without touching CI.
+- **Source**: `frontend/playwright.config.ts`
+- **Verified**: WebKit 6 of 6 passed; Firefox failed at launch in three attempts, one with the sandbox disabled; 2026-11-24
+- **Discovered in**: PF-009
