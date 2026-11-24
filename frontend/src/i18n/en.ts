@@ -11,6 +11,7 @@ const en = {
 
     'nav.label': 'Main',
     'nav.mobileLabel': 'Main menu',
+    'nav.about': 'About',
     'nav.work': 'Work',
     'nav.howIWork': 'How I work',
     'nav.skills': 'Skills',

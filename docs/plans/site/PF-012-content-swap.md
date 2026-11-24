@@ -42,7 +42,7 @@ After the first swap went live, the owner asked for these changes; each was appl
 | Name shown twice | The header brand reads "Portfolio" (its accessible name keeps the name); the hero keeps the name |
 | Portrait | The owner's photo, cropped to head and shoulders, 480 px WebP without metadata, in `src/assets/portrait.webp`, beside the name |
 | Hero fits one screen | Tighter hero spacing, a 144 px portrait, a wider pitch (three lines), and every proof point on two lines, so the whole hero fits a 1440 × 800 window |
-| Section order | Experience moves right after About; the header links follow the page order |
+| Section order | Experience moves right after About; the header links follow the page order and start with About |
 | Open source | The section, the `projects` feature, and `fallbackRepos` are removed; SITE-005 is retired. The backend endpoint stays until the owner decides; this site's case study drops its GitHub-list sentence |
 | Contact | The heading leads the left column with the note and the two profile links (each with its address); the form sits in a raised card on the right |
 
