@@ -16,7 +16,12 @@ export function useRecordVisit() {
     });
 }
 
-/** True once any page view of this page load was recorded (202); a skipped, failed, or rate-limited view never counts (D3). */
+/** How many page views of this page load were recorded (202); a skipped, failed, or rate-limited view never counts (D3). */
+export function useRecordedVisitCount(): number {
+    return useMutationState({ filters: { mutationKey: visitKeys.record(), status: 'success' } }).length;
+}
+
+/** True once any page view of this page load was recorded (D3). */
 export function useVisitCounted(): boolean {
-    return useMutationState({ filters: { mutationKey: visitKeys.record(), status: 'success' } }).length > 0;
+    return useRecordedVisitCount() > 0;
 }

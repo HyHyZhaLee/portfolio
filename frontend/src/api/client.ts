@@ -3,9 +3,13 @@ import { ApiError, NETWORK_ERROR, toApiError, UNEXPECTED_RESPONSE } from './erro
 import type { paths } from './schema';
 
 export const CORRELATION_HEADER = 'X-Correlation-Id';
-/** Most calls give up after 15 s; the visit beacon and the contact form use a 75 s client so a cold start on the free tier still succeeds. */
+/**
+ * Most calls give up after 15 s. The health check, the visit beacon, and the contact form wait up to 100 s, so a cold
+ * start of the free-tier API still succeeds: Render took 78.8 s to the first byte on 2026-11-24, past the earlier 75 s
+ * (PF-022).
+ */
 export const DEFAULT_TIMEOUT_MS = 15_000;
-export const COLD_START_TIMEOUT_MS = 75_000;
+export const COLD_START_TIMEOUT_MS = 100_000;
 
 export interface ApiClientOptions {
     baseUrl?: string;

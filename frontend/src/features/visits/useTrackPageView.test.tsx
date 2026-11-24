@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, render, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
+import { createContext, useContext } from 'react';
 import { createMemoryRouter, Outlet, RouterProvider } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { server } from '../../test/server';
@@ -13,15 +14,18 @@ interface VisitBody {
     ref?: string;
 }
 
+/** Whether the page's health check has answered; `RootLayout` passes the real one (PF-022 D4). */
+const ApiOnline = createContext(true);
+
 /** Stands in for `RootLayout`: the hook lives above the routes, so it survives navigation. */
 function Layout() {
-    useTrackPageView();
+    useTrackPageView(useContext(ApiOnline));
     return <Outlet />;
 }
 
 let bodies: VisitBody[];
 
-function renderAt(path: string) {
+function renderAt(path: string, apiOnline = true) {
     const router = createMemoryRouter(
         [
             {
@@ -36,12 +40,21 @@ function renderAt(path: string) {
         { initialEntries: [path] },
     );
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
-    const view = render(
-        <QueryClientProvider client={queryClient}>
-            <RouterProvider router={router} />
-        </QueryClientProvider>,
+    const tree = (online: boolean) => (
+        <ApiOnline value={online}>
+            <QueryClientProvider client={queryClient}>
+                <RouterProvider router={router} />
+            </QueryClientProvider>
+        </ApiOnline>
     );
-    return { router, ...view };
+    const view = render(tree(apiOnline));
+    return {
+        router,
+        ...view,
+        setApiOnline: (online: boolean) => {
+            view.rerender(tree(online));
+        },
+    };
 }
 
 async function navigate(router: ReturnType<typeof renderAt>['router'], to: string) {
@@ -172,6 +185,28 @@ describe('useTrackPageView', () => {
         setOwn(navigator, 'globalPrivacyControl', true);
 
         renderAt('/');
+
+        await settle();
+        expect(bodies).toHaveLength(0);
+    });
+
+    it('waits for the health check, then sends the queued views in route order', async () => {
+        const { router, setApiOnline } = renderAt('/', false);
+        await navigate(router, '/work/scheduling-platform');
+        await settle();
+        expect(bodies).toHaveLength(0);
+
+        setApiOnline(true);
+
+        await waitFor(() => expect(bodies).toEqual([{ path: '/' }, { path: '/work/scheduling-platform' }]));
+        await navigate(router, '/work/x');
+        await waitFor(() => expect(bodies).toHaveLength(3));
+        expect(bodies[2]).toEqual({ path: '/work/x' });
+    });
+
+    it('sends nothing while the API never answers', async () => {
+        const { router } = renderAt('/', false);
+        await navigate(router, '/work/x');
 
         await settle();
         expect(bodies).toHaveLength(0);

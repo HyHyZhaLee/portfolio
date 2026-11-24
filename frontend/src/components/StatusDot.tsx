@@ -1,8 +1,9 @@
-export type StatusTone = 'ok' | 'wake' | 'idle';
+export type StatusTone = 'ok' | 'wake' | 'down' | 'idle';
 
 const toneClass: Record<StatusTone, string> = {
     ok: 'bg-status-ok',
     wake: 'bg-status-wake motion-safe:animate-breathe',
+    down: 'bg-status-down',
     idle: 'bg-status-idle',
 };
 

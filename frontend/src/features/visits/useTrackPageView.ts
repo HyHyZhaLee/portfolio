@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import type { RecordVisitBody } from './api';
 import { useRecordVisit } from './queries';
@@ -11,11 +11,25 @@ import { readTrackingParams, referrerOrigin, rememberRef, setOptOut, storedRef, 
  * production build without an opt-out or Global Privacy Control, with the referrer as its origin (FR-2, P13). The
  * effect is keyed on the pathname only, so anchors, query changes, and the cleanup itself never send another view
  * (KNOWN-FE-002).
+ *
+ * A view goes out only once `apiOnline` is true, that is once the page's health check has answered: routes opened
+ * before then wait in a queue and are sent in order as soon as it does, so a view reaches an awake backend instead of
+ * racing its cold start. A view is still never retried, because a retry could count it twice (PF-022 D4).
  */
-export function useTrackPageView(): void {
+export function useTrackPageView(apiOnline: boolean): void {
     const { pathname, search, hash } = useLocation();
     const navigate = useNavigate();
     const { mutate } = useRecordVisit();
+    const queued = useRef<RecordVisitBody[]>([]);
+
+    const sendQueued = useEffectEvent(() => {
+        if (!apiOnline) {
+            return;
+        }
+        for (const body of queued.current.splice(0)) {
+            mutate(body);
+        }
+    });
 
     const onRouteOpened = useEffectEvent((path: string) => {
         const params = readTrackingParams(search);
@@ -42,10 +56,17 @@ export function useTrackPageView(): void {
         if (ref) {
             body.ref = ref;
         }
-        mutate(body);
+        queued.current.push(body);
+        sendQueued();
     });
 
     useEffect(() => {
         onRouteOpened(pathname);
     }, [pathname]);
+
+    useEffect(() => {
+        if (apiOnline) {
+            sendQueued();
+        }
+    }, [apiOnline]);
 }

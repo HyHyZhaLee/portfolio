@@ -2,6 +2,7 @@ package com.huygialy.portfolio.stats;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.huygialy.portfolio.visit.PageViewRecorded;
 import com.huygialy.portfolio.visit.PageViewTotals;
 import com.huygialy.portfolio.visit.VisitQueryService;
 import java.time.Duration;
@@ -26,6 +27,20 @@ class StatsQueryServiceTest {
         assertThat(visits.calls).isEqualTo(1);
         assertThat(second).isSameAs(first);
         assertThat(first.totalViews()).isEqualTo(1);
+    }
+
+    @Test
+    void aRecordedViewDropsTheCachedTotals() {
+        // PF-022 D5: the summary asked for right after a stored view includes it.
+        final var visits = new CountingVisitQueryService();
+        final var service = new StatsQueryService(visits, new StatsProperties(Duration.ofSeconds(60)));
+        service.summary();
+
+        service.onPageViewRecorded(new PageViewRecorded(Instant.parse("2026-11-24T08:00:00Z")));
+        final var after = service.summary();
+
+        assertThat(visits.calls).isEqualTo(2);
+        assertThat(after.totalViews()).isEqualTo(2);
     }
 
     @Test

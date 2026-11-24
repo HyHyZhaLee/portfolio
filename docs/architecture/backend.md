@@ -185,8 +185,8 @@ Rows marked _built_ exist; the others are planned until the ticket named has run
 | Drop bot traffic | `ClientInfo.bot()`, from `BotFilter` | `platform.client` | PF-004, _built_ |
 | Per-client rate limits | `RateLimiter.check(RateLimit.VISIT or RateLimit.CONTACT, client.rateLimitKey())` | `platform.ratelimit` | PF-004, _built_ |
 | Deterministic OpenAPI output and the snapshot test | `OpenApiConfig`, `OpenApiSnapshotIT` | `platform.openapi` | PF-002, _built_ |
-| Record a page view | `VisitCommandService` (rate limit, bot drop, referrer host and ref tag reduced, one insert) | `visit` | PF-005, _built_ |
-| Read totals for the footer | `StatsQueryService` (cached for `app.stats.cache-ttl`, 60 s by default), which reads page views only through `VisitQueryService.totals()` | `stats` | PF-005, _built_ |
+| Record a page view | `VisitCommandService` (rate limit, bot drop, referrer host and ref tag reduced, one insert, then `PageViewRecorded`) | `visit` | PF-005, PF-022, _built_ |
+| Read totals for the footer | `StatsQueryService` (cached for `app.stats.cache-ttl`, 60 s by default, and dropped on each `PageViewRecorded`), which reads page views only through `VisitQueryService.totals()` | `stats` | PF-005, PF-022, _built_ |
 | Send an email | `EmailSender` port (`Email`, `DeliveryException` nested); `ResendEmailSender` outside the local profile (`RestClient` with timeouts, Resilience4j retry, `ResendProperties`), `LoggingEmailSender` in the local profile | `contact` | PF-006, _built_ |
 | Accept and deliver a contact message | `ContactCommandService` (`submit`, and `deliver` shared with the job), `ContactLifecycle` (one transaction per step), `ContactRetryJob` (compare-and-set claim), `ContactProperties` | `contact` | PF-006, _built_ |
 | List public GitHub repositories | `ProjectQueryService.list()` (1 h snapshot, `CircuitBreaker` bean `gitHubCircuitBreaker` from `ProjectConfig`, last good result else empty), `GitHubClient` port (`GitHubRepo`, `GitHubException` nested) with the `GitHubRestClient` adapter, `RepositoryFilter`, `GitHubProperties` | `project` | PF-007, _built_ |
