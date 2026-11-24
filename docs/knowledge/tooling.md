@@ -357,3 +357,21 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Source**: `frontend/playwright.config.ts`
 - **Verified**: WebKit 6 of 6 passed; Firefox failed at launch in three attempts, one with the sandbox disabled; 2026-11-24
 - **Discovered in**: PF-009
+
+### AWS Architecture Icons package
+- **Rule / Behavior**: The icons page says "We allow customers and partners to use these toolkits and assets to create architecture diagrams" and names whitepapers, presentations, data sheets, and posters; it states no rule on recolouring or cropping, and the zip holds no licence or terms file, so the page is the only source of the terms. Packages ship quarterly (end of January, April, and July; none in Q4); the current one is `Icon-package_07312026`. Service icons sit at `Architecture-Service-Icons_07312026/Arch_{Category}/48/Arch_{Service}_48.svg`, and a "48" SVG declares `width="64px" height="64px"` with a 64-unit viewBox, so size it by the attributes you set, not by its name.
+- **Source**: https://aws.amazon.com/architecture/icons/ and the package zip (14 MB); `frontend/src/assets/aws/`
+- **Verified**: downloaded and unzipped the package, read the page text; 2026-11-24
+- **Discovered in**: PF-022
+
+### Vite asset inlining and `?no-inline`
+- **Rule / Behavior**: Vite inlines an imported asset under 4 kB as a data URI inside the JavaScript chunk; an SVG goes in URL-encoded, which compresses worse than the file. Importing with the `?no-inline` suffix (typed in `vite/client`) keeps it a separate file: for three AWS icons this cut the entry bundle by 3.8 kB gzip (150.6 kB to 146.8 kB) and the browser fetches the files as images, off the critical path.
+- **Source**: `frontend/src/components/diagram/DiagramCanvas.tsx`; `frontend/node_modules/vite/client.d.ts`
+- **Verified**: `pnpm build` output before and after; 2026-11-24
+- **Discovered in**: PF-022
+
+### Playwright `page.evaluate` in the e2e type-check
+- **Rule / Behavior**: `tsconfig.node.json` (which covers `e2e/`) has `lib: ["ES2023"]` and no DOM types, so `page.evaluate(() => document.documentElement.scrollWidth)` fails `check:type` with "Cannot find name 'document'". Pass the expression as a string with an explicit result type instead: `page.evaluate<boolean>('document.documentElement.scrollWidth <= window.innerWidth')`. A standalone Playwright script outside the test runner also needs `selectors.setTestIdAttribute('data-test-id')` before `getByTestId` finds anything.
+- **Source**: `frontend/e2e/smoke.spec.ts`, `frontend/tsconfig.node.json`
+- **Verified**: `check:type` failed, then passed with the string form; the smoke test passes at 360 px; 2026-11-24
+- **Discovered in**: PF-022

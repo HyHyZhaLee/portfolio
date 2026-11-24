@@ -3,8 +3,9 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TestIds } from '../config/test-ids.config';
 import { caseStudies } from '../content/caseStudies';
-import { caseStudyPath, caseStudySlugs } from '../content/caseStudies/slugs';
+import { caseStudyPath, caseStudySlugs, type CaseStudySlug } from '../content/caseStudies/slugs';
 import type { CaseStudy } from '../content/caseStudies/types';
+import { diagrams } from '../content/diagrams';
 import { featuredOrder } from '../content/featuredWork';
 import { renderRoute, renderWithProviders } from '../test/renderWithProviders';
 import { CaseStudyArticle } from './CaseStudyArticle';
@@ -43,6 +44,39 @@ describe('CaseStudyPage', () => {
         expect(screen.getByRole('heading', { level: 2, name: 'Outcome' })).toBeInTheDocument();
         expect(screen.queryByRole('heading', { level: 2, name: /^Deep dive/ })).not.toBeInTheDocument();
         expect(screen.queryByRole('heading', { level: 2, name: 'What I learned' })).not.toBeInTheDocument();
+    });
+
+    it('renders the architecture figure for a study with a diagram (PF-022)', () => {
+        renderRoute(caseStudyPath('ai-assessment-integration'));
+
+        expect(screen.getByTestId(TestIds.caseStudy.diagram)).toBeInTheDocument();
+        expect(screen.getByRole('img', { name: 'Frontera integration architecture' })).toBeInTheDocument();
+    });
+
+    it('renders no architecture figure for a study without a diagram (PF-022 FR-9)', () => {
+        // Every published study has a diagram now, so a stand-in slug with no diagram file proves the article still renders without one.
+        const plain: CaseStudy = { ...caseStudies[firstSlug], slug: 'study-without-diagram' as CaseStudySlug };
+        expect(diagrams[plain.slug]).toBeUndefined();
+        renderWithProviders(<CaseStudyArticle study={plain} />);
+
+        expect(screen.getByRole('heading', { level: 1, name: plain.title })).toBeInTheDocument();
+        expect(screen.queryByTestId(TestIds.caseStudy.diagram)).not.toBeInTheDocument();
+    });
+
+    it('starts the next case study with no diagram step pinned (PF-022)', async () => {
+        const user = userEvent.setup();
+        const { router } = renderRoute(caseStudyPath('this-site'));
+        const third = screen.getAllByTestId(TestIds.caseStudy.diagramStep)[2];
+        if (!third) throw new Error('This Portfolio needs at least three steps');
+        await user.click(third);
+        expect(third).toHaveAttribute('aria-pressed', 'true');
+
+        await user.click(screen.getByTestId(TestIds.caseStudy.nextLink));
+
+        expect(router.state.location.pathname).toBe(caseStudyPath('smart-pole'));
+        expect(screen.getByRole('img', { name: 'Smart Pole system layers' })).toBeInTheDocument();
+        for (const step of screen.getAllByTestId(TestIds.caseStudy.diagramStep)) expect(step).toHaveAttribute('aria-pressed', 'false');
+        for (const node of screen.getAllByTestId(TestIds.caseStudy.diagramNode)) expect(node).not.toHaveAttribute('data-dim');
     });
 
     it('renders the 404 page for an unknown case study', () => {

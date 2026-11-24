@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { caseStudies } from './caseStudies';
 import { caseStudySlugs, isCaseStudySlug } from './caseStudies/slugs';
+import { diagrams } from './diagrams';
 import { degrees, awards } from './education';
 import { roles } from './experience';
 import { featuredOrder, featuredWork, featuredWorkIntro } from './featuredWork';
@@ -18,6 +19,7 @@ function emptyStringPaths(value: unknown, path: string): string[] {
 
 const allContent = {
     caseStudies,
+    diagrams,
     featuredWorkIntro,
     featuredWork,
     howIWorkIntro,
@@ -65,6 +67,31 @@ describe('content shape', () => {
         expect(principles).toHaveLength(5);
         expect(roles).toHaveLength(3);
         expect(roles.filter((role) => role.current)).toHaveLength(1);
+    });
+
+    it('keeps every architecture diagram internally consistent (PF-022)', () => {
+        const entries = Object.entries(diagrams);
+        expect(entries.length).toBeGreaterThan(0);
+        for (const [slug, diagram] of entries) {
+            expect(isCaseStudySlug(slug)).toBe(true);
+            const zoneIds = diagram.zones.map((zone) => zone.id);
+            const nodeIds = diagram.nodes.map((node) => node.id);
+            const edgeIds = diagram.edges.map((edge) => edge.id);
+            for (const ids of [zoneIds, nodeIds, edgeIds]) expect(new Set(ids).size).toBe(ids.length);
+            for (const edge of diagram.edges) {
+                expect(nodeIds).toContain(edge.from.node);
+                expect(nodeIds).toContain(edge.to.node);
+            }
+            for (const step of diagram.steps) {
+                // A step highlights at least one edge or node (Smart Pole's first step is the firmware alone).
+                expect(step.edges.length + (step.nodes?.length ?? 0)).toBeGreaterThanOrEqual(1);
+                for (const id of step.edges) expect(edgeIds).toContain(id);
+                for (const id of step.nodes ?? []) expect(nodeIds).toContain(id);
+            }
+            const inside = (x: number, y: number, w = 0, h = 0) => x >= 0 && y >= 0 && x + w <= diagram.width && y + h <= diagram.height;
+            for (const box of [...diagram.zones, ...diagram.nodes]) expect(inside(box.x, box.y, box.w, box.h)).toBe(true);
+            for (const step of diagram.steps) expect(inside(step.badge.x, step.badge.y)).toBe(true);
+        }
     });
 
     it('has no empty or whitespace-only content string', () => {

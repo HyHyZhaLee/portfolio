@@ -20,6 +20,7 @@ docs/plans/
 | `visits` | Visit tracking and the stats summary | PF-005, PF-023 |
 | `contact` | The contact form and email delivery | PF-006 |
 | `projects` | The open-source projects list | PF-007 |
+| `content` | The content API: backend-owned portfolio content, its Flyway seed, and the frontend snapshot | PF-014, PF-020 |
 
 Add a domain only when a ticket fits none of these, and list it here. A docs or tooling chore without a plan needs no folder.
 

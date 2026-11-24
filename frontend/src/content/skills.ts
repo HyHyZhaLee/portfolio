@@ -11,7 +11,7 @@ export interface SkillGroup {
     skills: readonly Skill[];
 }
 
-export const skillsIntro = 'The tools I use in my work. Select a skill to see the case studies that used it.';
+export const skillsIntro = 'The tools I use in my work. Select a skill to see the projects that used it.';
 
 const AI = 'ai-assessment-integration';
 const SCHED = 'scheduling-platform';

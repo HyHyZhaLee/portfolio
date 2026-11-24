@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
+import { glyphShapes } from '../../components/diagram/glyphs';
 import { StatusDot, type StatusTone } from '../../components/StatusDot';
 import { getTestIdProp, TestIds } from '../../config/test-ids.config';
 import { caseStudyPath } from '../../content/caseStudies/slugs';
@@ -43,12 +44,7 @@ export function SystemPanel() {
             what: 'apiStatus.browserWhat',
             tone: 'ok',
             label: t('apiStatus.browserState'),
-            icon: (
-                <svg {...iconProps}>
-                    <rect x='3' y='4.5' width='18' height='15' rx='2.5' />
-                    <path d='M3 9h18' />
-                </svg>
-            ),
+            icon: <svg {...iconProps}>{glyphShapes.browser}</svg>,
         },
         {
             key: 'frontend',
@@ -56,13 +52,7 @@ export function SystemPanel() {
             what: 'apiStatus.frontendWhat',
             tone: 'ok',
             label: t('apiStatus.frontendState'),
-            icon: (
-                <svg {...iconProps}>
-                    <path d='M12 3.5l8.5 4.5L12 12.5 3.5 8 12 3.5z' />
-                    <path d='M3.5 12L12 16.5 20.5 12' />
-                    <path d='M3.5 16L12 20.5 20.5 16' />
-                </svg>
-            ),
+            icon: <svg {...iconProps}>{glyphShapes.layers}</svg>,
         },
         {
             key: 'api',
@@ -71,13 +61,7 @@ export function SystemPanel() {
             tone: apiTone[status.api],
             label: t(`apiStatus.api.${status.api}`),
             testId: TestIds.apiStatus.apiState,
-            icon: (
-                <svg {...iconProps}>
-                    <rect x='4' y='4' width='16' height='6.5' rx='1.8' />
-                    <rect x='4' y='13.5' width='16' height='6.5' rx='1.8' />
-                    <path d='M7.5 7.25h.01M7.5 16.75h.01' strokeWidth='2.4' strokeLinecap='round' />
-                </svg>
-            ),
+            icon: <svg {...iconProps}>{glyphShapes.server}</svg>,
         },
         {
             key: 'database',
@@ -86,13 +70,7 @@ export function SystemPanel() {
             tone: databaseTone[status.database],
             label: t(`apiStatus.database.${status.database}`),
             testId: TestIds.apiStatus.databaseState,
-            icon: (
-                <svg {...iconProps}>
-                    <ellipse cx='12' cy='6' rx='7.5' ry='2.8' />
-                    <path d='M4.5 6v12c0 1.55 3.36 2.8 7.5 2.8s7.5-1.25 7.5-2.8V6' />
-                    <path d='M4.5 12c0 1.55 3.36 2.8 7.5 2.8s7.5-1.25 7.5-2.8' />
-                </svg>
-            ),
+            icon: <svg {...iconProps}>{glyphShapes.database}</svg>,
         },
     ];
     const answered = status.api === 'online' || status.api === 'unreachable';
