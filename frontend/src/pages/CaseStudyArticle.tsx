@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { caseStudyMeta } from '../app/routeMeta';
 import { useDocumentMeta } from '../app/useDocumentMeta';
 import { ChipList } from '../components/ChipList';
 import { getTestIdProp, TestIds } from '../config/test-ids.config';
@@ -6,7 +7,6 @@ import { caseStudies } from '../content/caseStudies';
 import { caseStudyPath } from '../content/caseStudies/slugs';
 import type { CaseStudy } from '../content/caseStudies/types';
 import { nextInFeaturedOrder } from '../content/featuredWork';
-import { profile } from '../content/profile';
 import { t } from '../i18n/en';
 import { GlanceAside } from './GlanceAside';
 
@@ -18,7 +18,7 @@ interface Block {
 
 /** One case study in the order of content plan §6.3, with its own title and meta description (FR-5, FR-6). */
 export function CaseStudyArticle({ study }: { study: CaseStudy }) {
-    useDocumentMeta({ title: t('meta.caseStudyTitle', { title: study.title, name: profile.name }), description: study.metaDescription });
+    useDocumentMeta(caseStudyMeta(study));
     const next = caseStudies[nextInFeaturedOrder(study.slug)];
     const blocks: Block[] = [
         { heading: t('caseStudy.context'), paragraphs: study.context },

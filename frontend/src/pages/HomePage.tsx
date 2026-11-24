@@ -1,9 +1,7 @@
 import { useState } from 'react';
+import { homeMeta } from '../app/routeMeta';
 import { useDocumentMeta } from '../app/useDocumentMeta';
-import { profile } from '../content/profile';
-import { site } from '../content/site';
 import type { Skill } from '../content/skills';
-import { t } from '../i18n/en';
 import { About } from '../sections/About';
 import { Contact } from '../sections/Contact';
 import { Education } from '../sections/Education';
@@ -16,7 +14,7 @@ import { Skills } from '../sections/Skills';
 
 /** Every section renders from content at once; only the hero panel and the footer dot wait for the API (FR-1). */
 export function HomePage() {
-    useDocumentMeta({ title: t('meta.homeTitle', { name: profile.name, title: profile.title }), description: site.homeDescription });
+    useDocumentMeta(homeMeta());
     // The selected skill is shared by two sibling sections (P5).
     const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
     const toggleSkill = (skill: Skill) => {

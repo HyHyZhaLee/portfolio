@@ -21,6 +21,7 @@ export default defineConfig(({ mode }) => {
     const backendUrl = `http://localhost:${port(env.SERVER_PORT, 8080)}`;
     return {
         plugins: [react(), tailwindcss()],
+        build: { sourcemap: true },
         server: {
             port: port(env.FRONTEND_PORT, 5173),
             strictPort: true,

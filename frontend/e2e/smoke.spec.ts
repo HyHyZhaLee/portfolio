@@ -22,6 +22,19 @@ test('a case-study route renders its title', async ({ page }) => {
     await expect(page).not.toHaveTitle(/Page not found/);
 });
 
+// PF-009: the build writes one HTML file per case study (vite preview serves it at the trailing-slash URL; Vercel serves both), so a link preview reads the study's own tags without running JavaScript.
+test('a case-study route is served with its own title in the HTML source', async ({ request }) => {
+    const html = await (await request.get('/work/scheduling-platform/')).text();
+    expect(html).toMatch(/<title>[^<]*\| Will Ly<\/title>/);
+    expect(html).toContain('og:title');
+    expect(html).not.toContain('Full-stack Software Engineer');
+});
+
+test('an unknown case-study slug still shows the 404 page', async ({ page }) => {
+    await page.goto('/work/no-such-study');
+    await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
+});
+
 test('an unknown route shows the 404 page', async ({ page }) => {
     await page.goto('/no-such-page');
     await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
