@@ -30,12 +30,12 @@ export const profile: Profile = {
     name: 'Will Ly',
     title: 'Full-stack Software Engineer',
     where: 'Ho Chi Minh City, working remotely with a U.S. healthtech team',
-    pitch: 'I build backend services, integrations and web apps for healthcare products, with a focus on reliability and testing.',
+    pitch: 'I turn complex healthcare workflows into reliable software: event-driven AWS integrations and React apps that ship fast and stay tested.',
     stack: ['Java 21', 'Spring Boot', 'TypeScript', 'React', 'PostgreSQL', 'AWS'],
     proofPoints: [
         { claim: 'Event-driven AWS integration in production', where: 'Frontera integration, v1.0.0 in May 2026', slug: 'ai-assessment-integration' },
         { claim: 'PostgreSQL Row-Level Security tenant isolation', where: 'TPMA multi-tenancy, in production July 2026', slug: 'postgres-rls-multi-tenancy' },
-        { claim: 'Test coverage ~20% → 82%', where: 'TPMA/DCA web port, with an 80% CI gate', slug: 'legacy-app-web-port' },
+        { claim: 'Two legacy apps ported to React, in UAT in ~4 weeks', where: 'TPMA (Angular) and DCA (iPad) web port', slug: 'legacy-app-web-port' },
     ],
     about: [
         "I'm a full-stack software engineer at Xolv, a U.S. healthtech company. I build backend services, system integrations and web applications for products that clinicians and families use, across three healthcare products. What I care about most is reliability: tests that run in CI, and fixing a problem at its root instead of patching the symptom.",

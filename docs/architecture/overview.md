@@ -19,8 +19,8 @@ flowchart LR
 
 | Component | Responsibility | Hosting | Ticket |
 |---|---|---|---|
-| Frontend (`frontend/`) | Renders the portfolio from static content; calls the API for the counter, open-source list, contact form, and status dot; never waits for it | Vercel Hobby | PF-002, PF-003 |
-| Backend (`backend/`) | Records visits and serves stats, accepts and delivers contact messages, lists GitHub projects, reports health | Render Free, Docker, 512 MB / 0.1 CPU | PF-002, PF-004, PF-005 |
+| Frontend (`frontend/`) | Renders the portfolio from static content; calls the API for the counter, contact form, and status dot; never waits for it | Vercel Hobby | PF-002, PF-003 |
+| Backend (`backend/`) | Records visits and serves stats, accepts and delivers contact messages, lists GitHub projects (no page calls it since PF-012), reports health | Render Free, Docker, 512 MB / 0.1 CPU | PF-002, PF-004, PF-005 |
 | Database | `page_view` table (built in PF-005) and `contact_message` table (built in PF-006), migrated by Flyway | Neon Free PostgreSQL 17 | PF-005, PF-006 |
 | Email API | Delivers contact messages to the owner's inbox over HTTPS | Free tier | PF-006 |
 | GitHub API | Source of the public repository list | Public API; an optional read-only token only raises the rate limit | PF-007 |
@@ -37,7 +37,7 @@ flowchart LR
 
 ## Resilience on the free tier
 
-- The frontend's content is static, so a sleeping or failing backend only delays the counter, open-source list, and contact form (Non-Negotiable 1).
+- The frontend's content is static, so a sleeping or failing backend only delays the counter and the contact form (Non-Negotiable 1).
 - The first visit request doubles as a warm-up call while the visitor reads.
 - GitHub failures fall back to cached or static data; email failures are retried by a scheduled job.
 - Everything is containerized and configured by environment variables, so the backend can move to another host without code changes.

@@ -6,10 +6,10 @@ import { renderWithProviders } from '../test/renderWithProviders';
 import { Header } from './Header';
 
 const sectionLinks = [
+    { name: 'Experience', href: '/#experience' },
     { name: 'Work', href: '/#work' },
     { name: 'How I work', href: '/#how-i-work' },
     { name: 'Skills', href: '/#skills' },
-    { name: 'Experience', href: '/#experience' },
     { name: 'Contact', href: '/#contact' },
 ];
 
@@ -18,6 +18,15 @@ function mobileNav(): HTMLElement | null {
 }
 
 describe('Header', () => {
+    it('shows "Portfolio" as the home link, with the name for screen readers, since the hero carries the name', () => {
+        renderWithProviders(<Header />);
+
+        const home = screen.getByTestId(TestIds.header.homeLink);
+        expect(home).toHaveTextContent('Portfolio');
+        expect(home).toHaveAccessibleName('Will Ly portfolio, home');
+        expect(home).toHaveAttribute('href', '/');
+    });
+
     it('starts with the mobile menu closed', () => {
         renderWithProviders(<Header />);
 

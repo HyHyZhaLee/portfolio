@@ -1,3 +1,4 @@
+import portrait from '../assets/portrait.webp';
 import { ButtonLink } from '../components/ButtonLink';
 import { ChipList } from '../components/ChipList';
 import { DownloadIcon } from '../components/DownloadIcon';
@@ -7,17 +8,30 @@ import { SystemPanel } from '../features/api-status';
 import { t } from '../i18n/en';
 import { ProofPoints } from './ProofPoints';
 
-/** Name, title, pitch, stack, proof points, and the three actions: the 10-second test (FR-2). */
+/** Portrait, name, title, pitch, stack, proof points, and the three actions: the 10-second test (FR-2). */
 export function Hero() {
     return (
         <section aria-labelledby='hero-heading' className='pt-8 pb-14 lg:pt-10 lg:pb-18'>
             <div className='wrap grid gap-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-center lg:gap-16'>
                 <div>
-                    <h1 id='hero-heading' className='text-display font-bold' {...getTestIdProp(TestIds.home.heading)}>
-                        {profile.name}
-                    </h1>
-                    <p className='mt-3 font-ui text-subtitle font-medium tracking-tight'>{profile.title}</p>
-                    <p className='mt-1.5 font-ui text-label text-muted'>{profile.where}</p>
+                    <div className='flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-7'>
+                        <img
+                            src={portrait}
+                            alt={t('hero.portraitAlt', { name: profile.name })}
+                            width={480}
+                            height={480}
+                            fetchPriority='high'
+                            className='size-28 shrink-0 rounded-full border-4 border-surface-raised bg-surface-sunk object-cover shadow-panel sm:size-36 lg:size-44'
+                            {...getTestIdProp(TestIds.hero.portrait)}
+                        />
+                        <div className='min-w-0'>
+                            <h1 id='hero-heading' className='text-display font-bold' {...getTestIdProp(TestIds.home.heading)}>
+                                {profile.name}
+                            </h1>
+                            <p className='mt-3 font-ui text-subtitle font-medium tracking-tight'>{profile.title}</p>
+                            <p className='mt-1.5 font-ui text-label text-pretty text-muted'>{profile.where}</p>
+                        </div>
+                    </div>
                     <p className='mt-4.5 max-w-[42ch] text-lead'>{profile.pitch}</p>
                     <ChipList items={profile.stack} label={t('hero.stackLabel')} className='mt-4' />
                     <ProofPoints />

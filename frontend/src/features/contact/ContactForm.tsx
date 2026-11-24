@@ -19,7 +19,7 @@ const FIELD_ORDER: readonly VisibleField[] = ['name', 'email', 'message'];
 
 const labelClass = 'font-ui text-label font-semibold text-ink';
 const inputClass =
-    'w-full rounded-control border border-line bg-surface-raised px-3.5 py-3 font-ui text-base text-ink aria-invalid:border-status-wake aria-invalid:border-2';
+    'w-full rounded-control border border-line bg-surface px-3.5 py-3 font-ui text-base text-ink aria-invalid:border-status-wake aria-invalid:border-2';
 const errorClass = 'font-ui text-caption text-ink';
 const buttonClass =
     'inline-flex items-center justify-center gap-2 rounded-control border-[1.5px] px-5 py-3.5 font-ui text-base leading-none font-semibold transition-colors';
@@ -88,7 +88,7 @@ export function ContactForm() {
                 ref={focusOnMount}
                 role='status'
                 tabIndex={-1}
-                className='grid max-w-xl justify-items-start gap-3 rounded-panel border border-line bg-surface-raised px-5 py-5 font-ui'
+                className='grid justify-items-start gap-3 font-ui'
                 {...getTestIdProp(TestIds.contact.successRegion)}
             >
                 <p className='text-title font-semibold text-ink'>{t('contact.form.success')}</p>
@@ -118,7 +118,7 @@ export function ContactForm() {
             onSubmit={(event) => {
                 void onSubmit(event);
             }}
-            className='relative grid max-w-xl gap-5'
+            className='relative grid gap-5'
             {...getTestIdProp(TestIds.contact.form)}
         >
             <h3 id='contact-form-heading' className='text-title font-semibold'>

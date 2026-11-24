@@ -33,7 +33,7 @@ export const thisSite: CaseStudy = {
         'Cold-start handling. A status panel in the hero shows a calm "waking up" state, retries quietly and falls back to a neutral status, while the rest of the page stays unchanged.',
         'Private visit stats. A visit is stored as a keyed hash (HMAC-SHA256 over the IP address and user agent), with the path, the referrer host and a device class. There are no cookies and no raw IP address. The ?notrack=1 link opts a browser out, and the Global Privacy Control signal is honored.',
         'A contact outbox with retries. A message is saved first, then emailed outside any open database transaction. A failed send is marked and retried by a scheduled job, up to three attempts in total. A hidden honeypot field catches bots, and visits and messages are rate-limited (30 visits per minute, 3 messages per hour per client).',
-        "A GitHub fallback and link previews. Projects come from the GitHub API with an hour of caching; if GitHub fails, the last good result is used, then a bundled list. A small build step writes one HTML file per case study, so a shared link shows that page's title and description without server-side rendering.",
+        "Link previews. A small build step writes one HTML file per case study, so a shared link shows that page's title and description without server-side rendering.",
     ],
     deepDive: {
         topic: 'A contact form that survives outages',

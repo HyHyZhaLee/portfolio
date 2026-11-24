@@ -15,8 +15,5 @@ export const contactAccepted = http.post(
     () => new HttpResponse(null, { status: 202, headers: { 'X-Correlation-Id': 'contact-default-reference' } }),
 );
 
-/** No live repositories: every page renders the Open source list, which asks once health answers and then keeps its fallback (PF-007 P16). */
-export const projectsEmpty = http.get('*/api/v1/projects', () => HttpResponse.json({ items: [] }));
-
 /** Default API handlers shared by every test; override per test with `server.use(...)`. */
-export const handlers: RequestHandler[] = [healthUp, visitRecorded, statsEmpty, contactAccepted, projectsEmpty];
+export const handlers: RequestHandler[] = [healthUp, visitRecorded, statsEmpty, contactAccepted];

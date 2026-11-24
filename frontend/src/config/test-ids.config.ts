@@ -17,6 +17,7 @@ export const TestIds = {
         workLink: 'hero-work-link',
         cvLink: 'hero-cv-link',
         contactLink: 'hero-contact-link',
+        portrait: 'hero-portrait-image',
         proofLink: 'hero-proof-link',
     },
     work: {
@@ -58,13 +59,6 @@ export const TestIds = {
     },
     footer: {
         sourceLink: 'footer-source-link',
-    },
-    projects: {
-        statusText: 'projects-status-text',
-        repoLink: 'projects-repo-link',
-    },
-    openSource: {
-        profileLink: 'open-source-profile-link',
     },
     stats: {
         counterText: 'stats-counter-text',
