@@ -18,6 +18,7 @@ import com.huygialy.portfolio.contact.EmailSender.Email;
 import com.huygialy.portfolio.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * The Resend adapter against WireMock (PF-006 S1): the request shape, the bounded retry with one idempotency key per
@@ -33,10 +34,15 @@ class ResendEmailSenderIT {
 
     private final EmailSender sender;
     private final WireMockServer wireMock;
+    private final ResendProperties properties;
+    private final JsonMapper jsonMapper;
 
-    ResendEmailSenderIT(EmailSender sender, WireMockServer wireMock) {
+    ResendEmailSenderIT(
+            EmailSender sender, WireMockServer wireMock, ResendProperties properties, JsonMapper jsonMapper) {
         this.sender = sender;
         this.wireMock = wireMock;
+        this.properties = properties;
+        this.jsonMapper = jsonMapper;
     }
 
     @BeforeEach
@@ -58,7 +64,34 @@ class ResendEmailSenderIT {
                         .withRequestBody(equalToJson("""
                                 {"from": "Portfolio <onboarding@resend.dev>", "to": ["owner@example.com"],
                                  "subject": "New portfolio contact message (#901)", "text": "Synthetic body",
-                                 "reply_to": "visitor@example.com"}
+                                 "reply_to": "visitor@example.com",
+                                 "tags": [{"name": "environment", "value": "production"}]}
+                                """)));
+    }
+
+    @Test
+    void aNonProductionEnvironmentPrefixesTheSubjectAndTagsTheEmail() {
+        wireMock.stubFor(post(EMAILS).willReturn(okJson("{\"id\":\"email-staging\"}")));
+        final var staging = new ResendEmailSender(
+                new ResendProperties(
+                        properties.apiKey(),
+                        properties.toEmail(),
+                        properties.fromEmail(),
+                        properties.baseUrl(),
+                        properties.connectTimeout(),
+                        properties.readTimeout(),
+                        properties.maxTries(),
+                        properties.backoff(),
+                        "staging"),
+                jsonMapper);
+
+        assertThat(staging.send(EMAIL)).isEqualTo("email-staging");
+
+        wireMock.verify(1, postRequestedFor(urlEqualTo(EMAILS)).withRequestBody(equalToJson("""
+                                {"from": "Portfolio <onboarding@resend.dev>", "to": ["owner@example.com"],
+                                 "subject": "[staging] New portfolio contact message (#901)", "text": "Synthetic body",
+                                 "reply_to": "visitor@example.com",
+                                 "tags": [{"name": "environment", "value": "staging"}]}
                                 """)));
     }
 

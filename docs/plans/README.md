@@ -15,7 +15,7 @@ docs/plans/
 
 | Domain | Holds | Tickets |
 |---|---|---|
-| `platform` | Scaffolding, the cross-cutting backend platform (errors, correlation IDs, security, rate limits, client info), CI, and deployment | PF-002, PF-004, PF-008, PF-013, PF-024 |
+| `platform` | Scaffolding, the cross-cutting backend platform (errors, correlation IDs, security, rate limits, client info), CI, and deployment | PF-002, PF-004, PF-008, PF-013, PF-024, PF-027 |
 | `site` | The static site: layout, sections, content, routes, SEO, and launch | PF-003, PF-009 |
 | `visits` | Visit tracking and the stats summary | PF-005, PF-023 |
 | `contact` | The contact form and email delivery | PF-006 |

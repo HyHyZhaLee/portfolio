@@ -18,7 +18,7 @@ Facts about Vercel, Render, and Neon observed on this site's own projects. Versi
 
 ### The Vercel CLI runs from the repository root for a project with a Root Directory
 - **Rule / Behavior**: With `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` set, `vercel pull --yes --environment=production` run from the repository root writes `.vercel/project.json` (with `rootDirectory: frontend` and the dashboard build settings) and `.vercel/.env.production.local`. `vercel build --prod` from the root then builds `frontend/` with the `installCommand` and `buildCommand` from `frontend/vercel.json` when the dashboard commands are blank, writes `.vercel/output` (static files plus the SPA rewrite route) at the root, and also leaves files under `frontend/.vercel/static-build/`, which Prettier would check unless ignored.
-- **Source**: the `deploy` job in `.github/workflows/frontend.yml`; `frontend/.prettierignore`
+- **Source**: the `deploy` job in `.github/workflows/deploy.yml` (`frontend.yml` before PF-027); `frontend/.prettierignore`
 - **Verified**: local `vercel pull` and `vercel build --prod` with Vercel CLI 66.2.0, the dashboard commands blanked in the local `.vercel/project.json`; 2026-11-23
 - **Discovered in**: PF-013
 
@@ -27,6 +27,18 @@ Facts about Vercel, Render, and Neon observed on this site's own projects. Versi
 - **Source**: Vercel Project Settings → Environment Variables; `frontend/src/api/client.ts`
 - **Verified**: adding `VITE_API_URL` for Production; 2026-11-24
 - **Discovered in**: PF-013
+
+### Custom environments need Pro; Hobby stages on Preview
+- **Rule / Behavior**: On a Hobby team, Project Settings → Environments lists Production, Preview, and Development; the Custom Environments panel shows "0 Included" and "This feature is available on the Pro plan", and creating one asks to upgrade. Preview has a Branch Tracking switch: with it off, Vercel creates no preview deployment from a branch by itself, while the CLI can still create one. Deployment Protection lives under Settings → Security → Deployment Protection (`/settings/deployment-protection`); its Vercel Authentication switch ("Require Log In", Standard Protection) covers non-production deployments and can be switched off on Hobby, while Password Protection needs Pro.
+- **Source**: Vercel Project Settings → Environments and → Deployment Protection
+- **Verified**: the owner's dashboard for `will-ly-portfolio`, Branch Tracking switched off and Vercel Authentication disabled for staging; 2026-11-25
+- **Discovered in**: PF-027
+
+### An unclaimed `*.vercel.app` name answers `DEPLOYMENT_NOT_FOUND`
+- **Rule / Behavior**: A request to a `*.vercel.app` host that no deployment or alias uses answers 404 with `server: Vercel` and `x-vercel-error: DEPLOYMENT_NOT_FOUND`, so a read-only `curl -sI` shows whether an alias name looks free before `vercel alias set` claims it.
+- **Source**: `curl -sI https://will-ly-portfolio-staging.vercel.app`
+- **Verified**: before the staging alias was first assigned; 2026-11-25
+- **Discovered in**: PF-027
 
 ## Render
 
@@ -38,7 +50,7 @@ Facts about Vercel, Render, and Neon observed on this site's own projects. Versi
 
 ### A deploy hook with `ref` deploys one exact commit and turns auto-deploy off
 - **Rule / Behavior**: A `POST` (or `GET`) to the service's deploy hook URL starts a deploy. Appending `&ref=<commit SHA>` (full or short) deploys exactly that commit, answering 200 when the deploy starts and 404 when the SHA is not in the linked repository. Using `ref` turns the service's automatic deploys off, so the caller becomes the only path to production. The hook URL carries a key, so it is a secret.
-- **Source**: Render docs, Deploy Hooks and Deploying a Specific Commit; the `deploy` job in `.github/workflows/backend.yml`
+- **Source**: Render docs, Deploy Hooks and Deploying a Specific Commit; the `deploy` job in `.github/workflows/deploy.yml` (`backend.yml` before PF-027)
 - **Verified**: Render docs read on 2026-11-24; the first run after the PF-013 merge exercises it
 - **Discovered in**: PF-013
 
@@ -54,6 +66,12 @@ Facts about Vercel, Render, and Neon observed on this site's own projects. Versi
 - **Verified**: two failed deploys at 09:39 and 10:30 UTC; a cache-free local build then downloaded all 566 files from the mirror; 2026-11-24
 - **Discovered in**: PF-024
 
+### One pool of free instance hours for every service in the workspace
+- **Rule / Behavior**: Render Free gives each workspace 750 instance hours a month, shared by all its free web services; a sleeping service uses none. When the pool runs out, every free service in the workspace is suspended until the next month. A keep-alive pinger on one service (about 744 hours) would leave nothing for a second one, so this site runs staging and production without a pinger and lets both sleep after 15 idle minutes.
+- **Source**: Render docs, Free instance types (Free instance hours)
+- **Verified**: Render docs read on 2026-11-25, when the staging service `will-ly-portfolio-api-staging` was added
+- **Discovered in**: PF-027
+
 ## Neon
 
 ### The JDBC URL comes from the direct connection string
@@ -61,3 +79,9 @@ Facts about Vercel, Render, and Neon observed on this site's own projects. Versi
 - **Source**: Neon Console → Connect; `backend/src/main/resources/application.yml`
 - **Verified**: the first Render deploy connected over the direct host and Flyway created `page_view` and `contact_message`; 2026-11-24
 - **Discovered in**: PF-013
+
+### Each Free project has its own compute quota
+- **Rule / Behavior**: Neon Free allows up to 100 projects, each with its own 100 CU-hours of compute a month, and up to 10 branches per project; branches share their project's quota. A separate project for staging therefore leaves production's compute untouched and starts empty, while a branch of the production database would copy its rows and spend production's CU-hours.
+- **Source**: Neon docs, Plans; Neon Console → project usage
+- **Verified**: Neon docs read and the production project's usage (about 2 CU-hours in its first day) checked when the staging project was created; 2026-11-25
+- **Discovered in**: PF-027

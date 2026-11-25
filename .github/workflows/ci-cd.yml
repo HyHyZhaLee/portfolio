@@ -1,0 +1,221 @@
+# One pipeline per commit (PF-027). A pull request: changes → checks → ci-ok. A push to main: every check → ci-ok →
+# staging (deploy, smoke). A release tag vX.Y.Z: release-gate → production (deploy, smoke) → release.
+name: ci-cd
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  # On main: re-runs every check and redeploys staging. On a release tag: redeploys that version to production through
+  # the release gate, which is also the rollback (PF-027 P14).
+  workflow_dispatch:
+
+permissions: {}
+
+# A newer run cancels an older one only on pull requests. On main and on tags a run waits for the one in progress, so
+# deploys happen in commit order and are never stopped halfway (PF-027 P10).
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # Pull requests run only the checks for changed areas; main and manual runs run everything (PF-027 D15).
+  changes:
+    if: github.ref_type != 'tag'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      backend: ${{ github.event_name == 'pull_request' && steps.filter.outputs.backend || 'true' }}
+      frontend: ${{ github.event_name == 'pull_request' && steps.filter.outputs.frontend || 'true' }}
+    steps:
+      - name: List the areas this pull request changes
+        id: filter
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - '.github/**'
+              - 'scripts/**'
+            frontend:
+              - 'frontend/**'
+              - '.nvmrc'
+              - 'backend/openapi/openapi.json'
+              - '.github/**'
+
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+      - name: Format, unit and integration tests, branch coverage
+        run: ./gradlew check
+      # OpenApiSnapshotIT rewrites the snapshot during check, so a diff means an API change was not committed (make openapi).
+      - name: OpenAPI snapshot is up to date
+        run: git diff --exit-code -- openapi/openapi.json
+
+  frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-frontend
+      - name: Generated API types match the OpenAPI snapshot
+        run: pnpm gen:api && git diff --exit-code -- src/api/schema.d.ts
+      - run: pnpm check:type
+      - run: pnpm check:lint
+      - run: pnpm check:format
+      - run: pnpm coverage
+      - run: pnpm build
+
+  # Every page works with the API unreachable (Non-Negotiable 1), checked in a real browser against the production build.
+  e2e:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-frontend
+        with:
+          playwright: "true"
+      - run: pnpm test:e2e
+      - name: Upload the Playwright traces on failure
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-traces
+          path: frontend/node_modules/.tmp/test-results
+          include-hidden-files: true
+          retention-days: 7
+
+  # A new dependency with a high or critical vulnerability fails the pull request (PF-027 D13).
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec # v5.0.1
+        with:
+          fail-on-severity: high
+
+  # The only required status check (PF-027 P3): red when any check failed or was cancelled, green when each passed or
+  # was skipped because its area is unchanged.
+  ci-ok:
+    if: always() && github.ref_type != 'tag'
+    needs: [changes, backend, frontend, e2e, dependency-review]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Every check passed or was skipped
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Check results: $RESULTS"
+          case " $RESULTS " in
+            *" failure "* | *" cancelled "*) exit 1 ;;
+          esac
+
+  # needs.ci-ok.result is checked explicitly: dependency-review is skipped on main, and a skipped job further up the
+  # chain would otherwise skip this one too.
+  staging:
+    needs: ci-ok
+    if: >-
+      !cancelled() && needs.ci-ok.result == 'success' && github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    permissions:
+      contents: read
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: staging
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  # A tag ships only if its commit is on main and passed staging, or went live before (PF-027 F3).
+  release-gate:
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      actions: read
+      deployments: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check that this tag may ship
+        env:
+          TAG: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/release-gate.sh
+
+  production:
+    needs: release-gate
+    permissions:
+      contents: read
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: production
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  # The Releases page lists what went live: created only after the production deploy and smoke test passed, and an
+  # owner-created Release is left as it is (PF-027 P13). It sits here rather than in deploy.yml so that the staging call
+  # can stay read-only.
+  release:
+    needs: production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Create the GitHub Release if it does not exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: gh release view "$TAG" > /dev/null 2>&1 || gh release create "$TAG" --verify-tag --generate-notes

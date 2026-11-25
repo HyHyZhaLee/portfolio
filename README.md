@@ -4,7 +4,7 @@ Personal portfolio site and live full-stack demo of Will Ly, Full-stack Software
 
 **Live site:** _URL to be added after the first deployment._
 
-[![backend](https://github.com/HyHyZhaLee/portfolio/actions/workflows/backend.yml/badge.svg)](https://github.com/HyHyZhaLee/portfolio/actions/workflows/backend.yml) [![frontend](https://github.com/HyHyZhaLee/portfolio/actions/workflows/frontend.yml/badge.svg)](https://github.com/HyHyZhaLee/portfolio/actions/workflows/frontend.yml) [![e2e](https://github.com/HyHyZhaLee/portfolio/actions/workflows/e2e.yml/badge.svg)](https://github.com/HyHyZhaLee/portfolio/actions/workflows/e2e.yml)
+[![ci-cd](https://github.com/HyHyZhaLee/portfolio/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/HyHyZhaLee/portfolio/actions/workflows/ci-cd.yml)
 
 ## Architecture
 
@@ -67,12 +67,25 @@ E2E_ALL_BROWSERS=1 scripts/with-node.sh pnpm --dir frontend test:e2e   # the sam
 
 | Gate | Command |
 |---|---|
-| Backend: format, tests, coverage, API snapshot | `make check` (CI: `backend.yml`) |
-| Frontend: types, lint, format, unit tests with a branch-coverage threshold | `pnpm --dir frontend check:type`, `check:lint`, `check:format`, `coverage` (CI: `frontend.yml`) |
-| End to end: smoke suite with the API unreachable | `pnpm --dir frontend test:e2e` (CI: `e2e.yml`) |
+| Backend: format, tests, coverage, API snapshot | `make check` (CI: the `backend` job) |
+| Frontend: types, lint, format, unit tests with a branch-coverage threshold | `pnpm --dir frontend check:type`, `check:lint`, `check:format`, `coverage` (CI: the `frontend` job) |
+| End to end: smoke suite with the API unreachable | `pnpm --dir frontend test:e2e` (CI: the `e2e` job) |
+| Live smoke test after every deploy | `LIVE_SITE_URL=… LIVE_ENVIRONMENT=staging pnpm --dir frontend test:live` (CI: the `smoke` job) |
 | Lighthouse | Performance, accessibility, best practices, and SEO of at least 90 on the home page and a case study, measured on a production build with the API unreachable (results in [the PF-009 plan](docs/plans/site/PF-009-polish.md)) |
 
-A push to `main` deploys each app only after its own checks pass: `frontend.yml` builds and uploads the site with the Vercel CLI, and `backend.yml` asks Render to deploy the checked commit through a deploy hook.
+## Delivery
+
+One workflow, [`ci-cd.yml`](.github/workflows/ci-cd.yml), runs for every commit, and one required check, `ci-ok`, gates every pull request.
+
+| Trigger | What runs |
+|---|---|
+| Pull request | the checks for the changed areas, dependency review, then `ci-ok` |
+| Merge to `main` | every check, `ci-ok`, then a deploy to **staging**: the backend first (the pipeline waits until `/actuator/info` reports the new commit), then the frontend, then a live browser smoke test |
+| Release tag `vX.Y.Z` on `main` | a release gate (the commit passed staging, or went live before), the same deploy and smoke test against **production**, then a GitHub Release with generated notes |
+
+Staging is a full free-tier copy with none of production's data: [will-ly-portfolio-staging.vercel.app](https://will-ly-portfolio-staging.vercel.app), a second Render service, and its own Neon project. It shows a "Staging" badge and is not indexed. The footer shows the deployed version: the release tag in production, `git describe` on staging.
+
+To release what staging shows: `make release VERSION=1.2.3`. To roll back, run `ci-cd` by hand from an older tag. Actions are pinned to commit SHAs, and secret scanning, push protection, Dependabot, and CodeQL are on.
 
 ## Documentation
 

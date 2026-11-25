@@ -62,7 +62,7 @@ Settings bind to validated `@ConfigurationProperties` records under `app.*`; `@V
 
 ### 13. Observable by default
 
-Every request carries a correlation ID (`X-Correlation-Id`) in the logging context, on the response, and in problem bodies. Every scheduled run gets its own correlation ID in the logging context. Logs record identifiers and outcomes, never request bodies, IP addresses, user agents, email addresses, message text, or tokens. The `prod` profile logs structured JSON. Health includes `db`; an external provider is not a health component, so a GitHub or email outage never turns the Render health check red and never restarts the service.
+Every request carries a correlation ID (`X-Correlation-Id`) in the logging context, on the response, and in problem bodies. Every scheduled run gets its own correlation ID in the logging context. Logs record identifiers and outcomes, never request bodies, IP addresses, user agents, email addresses, message text, or tokens. The `prod` profile logs structured JSON. Health includes `db`; an external provider is not a health component, so a GitHub or email outage never turns the Render health check red and never restarts the service. Render's health check uses `/actuator/health/liveness`, which never touches the database. `/actuator/info` reports only the deployed commit (`RENDER_GIT_COMMIT`) and the environment name (`app.environment`, env `APP_ENVIRONMENT`, default `production`); the deploy pipeline waits on it, and the `prod` profile also writes the commit into every log line as ECS `service.version` (PF-027). Every other actuator path answers 404.
 
 ### 14. Tests prove behavior against real infrastructure where mocks cannot
 

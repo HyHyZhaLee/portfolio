@@ -3,3 +3,6 @@ logging:
   structured:
     format:
       console: ecs # one JSON object per line
+    ecs:
+      service:
+        version: ${RENDER_GIT_COMMIT:local} # the deployed commit, instead of the Gradle 0.0.1-SNAPSHOT (PF-027 P16)

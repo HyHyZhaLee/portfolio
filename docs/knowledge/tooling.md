@@ -260,6 +260,20 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Verified**: `ps` showed the Vite process re-parented to PID 1 and still listening; 2026-11-11
 - **Discovered in**: Carried over
 
+## GitHub Actions
+
+### actionlint wants environment secrets declared in a called workflow
+- **Rule / Behavior**: In a called workflow (`on: workflow_call`), actionlint reports `property "<name>" is not defined in object type {…}` for `secrets.<NAME>` unless the name is declared under `on.workflow_call.secrets`, even when the job reads it from its `environment:`. Declaring it with `required: false`, and never passing it from the caller, satisfies the linter.
+- **Source**: `.github/workflows/deploy.yml` (`RENDER_DEPLOY_HOOK_URL`)
+- **Verified**: actionlint 1.7.12 (Docker image `rhysd/actionlint:1.7.12`) failed, then passed with the declaration; 2026-11-25
+- **Discovered in**: PF-027
+
+### Linting workflows and scripts without installing tools
+- **Rule / Behavior**: `docker run --rm -v "$PWD":/repo -w /repo rhysd/actionlint:<version>` lints every workflow and runs shellcheck on each `run:` block; `docker run --rm -v "$PWD":/mnt -w /mnt koalaman/shellcheck:<version> <scripts>` checks shell scripts. A plain YAML scalar containing `: ` (for example `run: echo "to $ENV: $URL"`) is a parse error, so such a step needs a `run: |` block.
+- **Source**: `.github/workflows/`, `scripts/release-gate.sh`, `scripts/wait-for-commit.sh`
+- **Verified**: actionlint 1.7.12 and shellcheck v0.11.0 on PF-027's workflows and scripts; 2026-11-25
+- **Discovered in**: PF-027
+
 ## Node and frontend tooling
 
 ### Vite 8 needs a recent Node
@@ -336,7 +350,7 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 
 ### Playwright smoke suite against `vite preview`
 - **Rule / Behavior**: The repository marks elements with `data-test-id`, so `playwright.config.ts` sets `use.testIdAttribute: 'data-test-id'`; without it `getByTestId` times out. `vite preview` has no proxy, so an unmocked `/api/` call would receive `index.html`: abort `/api/` and `/actuator/` requests with `page.route`. Keep Playwright output inside `node_modules` (`outputDir: ./node_modules/.tmp/test-results`) so Prettier, ESLint, and git ignore it, and set `include-hidden-files: true` when uploading that folder because `actions/upload-artifact` skips dot folders. Limit Vitest's `include` to `src/**/*.test.{ts,tsx}` so it never collects `e2e/`.
-- **Source**: `frontend/playwright.config.ts`, `frontend/e2e/smoke.spec.ts`, `.github/workflows/e2e.yml`
+- **Source**: `frontend/playwright.config.ts`, `frontend/e2e/smoke.spec.ts`, the `e2e` job in `.github/workflows/ci-cd.yml` (`.github/workflows/e2e.yml` before PF-027)
 - **Verified**: four tests passed against the production build in about 2 s with Chromium headless shell 159 and `@playwright/test` 1.65.1; the first run failed on `getByTestId` until the attribute was set; 2026-11-24
 - **Discovered in**: PF-008
 

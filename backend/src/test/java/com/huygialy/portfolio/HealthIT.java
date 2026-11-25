@@ -2,6 +2,7 @@ package com.huygialy.portfolio;
 
 import com.huygialy.portfolio.support.IntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @IntegrationTest
@@ -48,6 +49,19 @@ class HealthIT {
                 .jsonPath("$.components.db")
                 .doesNotExist();
         client.head().uri("/actuator/health/liveness").exchange().expectStatus().isOk();
+    }
+
+    @Test
+    void infoIsPublicAndShowsOnlyCommitAndEnvironment() {
+        // PF-027: the deploy gate reads the commit; nothing else (no build, git, or env details) may appear.
+        client.get()
+                .uri("/actuator/info")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .json("{\"app\": {\"commit\": \"local\", \"environment\": \"production\"}}", JsonCompareMode.STRICT);
+        client.head().uri("/actuator/info").exchange().expectStatus().isOk();
     }
 
     @Test

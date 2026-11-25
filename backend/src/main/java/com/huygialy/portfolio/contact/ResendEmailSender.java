@@ -27,7 +27,9 @@ import tools.jackson.databind.json.JsonMapper;
  * Emails the owner through Resend's REST API over HTTPS (backend guide principle 8, PF-006 P10). The client has explicit
  * connect and read timeouts; one delivery attempt makes up to {@code maxTries} requests with exponential backoff and one
  * {@code Idempotency-Key}, retrying only timeouts, connection errors, 429, and 5xx. Every failure becomes a
- * {@link DeliveryException} with a reason code; provider text is never logged, stored, or chained (PF-006 D8).
+ * {@link DeliveryException} with a reason code; provider text is never logged, stored, or chained (PF-006 D8). Every
+ * email carries the Resend tag {@code environment=<name>}, and outside production its subject starts with
+ * {@code [<name>] }, so staging mail is recognizable in the inbox and in Resend's logs (PF-027 P15).
  */
 @Component
 @Profile("!local")
@@ -41,11 +43,16 @@ class ResendEmailSender implements EmailSender {
     private final JsonMapper jsonMapper;
     private final String fromEmail;
     private final String toEmail;
+    private final String subjectPrefix;
+    private final List<Tag> tags;
 
     ResendEmailSender(ResendProperties properties, JsonMapper jsonMapper) {
         this.jsonMapper = jsonMapper;
         this.fromEmail = properties.fromEmail();
         this.toEmail = properties.toEmail();
+        final var environment = properties.environment();
+        this.subjectPrefix = ResendProperties.PRODUCTION.equals(environment) ? "" : "[" + environment + "] ";
+        this.tags = List.of(new Tag("environment", environment));
         // HTTP/1.1: the JDK client would otherwise try an h2c upgrade on a plain-HTTP port such as WireMock's.
         final var httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
@@ -84,7 +91,13 @@ class ResendEmailSender implements EmailSender {
                     .uri("/emails")
                     .header(IDEMPOTENCY_KEY, email.idempotencyKey())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(new SendRequest(fromEmail, List.of(toEmail), email.subject(), email.text(), email.replyTo()))
+                    .body(new SendRequest(
+                            fromEmail,
+                            List.of(toEmail),
+                            subjectPrefix + email.subject(),
+                            email.text(),
+                            email.replyTo(),
+                            tags))
                     .retrieve()
                     .body(String.class);
         } catch (RestClientResponseException e) {
@@ -118,13 +131,17 @@ class ResendEmailSender implements EmailSender {
             List<String> to,
             String subject,
             String text,
-            @JsonProperty("reply_to") String replyTo) {
+            @JsonProperty("reply_to") String replyTo,
+            List<Tag> tags) {
 
         @Override
         public String toString() {
             return "SendRequest[redacted]";
         }
     }
+
+    /** A Resend email tag; the name and value hold ASCII letters, digits, underscores, or dashes only. */
+    record Tag(String name, String value) {}
 
     /** The part of Resend's answer that is kept. */
     record SendResponse(String id) {}

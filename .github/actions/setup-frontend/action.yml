@@ -1,0 +1,45 @@
+name: Set up the frontend
+description: pnpm, Node from .nvmrc with the pnpm store cached, a frozen install, and optionally Chromium for Playwright (PF-027 P9).
+inputs:
+  playwright:
+    description: Also install Chromium and its system libraries, cached by Playwright version.
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      with:
+        package_json_file: frontend/package.json
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+        cache-dependency-path: frontend/pnpm-lock.yaml
+    - name: Install the dependencies
+      shell: bash
+      working-directory: frontend
+      run: pnpm install --frozen-lockfile
+    - name: Resolve the Playwright version
+      if: inputs.playwright == 'true'
+      id: playwright
+      shell: bash
+      working-directory: frontend
+      run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+    - name: Cache the Chromium browser
+      if: inputs.playwright == 'true'
+      id: browser-cache
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+    - name: Install Chromium and its system libraries
+      if: inputs.playwright == 'true' && steps.browser-cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: frontend
+      run: pnpm exec playwright install --with-deps chromium
+    - name: Install the system libraries only
+      if: inputs.playwright == 'true' && steps.browser-cache.outputs.cache-hit == 'true'
+      shell: bash
+      working-directory: frontend
+      run: pnpm exec playwright install-deps chromium
