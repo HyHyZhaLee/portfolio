@@ -262,10 +262,10 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 
 ## GitHub Actions
 
-### A declared but unpassed secret hides the environment's secret in a called workflow
-- **Rule / Behavior**: In a called workflow (`on: workflow_call`), a job with `environment:` reads that environment's secrets as `secrets.<NAME>`, but only when `<NAME>` is not declared under `on.workflow_call.secrets`. If it is declared (even `required: false`) and the caller does not pass it, it resolves to an empty string although the environment holds a value. actionlint, on the other hand, reports `property "<name>" is not defined in object type {…}` for the undeclared name, so silence that one message with a `paths:` → `ignore:` entry in `.github/actionlint.yaml` instead of declaring the secret.
-- **Source**: `.github/workflows/deploy.yml` (`RENDER_DEPLOY_HOOK_URL`), `.github/actionlint.yaml`
-- **Verified**: run 45592131148 logged `RENDER_DEPLOY_HOOK_URL:` empty and curl failed with "URL rejected: Bad hostname" while the `staging` environment held the secret; actionlint 1.7.12 passed with the ignore entry; 2026-11-25
+### A called workflow sees environment secrets only when the caller passes secrets
+- **Rule / Behavior**: In a called workflow (`on: workflow_call`), a job with `environment:` does not read that environment's secrets by itself: unless the caller passes secrets (`secrets: inherit`, or the secret by name), `secrets.<NAME>` resolves to an empty string, whether or not `<NAME>` is declared under `on.workflow_call.secrets`. The caller cannot read the environment's secrets itself, so it uses `secrets: inherit`. With no `secrets:` declared in the called workflow, actionlint does not type-check `secrets.*` there.
+- **Source**: `.github/workflows/ci-cd.yml` (`secrets: inherit` on the `staging` and `production` jobs), `.github/workflows/deploy.yml`; GitHub docs, Reuse workflows ("If the caller workflow doesn't pass an environment secret, the secret resolves to an empty string"); actions/runner issue 4453
+- **Verified**: runs 45592131148 (secret declared, not passed) and 45593658140 (not declared, not passed) both logged `RENDER_DEPLOY_HOOK_URL:` empty, and curl failed with "URL rejected: Bad hostname", while the `staging` environment held the secret; actionlint 1.7.12 passes with neither a declaration nor an ignore entry; 2026-11-25
 - **Discovered in**: PF-027
 
 ### Linting workflows and scripts without installing tools
