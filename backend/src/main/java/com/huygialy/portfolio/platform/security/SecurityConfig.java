@@ -30,10 +30,13 @@ class SecurityConfig {
     private static final String HEALTH_PATH = "/actuator/health";
     /** The database-free check for Render's health check and the keep-alive ping (PF-023 D7). */
     private static final String LIVENESS_PATH = "/actuator/health/liveness";
+    /** The deployed commit and environment name, which the deploy pipeline waits for (PF-027 P6). */
+    private static final String INFO_PATH = "/actuator/info";
 
     private static final String[] PUBLIC_GET_PATHS = {
         HEALTH_PATH,
         LIVENESS_PATH,
+        INFO_PATH,
         "/v3/api-docs",
         "/v3/api-docs/**",
         "/swagger-ui.html",
@@ -72,7 +75,7 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PUBLIC_POST_PATHS)
                         .permitAll()
                         // Uptime monitors may probe with HEAD.
-                        .requestMatchers(HttpMethod.HEAD, HEALTH_PATH, LIVENESS_PATH)
+                        .requestMatchers(HttpMethod.HEAD, HEALTH_PATH, LIVENESS_PATH, INFO_PATH)
                         .permitAll()
                         .anyRequest()
                         .denyAll())

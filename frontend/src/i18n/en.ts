@@ -4,6 +4,8 @@
  */
 const en = {
     'app.skipToContent': 'Skip to content',
+    'app.staging.label': 'Staging',
+    'app.staging.liveLink': 'Go to the live site',
 
     'meta.homeTitle': '{name} - {title}',
     'meta.caseStudyTitle': '{title} | {name}',
@@ -76,6 +78,7 @@ const en = {
 
     'footer.copyright': '© {year} {name}',
     'footer.source': 'View source',
+    'footer.version': 'Version {version}: see what changed',
 
     'apiStatus.title': 'This page is a live full-stack app',
     'apiStatus.subtitle': 'Status now',

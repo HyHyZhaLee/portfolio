@@ -2,6 +2,8 @@
 
 **Ticket**: PF-013 · **Refined requirement**: [PF-013-refined-requirement.md](PF-013-refined-requirement.md) · **Packages**: frontend and backend (CI and hosting config only) · **Status**: Approved 2026-11-23 for the frontend (owner approved the design in chat); extended to the backend on 2026-11-24 at the owner's request in chat · **Last updated**: 2026-11-24 (rebased on `main`, backend deploy job added)
 
+> **Superseded in part by [PF-027](PF-027-staging-pipeline.md)** (2026-11-25): one `ci-cd` workflow replaced `frontend.yml`, `backend.yml`, and `e2e.yml`; a push to `main` now deploys to staging, and only a release tag deploys production. The Vercel CLI commands, the pinned CLI, the token handling, and the deploy hook with `ref` carry over.
+
 > ⚠️ **Review these flows first** — No complex flows
 
 ## 1. Requirement summary

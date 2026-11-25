@@ -15,7 +15,7 @@
 | Forms | react-hook-form with zod schemas |
 | Analytics | `@vercel/analytics` (cookieless, PF-012) plus the site's own visit tracking (PF-005) |
 | Tests | Vitest, Testing Library, jest-dom, MSW |
-| Hosting | Vercel Hobby; Root Directory `frontend`; production is deployed by the `deploy` job in `.github/workflows/frontend.yml` after the checks pass, with Vercel's own Git deploys off and the install and build commands in `vercel.json` (PF-013) |
+| Hosting | Vercel Hobby; Root Directory `frontend`; `.github/workflows/deploy.yml` builds and deploys it with the Vercel CLI: Preview variables and the alias `will-ly-portfolio-staging.vercel.app` for staging on every merge to `main`, `--prod` for a release tag (PF-027). Vercel's own Git deploys are off and the install and build commands are in `vercel.json` (PF-013) |
 
 ## Commands
 
@@ -32,6 +32,7 @@ scripts/with-node.sh pnpm --dir frontend format
 scripts/with-node.sh pnpm --dir frontend test --run       # add a file path to run one test file
 scripts/with-node.sh pnpm --dir frontend coverage         # branch coverage ≥ 80%
 scripts/with-node.sh pnpm --dir frontend test:e2e         # Playwright smoke suite against the production build, no backend (PF-008); first run: exec playwright install chromium
+LIVE_SITE_URL=https://… LIVE_ENVIRONMENT=staging scripts/with-node.sh pnpm --dir frontend test:live   # read-only smoke test of a deployed site (PF-027); CI runs it after each deploy
 scripts/with-node.sh pnpm --dir frontend gen:api          # regenerate src/api/schema.d.ts from the OpenAPI snapshot
 ```
 
@@ -49,6 +50,8 @@ scripts/with-node.sh pnpm --dir frontend gen:api          # regenerate src/api/s
 frontend/
 ├── index.html                  # default title, meta description, Open Graph tags
 ├── vercel.json                 # SPA rewrite for /work/:slug, pinned install and build commands, Git deploys off (PF-013)
+├── e2e/ · playwright.config.ts           # smoke suite against vite preview with the API unreachable (PF-008)
+├── e2e-live/ · playwright.live.config.ts # read-only smoke test of a deployed site, run after each deploy (PF-027)
 ├── public/                     # favicon.svg (WL monogram) and apple-touch-icon.png (PF-025), robots.txt (PF-012); og-image.png and sitemap.xml are PF-012 items not created yet
 └── src/
     ├── index.css               # Tailwind import and @theme design tokens

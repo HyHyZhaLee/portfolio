@@ -11,7 +11,6 @@ flowchart LR
     BE -->|"JDBC + Flyway"| DB[("Neon Free - PostgreSQL")]
     BE -->|HTTPS| GH[GitHub REST API]
     BE -->|HTTPS| RS[Email API]
-    UR[Uptime monitor] -->|"ping /actuator/health"| BE
     FE -.->|cookieless| VA[Vercel Web Analytics]
 ```
 
@@ -24,7 +23,17 @@ flowchart LR
 | Database | `page_view` table (built in PF-005) and `contact_message` table (built in PF-006), migrated by Flyway | Neon Free PostgreSQL 17 | PF-005, PF-006 |
 | Email API | Delivers contact messages to the owner's inbox over HTTPS | Free tier | PF-006 |
 | GitHub API | Source of the public repository list | Public API; an optional read-only token only raises the rate limit | PF-007 |
-| Uptime monitor | Pings the health endpoint so the backend rarely sleeps | Free tier | PF-009 |
+
+No keep-alive pinger runs: Render Free has one pool of 750 instance hours a month for every service in the workspace, so the backend sleeps after 15 idle minutes and the frontend shows its waking state (PF-023, PF-027 D5).
+
+## Environments
+
+| Environment | Frontend | Backend | Database | Deployed by |
+|---|---|---|---|---|
+| Staging | Vercel preview deployment at `will-ly-portfolio-staging.vercel.app`, with a "Staging" badge, not indexed | Render Free `will-ly-portfolio-api-staging`, `APP_ENVIRONMENT=staging` | its own Neon Free project, empty except for staging's own visits and messages | every merge to `main`, after every check passes |
+| Production | Vercel production `will-ly-portfolio.vercel.app` | Render Free `will-ly-portfolio-api` | Neon Free project | a release tag `vX.Y.Z` on a commit that passed staging |
+
+Both are built from the same commit by `.github/workflows/deploy.yml`, backend first: the pipeline waits until the public `/actuator/info` reports the new commit and environment, then deploys the frontend, then runs a live smoke test. The footer shows the deployed version, taken from the git tag (PF-027).
 
 ## Request lifecycle (backend)
 

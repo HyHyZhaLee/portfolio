@@ -3,6 +3,8 @@ export const TestIds = {
     app: {
         skipLink: 'app-skip-link',
         main: 'app-main-region',
+        stagingBadge: 'app-staging-badge-region',
+        liveSiteLink: 'app-live-site-link',
     },
     header: {
         homeLink: 'header-home-link',
@@ -73,6 +75,7 @@ export const TestIds = {
     },
     footer: {
         sourceLink: 'footer-source-link',
+        version: 'footer-version',
     },
     stats: {
         counterText: 'stats-counter-text',

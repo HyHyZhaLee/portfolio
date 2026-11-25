@@ -6,6 +6,7 @@ import { useTrackPageView } from '../features/visits';
 import { t } from '../i18n/en';
 import { Footer } from '../sections/Footer';
 import { Header } from '../sections/Header';
+import { StagingBadge } from './StagingBadge';
 
 /**
  * Every fresh page load (a URL typed or opened in a new tab, a reload) gets the location key `default`, so their saved
@@ -15,7 +16,7 @@ import { Header } from '../sections/Header';
 const scrollKey = (location: Location) => (location.key === 'default' ? location.pathname : location.key);
 
 /**
- * Skip link, sticky header, the page, and the footer. `ScrollRestoration` scrolls to the hash or to the top on navigation
+ * Skip link, sticky header, the page, the footer, and in staging builds the staging badge (PF-027). `ScrollRestoration` scrolls to the hash or to the top on navigation
  * (PF-003 P6). Each route opened sends one page view from production builds (PF-005 F2), once the health check has
  * answered (PF-023 D4). The page sits in a `Suspense` boundary that is already on screen, so while a lazy page such as
  * a case study loads, React keeps the current page visible during in-app navigation (router updates are transitions), and a
@@ -39,6 +40,7 @@ export function RootLayout() {
                 </Suspense>
             </main>
             <Footer />
+            <StagingBadge />
             <ScrollRestoration getKey={scrollKey} />
         </>
     );

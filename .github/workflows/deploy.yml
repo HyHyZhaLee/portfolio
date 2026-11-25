@@ -1,0 +1,148 @@
+# Deploys one environment and proves it works (PF-027 P1, P5). ci-cd.yml calls it for staging on main and for production
+# on a release tag; the GitHub environment holds everything that differs: SITE_URL, API_URL, VERCEL_ALIAS (staging only),
+# and the RENDER_DEPLOY_HOOK_URL secret. Both calls grant read-only permissions: a called workflow can never hold more than
+# its caller grants, and GitHub checks every job here, even a skipped one, before the run starts. So the GitHub Release,
+# which needs contents: write, is created by the release job in ci-cd.yml.
+name: deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: staging or production
+        required: true
+        type: string
+    secrets:
+      VERCEL_TOKEN:
+        required: true
+      VERCEL_ORG_ID:
+        required: true
+      VERCEL_PROJECT_ID:
+        required: true
+      # Never passed by the caller: each GitHub environment holds its own, and an environment secret wins over a passed one.
+      RENDER_DEPLOY_HOOK_URL:
+        required: false
+
+permissions: {}
+
+jobs:
+  # Backend first, then the frontend, so the new frontend never runs against an older API (PF-027 D17).
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ vars.SITE_URL }}
+    # Two deploys of one environment run one after the other and are never cancelled halfway (PF-027 P10).
+    concurrency:
+      group: deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      site-url: ${{ steps.version.outputs.site-url }}
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # git describe needs the tags and the history
+          persist-credentials: false
+      # The release tag is the version: v1.0.0 on a release, v1.0.0-3-gabc1234 on staging, the short SHA before the
+      # first tag (PF-027 P16).
+      - name: Compute the version
+        id: version
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          echo "version=$(git describe --tags --match 'v[0-9]*.[0-9]*.[0-9]*' --abbrev=7 --always)" >> "$GITHUB_OUTPUT"
+          echo "site-url=${SITE_URL}" >> "$GITHUB_OUTPUT"
+      # The ref parameter makes Render build exactly this commit; a hook call with ref keeps Render's auto-deploy out of
+      # the way (PF-013 D9).
+      - name: Ask Render to deploy this commit
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: curl --fail-with-body --silent --show-error --max-time 60 --request POST "${RENDER_DEPLOY_HOOK_URL}&ref=${GITHUB_SHA}"
+      - name: Wait until the API serves this commit
+        env:
+          API_URL: ${{ vars.API_URL }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: scripts/wait-for-commit.sh "$API_URL" "$GITHUB_SHA" "$ENVIRONMENT"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      # The token reaches only the vercel steps, never the install step whose scripts could read the job environment.
+      - run: npm install --global vercel@66.2.0
+      # Vite bakes VITE_* in at build time, so each environment gets its own build of the same commit (PF-027 P7).
+      # The CLI runs from the repository root because the Vercel project's Root Directory is frontend (PF-013 D3).
+      - name: Pull the Vercel settings and variables
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TARGET: ${{ inputs.environment == 'production' && 'production' || 'preview' }}
+        run: vercel pull --yes --environment="$VERCEL_TARGET" --token="$VERCEL_TOKEN"
+      - name: Build with the commands in frontend/vercel.json
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          VITE_APP_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if [[ "$ENVIRONMENT" == production ]]; then
+            vercel build --prod --token="$VERCEL_TOKEN"
+          else
+            vercel build --token="$VERCEL_TOKEN"
+          fi
+      # Production: --prod moves the production domain atomically. Staging: the fixed alias points at the new
+      # deployment, so staging keeps one address for CORS and for the owner (PF-027 D9).
+      - name: Deploy the build
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          VERCEL_ALIAS: ${{ vars.VERCEL_ALIAS }}
+        run: |
+          if [[ "$ENVIRONMENT" == production ]]; then
+            vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+          else
+            deployment_url="$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")"
+            vercel alias set "$deployment_url" "$VERCEL_ALIAS" --token="$VERCEL_TOKEN"
+          fi
+      - name: Summarize the deploy
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+          VERSION: ${{ steps.version.outputs.version }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          echo "Deployed \`$VERSION\` (\`$GITHUB_SHA\`) to $ENVIRONMENT: $SITE_URL" >> "$GITHUB_STEP_SUMMARY"
+
+  # What a visitor sees on the pair that is now live, read-only and without counting a visit (PF-027 P8).
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-frontend
+        with:
+          playwright: "true"
+      - name: Smoke-test the live site
+        env:
+          LIVE_SITE_URL: ${{ needs.deploy.outputs.site-url }}
+          LIVE_ENVIRONMENT: ${{ inputs.environment }}
+          LIVE_VERSION: ${{ needs.deploy.outputs.version }}
+        run: pnpm test:live
+      - name: Upload the Playwright traces on failure
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: live-smoke-traces-${{ inputs.environment }}
+          path: frontend/node_modules/.tmp/test-results-live
+          include-hidden-files: true
+          retention-days: 7
