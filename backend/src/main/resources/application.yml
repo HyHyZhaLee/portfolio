@@ -34,7 +34,8 @@ spring:
     factory:
       constraints:
         read:
-          # Public JSON bodies are a few hundred bytes. The cap stops parsing an oversized body before binding,
+          # Public JSON bodies stay well under it: the largest, a contact message, is about 32 KB at most (a 10,000-character
+          # message at 3 UTF-8 bytes per character, plus the other fields; PF-028). The cap stops parsing an oversized body before binding,
           # validation, and the rate limit, so it cannot fill the heap; it answers 400 VALIDATION_FAILED (PF-005).
           max-document-length: 65536
   # spring.mvc.problemdetails stays off: Boot's handler puts framework text in `detail` (Non-Negotiable 5).

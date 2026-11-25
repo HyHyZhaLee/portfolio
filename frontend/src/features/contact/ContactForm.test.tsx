@@ -32,7 +32,8 @@ function capture(answer: () => Response | Promise<Response> = () => new HttpResp
 async function fillAndSend(user: ReturnType<typeof userEvent.setup>) {
     await user.type(screen.getByTestId(ids.nameInput), 'Ada Example');
     await user.type(screen.getByTestId(ids.emailInput), 'visitor@example.com');
-    await user.type(screen.getByTestId(ids.messageInput), 'Hello from the form test.');
+    await user.type(screen.getByTestId(ids.subjectInput), 'A backend role');
+    await user.type(screen.getByTestId(ids.messageInput), 'Hi');
     await user.click(screen.getByTestId(ids.submitButton));
 }
 
@@ -46,7 +47,7 @@ describe('ContactForm', () => {
         expect(screen.getByRole('button', { name: 'Send message' })).toBeEnabled();
     });
 
-    it('shows the three field errors and sends nothing when submitted empty', async () => {
+    it('shows the four field errors and sends nothing when submitted empty', async () => {
         const bodies = capture();
         const user = userEvent.setup();
         renderWithProviders(<ContactForm />);
@@ -55,12 +56,13 @@ describe('ContactForm', () => {
 
         expect(await screen.findByText('Enter your name, up to 100 characters.')).toBeInTheDocument();
         expect(screen.getByText('Enter a valid email address, up to 254 characters.')).toBeInTheDocument();
-        expect(screen.getByText('Write between 10 and 2,000 characters.')).toBeInTheDocument();
+        expect(screen.getByText('Enter a subject, up to 150 characters.')).toBeInTheDocument();
+        expect(screen.getByText('Write your message, up to 10,000 characters.')).toBeInTheDocument();
         expect(screen.getByTestId(ids.nameInput)).toHaveAttribute('aria-invalid', 'true');
         expect(bodies).toHaveLength(0);
     });
 
-    it('sends the message, shows the reference, and starts over on request', async () => {
+    it('sends the message, confirms it without a reference, and starts over on request', async () => {
         const bodies = capture();
         const user = userEvent.setup();
         renderWithProviders(<ContactForm />);
@@ -68,13 +70,14 @@ describe('ContactForm', () => {
         await fillAndSend(user);
 
         const success = await screen.findByTestId(ids.successRegion);
-        expect(success).toHaveTextContent('Thanks, your message was received.');
-        expect(success).toHaveTextContent('Reference: ref-123');
-        expect(bodies).toEqual([{ name: 'Ada Example', email: 'visitor@example.com', message: 'Hello from the form test.', website: '' }]);
+        expect(success).toHaveTextContent('Message sent. Thanks for getting in touch.');
+        expect(success).not.toHaveTextContent('ref-123');
+        expect(bodies).toEqual([{ name: 'Ada Example', email: 'visitor@example.com', subject: 'A backend role', message: 'Hi', website: '' }]);
 
         await user.click(screen.getByTestId(ids.anotherButton));
 
         expect(screen.getByTestId(ids.nameInput)).toHaveValue('');
+        expect(screen.getByTestId(ids.subjectInput)).toHaveValue('');
         expect(screen.getByTestId(ids.messageInput)).toHaveValue('');
     });
 

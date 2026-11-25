@@ -130,6 +130,7 @@ test.describe('touch targets (AC-6)', () => {
             'contact-github-link',
             'contact-name-input',
             'contact-email-input',
+            'contact-subject-input',
             'contact-submit-button',
         ];
         for (const testId of ['header-menu-button', ...ids]) {

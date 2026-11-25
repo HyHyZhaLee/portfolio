@@ -1,5 +1,6 @@
 package com.huygialy.portfolio.contact;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.notContaining;
@@ -40,6 +41,7 @@ class ContactApiIT {
     private static final String CHROME =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
     private static final String NAME = "Ada Example";
+    private static final String SUBJECT = "A backend role at Example Co";
     private static final String TEXT = "Hello from the contact API test";
 
     private final RestTestClient client;
@@ -63,13 +65,10 @@ class ContactApiIT {
         final var ip = "192.0.2.10";
         wireMock.stubFor(post("/emails").willReturn(okJson("{\"id\":\"email-api-valid\"}")));
 
-        send(Map.of("name", NAME, "email", email, "message", TEXT), ip)
-                .expectStatus()
-                .isAccepted()
-                .expectBody()
-                .isEmpty();
+        send(valid(email, TEXT), ip).expectStatus().isAccepted().expectBody().isEmpty();
 
         final var row = single(email);
+        assertThat(row.get("subject")).isEqualTo(SUBJECT);
         assertThat(row.get("status")).isEqualTo("SENT");
         assertThat(row.get("attempts")).isEqualTo(1);
         assertThat(row.get("provider_message_id")).isEqualTo("email-api-valid");
@@ -83,21 +82,29 @@ class ContactApiIT {
                 1,
                 postRequestedFor(urlEqualTo("/emails"))
                         .withRequestBody(matchingJsonPath("$.reply_to", equalTo(email)))
-                        .withRequestBody(matchingJsonPath("$.subject", notContaining(TEXT))));
-        assertThat(output.getAll()).doesNotContain(NAME, email, TEXT);
+                        .withRequestBody(matchingJsonPath("$.subject", notContaining(SUBJECT)))
+                        .withRequestBody(matchingJsonPath("$.subject", notContaining(TEXT)))
+                        .withRequestBody(matchingJsonPath("$.text", containing("Subject: " + SUBJECT))));
+        assertThat(output.getAll()).doesNotContain(NAME, email, SUBJECT, TEXT);
     }
 
-    /** A blank name, an invalid email, a 9-character message, and a NUL, which PostgreSQL would reject as a 500. */
+    /**
+     * A blank name, an invalid email, a blank subject, a blank message, a message over 10,000 characters, and a NUL, which
+     * PostgreSQL would reject as a 500.
+     */
     @ParameterizedTest
     @CsvSource({
-        "' ', contact-api-it-blank@example.com, Hello from a test, name",
-        "Ada Example, not-an-email, Hello from a test, email",
-        "Ada Example, contact-api-it-short@example.com, 123456789, message",
-        "Ada Example, contact-api-it-nul@example.com, Hello\u0000 from a test, message"
+        "' ', contact-api-it-blank@example.com, A role, Hello from a test, name",
+        "Ada Example, not-an-email, A role, Hello from a test, email",
+        "Ada Example, contact-api-it-no-subject@example.com, ' ', Hello from a test, subject",
+        "Ada Example, contact-api-it-empty@example.com, A role, ' ', message",
+        "Ada Example, contact-api-it-long@example.com, A role, TOO_LONG, message",
+        "Ada Example, contact-api-it-nul@example.com, A role, Hello\u0000 from a test, message"
     })
     void anInvalidMessageIsRejectedWithAFieldErrorAndNotStored(
-            String name, String email, String message, String field) {
-        send(Map.of("name", name, "email", email, "message", message), "192.0.2.11")
+            String name, String email, String subject, String message, String field) {
+        final var text = "TOO_LONG".equals(message) ? "m".repeat(10_001) : message;
+        send(Map.of("name", name, "email", email, "subject", subject, "message", text), "192.0.2.11")
                 .expectStatus()
                 .isBadRequest()
                 .expectHeader()
@@ -110,6 +117,17 @@ class ContactApiIT {
 
         assertThat(rows(email)).isEmpty();
         wireMock.verify(0, postRequestedFor(urlEqualTo("/emails")));
+    }
+
+    /** PF-028: no minimum length; 10,000 three-byte characters fit the column and the 64 KB body cap. */
+    @ParameterizedTest
+    @CsvSource({"1, contact-api-it-one-char@example.com", "10000, contact-api-it-max@example.com"})
+    void aMessageFromOneTo10000CharactersIsAccepted(int length, String email) {
+        wireMock.stubFor(post("/emails").willReturn(okJson("{\"id\":\"email-api-length\"}")));
+
+        send(valid(email, "ệ".repeat(length)), "192.0.2.15").expectStatus().isAccepted();
+
+        assertThat(single(email).get("message")).asString().hasSize(length);
     }
 
     @Test
@@ -149,9 +167,7 @@ class ContactApiIT {
         final var email = "contact-api-it-outage@example.com";
         wireMock.stubFor(post("/emails").willReturn(serviceUnavailable()));
 
-        send(Map.of("name", NAME, "email", email, "message", TEXT), "192.0.2.14")
-                .expectStatus()
-                .isAccepted();
+        send(valid(email, TEXT), "192.0.2.14").expectStatus().isAccepted();
 
         final var row = single(email);
         assertThat(row.get("status")).isEqualTo("FAILED");
@@ -159,8 +175,13 @@ class ContactApiIT {
         assertThat(row.get("last_error")).isEqualTo("HTTP_503");
     }
 
+    private static Map<String, String> valid(String email, String message) {
+        return Map.of("name", NAME, "email", email, "subject", SUBJECT, "message", message);
+    }
+
     private static Map<String, String> honeypot(String email) {
-        return Map.of("name", NAME, "email", email, "message", TEXT, "website", "https://spam.example");
+        return Map.of(
+                "name", NAME, "email", email, "subject", SUBJECT, "message", TEXT, "website", "https://spam.example");
     }
 
     private RestTestClient.ResponseSpec send(Map<String, String> body, String forwardedFor) {

@@ -30,7 +30,8 @@ Ticket registry. A ticket is registered here before work starts. Its plan, refin
 | PF-024 | Render builds cache their dependencies and avoid Maven Central's rate limit: the Docker dependency layer downloads the jars (`downloadDependencies`) and `bootJar` runs offline; Gradle resolves from Google's Maven Central mirror first | Fix | Owner report, 2026-11-24 (Render build failed with 429); implementation plan §8.D | Done (2026-11-24) | [PF-024-maven-mirror.md](../plans/platform/PF-024-maven-mirror.md) |
 | PF-025 | App icon: a "WL" monogram favicon (SVG) drawn as round-capped strokes in white on the site's ink colour, replacing PF-009's placeholder dot, plus a full-bleed 180 px Apple touch icon; shipped with PF-022 | Chore | Owner request, 2026-11-24 | Done | none |
 | PF-026 | Mobile Lighthouse performance back to 90 or more: the entry bundle grew from 127 kB to 151 kB gzip with PF-022 (mobile performance 86 on `main` at `99ce517`, 85 with PF-015); load the architecture-diagram kit and diagram data, or the whole case-study route, as a lazy chunk the home page does not download | Chore | PF-015 S5 measurement, 2026-11-25; PF-009 lazy contact-form precedent | Done (2026-11-25) | [PF-026-mobile-performance.md](../plans/site/PF-026-mobile-performance.md) |
+| PF-028 | Contact form gains a required `subject` (1 to 150 characters, no control characters; a nullable `contact_message.subject` column, so earlier rows read "(none)" in the owner's email), the message loses its 10-character minimum and its maximum rises from 2,000 to 10,000 characters (10,000 three-byte characters stay under the 64 KB body cap), and the success note says "Message sent" without the correlation-ID reference | Feature | Owner request, 2026-11-25 | In progress | none |
 
 **Type**: Feature · Fix · Chore. **Status**: Planned · In progress · Done · Dropped.
 
-Next free ID: **PF-027**.
+Next free ID: **PF-029**.

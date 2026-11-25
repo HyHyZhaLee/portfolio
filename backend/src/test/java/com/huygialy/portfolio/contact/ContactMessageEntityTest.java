@@ -68,6 +68,7 @@ class ContactMessageEntityTest {
     }
 
     private static ContactMessageEntity receive(String honeypot) {
-        return ContactMessageEntity.receive("Ada Example", "visitor@example.com", "Hello there!", honeypot, HASH, NOW);
+        return ContactMessageEntity.receive(
+                "Ada Example", "visitor@example.com", "A role", "Hello there!", honeypot, HASH, NOW);
     }
 }

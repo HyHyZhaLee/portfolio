@@ -26,7 +26,13 @@ public class ContactLifecycle {
     @Transactional
     public ContactMessageEntity savePending(CreateContactMessageRequest body, String senderHash) {
         return repository.save(ContactMessageEntity.receive(
-                body.name(), body.email(), body.message(), body.website(), senderHash, clock.instant()));
+                body.name(),
+                body.email(),
+                body.subject(),
+                body.message(),
+                body.website(),
+                senderHash,
+                clock.instant()));
     }
 
     /** TX 2 after a delivered attempt. */

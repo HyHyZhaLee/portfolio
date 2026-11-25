@@ -49,12 +49,14 @@ test('the contact form shows field errors for invalid input', async ({ page }) =
     await page.locator('#contact').scrollIntoViewIfNeeded();
     await expect(page.getByTestId('contact-form-region')).toBeVisible();
     await page.getByTestId('contact-email-input').fill('not-an-email');
-    await page.getByTestId('contact-message-input').fill('short');
+    await page.getByTestId('contact-message-input').fill('Hi');
     await page.getByTestId('contact-submit-button').click();
     await expect(page.getByText('Enter your name, up to 100 characters.')).toBeVisible();
     await expect(page.getByText('Enter a valid email address, up to 254 characters.')).toBeVisible();
-    await expect(page.getByText('Write between 10 and 2,000 characters.')).toBeVisible();
+    await expect(page.getByText('Enter a subject, up to 150 characters.')).toBeVisible();
     await expect(page.getByTestId('contact-name-input')).toHaveAttribute('aria-invalid', 'true');
+    // PF-028: a message has no minimum length.
+    await expect(page.getByTestId('contact-message-input')).not.toHaveAttribute('aria-invalid');
 });
 
 // PF-022: the architecture figure is static content, so it renders with the API unreachable and fits a phone screen.

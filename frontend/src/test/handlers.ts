@@ -9,7 +9,7 @@ export const visitRecorded = http.post('*/api/v1/visits', () => new HttpResponse
 /** An empty database: every page renders the footer counter, which asks once health answers (PF-005 P17). */
 export const statsEmpty = http.get('*/api/v1/stats/summary', () => HttpResponse.json({ totalViews: 0, uniqueVisitors: 0, since: null }));
 
-/** An accepted contact message: 202 with no body and the correlation ID the form shows as its reference (PF-006 P22). */
+/** An accepted contact message: 202 with no body, and the correlation ID every response carries (PF-006 P22). */
 export const contactAccepted = http.post(
     '*/api/v1/contact-messages',
     () => new HttpResponse(null, { status: 202, headers: { 'X-Correlation-Id': 'contact-default-reference' } }),
