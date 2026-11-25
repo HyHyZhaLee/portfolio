@@ -393,3 +393,21 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Source**: `frontend/src/sections/Header.tsx`, `frontend/src/index.css`
 - **Verified**: Playwright Chromium, Tab from mid-page through the header: `scrollY` fell 4794, 4402, 4010 … on `main` and on the sticky build, and stayed at 4794 with the fixed header; anchors still landed 80 px down; 2026-11-25
 - **Discovered in**: PF-015
+
+### Lighthouse simulated paints count every request started before them
+- **Rule / Behavior**: Lighthouse's default mobile run (simulated throttling) estimates FCP and LCP from the requests that started before the paint observed in the real, unthrottled trace, so a lazy chunk, an image, or a font requested during the first render still costs simulated time even when it blocks nothing. On `/`, loading the contact chunk only near the viewport (−38 kB) and an 80px portrait from a 160w file (−28 kB) raised mobile performance from 87 to 90; preloading the two critical `woff2` files cut the simulated FCP from 2.7 s to 1.7 s (90 to 94).
+- **Source**: `docs/plans/site/PF-026-mobile-performance.md` (S0); `frontend/vite.config.ts` (`preloadFonts`)
+- **Verified**: Lighthouse 13.5.0 mobile against `vite preview`, three runs per build, 2026-11-25
+- **Discovered in**: PF-026
+
+### React Router 8 `ScrollRestoration` and fresh page loads
+- **Rule / Behavior**: Every fresh document load (a typed URL, a new tab, a reload) has no router state, so its location key is `default`, and the default `ScrollRestoration` keys saved positions by location key: two different pages loaded fresh in one tab share one saved position (stored in `sessionStorage` under `react-router-scroll-positions`, which a new tab opened from the page copies). A case study opened by URL after scrolling the home page to 3,000px opened 3,000px down. `getKey={(location) => (location.key === 'default' ? location.pathname : location.key)}` separates them and leaves in-app history as it was.
+- **Source**: `frontend/src/app/RootLayout.tsx` (`scrollKey`); `react-router` 8.5.2 `dist/development/lib/dom/lib.js` (`getScrollRestorationKey`)
+- **Verified**: Playwright on `vite preview`, `main` and this branch, `sessionStorage` read as `{"default":3000}` after the home page; e2e "a case study opened by URL after scrolling the home page starts at the top"; 2026-11-25
+- **Discovered in**: PF-026
+
+### React Router 8 navigation and `React.lazy` route elements
+- **Rule / Behavior**: `RouterProvider` wraps router state updates in `React.startTransition` unless `useTransitions={false}`, so a page that suspends on a `React.lazy` chunk keeps the previous page on screen during in-app navigation, but only when the nearest `Suspense` boundary is already on screen: a boundary created with the new route element shows its fallback even inside a transition, which left `main` empty for the whole chunk download. The boundary therefore sits in `RootLayout` around `<Outlet />`. A route's own `lazy` property instead leaves the router uninitialized, rendering nothing, until the matched route's chunk loads.
+- **Source**: `react-router` 8.5.2 `dist/development/lib/components.js` (`RouterProvider`) and `lib/router/router.js` (`initialMatches.some((m) => m.route.lazy)` sets `initialized = false`)
+- **Verified**: read the source, 2026-11-25; Playwright with the chunk held back: the route-level boundary blanked `main`, the layout boundary kept the home page (`frontend/e2e/performance.spec.ts`, "the home page stays on screen while the case-study chunk loads")
+- **Discovered in**: PF-026

@@ -4,10 +4,12 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { TestIds } from '../config/test-ids.config';
+import { caseStudies } from '../content/caseStudies';
 import { caseStudyPath } from '../content/caseStudies/slugs';
 import { profile } from '../content/profile';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { renderRoute, renderWithProviders } from '../test/renderWithProviders';
+import { caseStudyMeta } from './routeMeta';
 import { buildRoutes } from './routes';
 
 function Broken(): never {
@@ -31,6 +33,14 @@ describe('routes', () => {
         expect(proofLinks).toHaveLength(3);
         expect(document.querySelector('a[href="/cv.pdf"]')).toBeNull();
         expect(document.title).toBe('Will Ly - Full-stack Software Engineer');
+    });
+
+    it('renders a case study through the lazy route and sets its document title', async () => {
+        const study = caseStudies['this-site'];
+        renderRoute(caseStudyPath(study.slug));
+
+        expect(await screen.findByRole('heading', { level: 1, name: study.title })).toBeInTheDocument();
+        expect(document.title).toBe(caseStudyMeta(study).title);
     });
 
     it('renders the 404 page for an unknown path and links back home', async () => {

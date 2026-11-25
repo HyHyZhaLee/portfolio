@@ -121,6 +121,9 @@ test.describe('touch targets (AC-6)', () => {
 
     test('the menu, contact cards, and form controls are at least 44px tall', async ({ page }) => {
         await page.goto('/');
+        // The form chunk loads once Contact is near the viewport (PF-026).
+        await page.locator('#contact').scrollIntoViewIfNeeded();
+        await expect(page.getByTestId('contact-form-region')).toBeVisible();
         const ids = [
             'contact-email-link',
             'contact-linkedin-link',

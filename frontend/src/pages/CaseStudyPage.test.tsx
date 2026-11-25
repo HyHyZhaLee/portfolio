@@ -23,11 +23,11 @@ afterEach(() => {
 });
 
 describe('CaseStudyPage', () => {
-    it.each(caseStudySlugs)('renders the %s case study with its headings, title, and meta description', (slug) => {
+    it.each(caseStudySlugs)('renders the %s case study with its headings, title, and meta description', async (slug) => {
         const study = caseStudies[slug];
         renderRoute(caseStudyPath(slug));
 
-        expect(screen.getByRole('heading', { level: 1, name: study.title })).toBeInTheDocument();
+        expect(await screen.findByRole('heading', { level: 1, name: study.title })).toBeInTheDocument();
         const optional = [study.deepDive && `Deep dive: ${study.deepDive.topic}`, study.learned && 'What I learned'].filter((heading) => heading !== undefined);
         for (const heading of [...staticHeadings, ...optional]) {
             expect(screen.getByRole('heading', { level: 2, name: heading })).toBeInTheDocument();
@@ -47,10 +47,10 @@ describe('CaseStudyPage', () => {
         expect(screen.queryByRole('heading', { level: 2, name: 'What I learned' })).not.toBeInTheDocument();
     });
 
-    it('renders the architecture figure for a study with a diagram (PF-022)', () => {
+    it('renders the architecture figure for a study with a diagram (PF-022)', async () => {
         renderRoute(caseStudyPath('ai-assessment-integration'));
 
-        expect(screen.getByTestId(TestIds.caseStudy.diagram)).toBeInTheDocument();
+        expect(await screen.findByTestId(TestIds.caseStudy.diagram)).toBeInTheDocument();
         expect(screen.getByRole('img', { name: 'Frontera integration architecture' })).toBeInTheDocument();
     });
 
@@ -67,7 +67,7 @@ describe('CaseStudyPage', () => {
     it('starts the next case study with no diagram step pinned (PF-022)', async () => {
         const user = userEvent.setup();
         const { router } = renderRoute(caseStudyPath('this-site'));
-        const third = screen.getAllByTestId(TestIds.caseStudy.diagramStep)[2];
+        const third = (await screen.findAllByTestId(TestIds.caseStudy.diagramStep))[2];
         if (!third) throw new Error('This Portfolio needs at least three steps');
         await user.click(third);
         expect(third).toHaveAttribute('aria-pressed', 'true');
@@ -75,25 +75,25 @@ describe('CaseStudyPage', () => {
         await user.click(screen.getByTestId(TestIds.caseStudy.nextLink));
 
         expect(router.state.location.pathname).toBe(caseStudyPath('smart-pole'));
-        expect(screen.getByRole('img', { name: 'Smart Pole system layers' })).toBeInTheDocument();
+        expect(await screen.findByRole('img', { name: 'Smart Pole system layers' })).toBeInTheDocument();
         for (const step of screen.getAllByTestId(TestIds.caseStudy.diagramStep)) expect(step).toHaveAttribute('aria-pressed', 'false');
         for (const node of screen.getAllByTestId(TestIds.caseStudy.diagramNode)) expect(node).not.toHaveAttribute('data-dim');
     });
 
-    it('renders the 404 page for an unknown case study', () => {
+    it('renders the 404 page for an unknown case study', async () => {
         renderRoute('/work/no-such-study');
 
-        expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeInTheDocument();
+        expect(await screen.findByRole('heading', { level: 1, name: 'Page not found' })).toBeInTheDocument();
         expect(document.title).toBe('Page not found | Will Ly');
     });
 
     it.each([
         ['the first', firstSlug, secondSlug],
         ['the last (wrapping to the first)', lastSlug, firstSlug],
-    ])('links the next case study from %s one in Featured work order', (_label, from, to) => {
+    ])('links the next case study from %s one in Featured work order', async (_label, from, to) => {
         renderRoute(caseStudyPath(from));
 
-        const next = screen.getByTestId(TestIds.caseStudy.nextLink);
+        const next = await screen.findByTestId(TestIds.caseStudy.nextLink);
         expect(next).toHaveAttribute('href', caseStudyPath(to));
         expect(next).toHaveTextContent(caseStudies[to].title);
     });
@@ -101,6 +101,7 @@ describe('CaseStudyPage', () => {
     it("goes to the home page's work section from the header Work link", async () => {
         const scrollIntoView = vi.spyOn(Element.prototype, 'scrollIntoView');
         const { router } = renderRoute(caseStudyPath(firstSlug));
+        await screen.findByTestId(TestIds.caseStudy.backLink);
 
         const workLink = screen.getAllByTestId(TestIds.header.navLink).find((link) => link.textContent === 'Work');
         if (!workLink) throw new Error('no Work nav link in the header');
@@ -115,7 +116,7 @@ describe('CaseStudyPage', () => {
     it('goes back to the work section of the home page from the back link', async () => {
         const { router } = renderRoute(caseStudyPath(firstSlug));
 
-        await userEvent.click(screen.getByTestId(TestIds.caseStudy.backLink));
+        await userEvent.click(await screen.findByTestId(TestIds.caseStudy.backLink));
 
         expect(router.state.location.pathname).toBe('/');
         expect(router.state.location.hash).toBe('#work');
@@ -123,7 +124,7 @@ describe('CaseStudyPage', () => {
 
     it('folds the glance details behind a toggle that controls the region holding the stack and outcomes (PF-015 FR-5)', async () => {
         renderRoute(caseStudyPath(firstSlug));
-        const toggle = screen.getByTestId(TestIds.caseStudy.glanceToggle);
+        const toggle = await screen.findByTestId(TestIds.caseStudy.glanceToggle);
         const region = document.getElementById(toggle.getAttribute('aria-controls') ?? '');
         if (!region) throw new Error('aria-controls points at no element');
         expect(toggle).toHaveAttribute('aria-expanded', 'false');

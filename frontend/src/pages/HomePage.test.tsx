@@ -60,6 +60,14 @@ describe('HomePage', () => {
         expect(screen.getByTestId(TestIds.hero.portrait)).toHaveAccessibleName(`Portrait of ${profile.name}`);
     });
 
+    it('offers the portrait in three widths so a phone downloads the small one', () => {
+        renderRoute('/');
+
+        const portrait = screen.getByTestId(TestIds.hero.portrait);
+        expect(portrait.getAttribute('srcset')).toMatch(/160w.*288w.*480w/);
+        expect(portrait).toHaveAttribute('sizes', '(min-width: 100rem) 11.25rem, (min-width: 64rem) 9rem, (min-width: 40rem) 8rem, 5rem');
+    });
+
     it('links the contact profiles', () => {
         renderRoute('/');
 

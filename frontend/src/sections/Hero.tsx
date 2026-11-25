@@ -1,4 +1,6 @@
 import portrait from '../assets/portrait.webp';
+import portrait160 from '../assets/portrait-160.webp';
+import portrait288 from '../assets/portrait-288.webp';
 import { ButtonLink } from '../components/ButtonLink';
 import { ChipList } from '../components/ChipList';
 import { getTestIdProp, TestIds } from '../config/test-ids.config';
@@ -16,6 +18,8 @@ export function Hero() {
                     <div className='grid grid-cols-[5rem_minmax(0,1fr)] items-center gap-x-4 gap-y-3 sm:flex sm:gap-6'>
                         <img
                             src={portrait}
+                            srcSet={`${portrait160} 160w, ${portrait288} 288w, ${portrait} 480w`}
+                            sizes='(min-width: 100rem) 11.25rem, (min-width: 64rem) 9rem, (min-width: 40rem) 8rem, 5rem'
                             alt={t('hero.portraitAlt', { name: profile.name })}
                             width={480}
                             height={480}

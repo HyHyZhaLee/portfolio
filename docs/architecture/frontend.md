@@ -64,7 +64,7 @@ Derive values during render, handle user actions in event handlers, and use an e
 
 ### 13. Fast and findable
 
-The site is judged in its first ten seconds. The home page scores 90 or more in every Lighthouse category on the production URL. Images below the fold are lazy-loaded with explicit dimensions, fonts are self-hosted or preloaded, and no dependency is added where the platform suffices. Every route sets its own `<title>` and meta description; `index.html` carries the default title, description, and Open Graph tags; `public/` holds `robots.txt`, `sitemap.xml`, and `og-image.png`. `vercel.json` rewrites unknown paths to `index.html`, so `/work/:slug` survives a hard refresh.
+The site is judged in its first ten seconds. The home page scores 90 or more in every Lighthouse category on the production URL. Images below the fold are lazy-loaded with explicit dimensions, fonts are self-hosted or preloaded, and no dependency is added where the platform suffices. Code that one route or a below-the-fold section needs loads as its own chunk, never on the first render of `/` (PF-009 contact form, PF-026 case-study page and near-viewport form). Every route sets its own `<title>` and meta description; `index.html` carries the default title, description, and Open Graph tags; `public/` holds `robots.txt`, `sitemap.xml`, and `og-image.png`. `vercel.json` rewrites unknown paths to `index.html`, so `/work/:slug` survives a hard refresh.
 
 ### 14. Privacy in the browser
 
