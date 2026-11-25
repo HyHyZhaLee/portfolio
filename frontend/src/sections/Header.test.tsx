@@ -2,6 +2,7 @@ import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TestIds } from '../config/test-ids.config';
+import { profile } from '../content/profile';
 import { renderWithProviders } from '../test/renderWithProviders';
 import { Header } from './Header';
 
@@ -61,6 +62,7 @@ function stubObserverWithSections() {
 
 afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
     observerCallback = undefined;
     observed.length = 0;
     for (const { id } of sections) document.getElementById(id)?.remove();
@@ -74,6 +76,23 @@ describe('Header', () => {
         expect(home).toHaveTextContent('Portfolio');
         expect(home).toHaveAccessibleName('Will Ly portfolio, home');
         expect(home).toHaveAttribute('href', '/');
+    });
+
+    it('shows the deployed version beside the brand, linked to its release', () => {
+        vi.stubEnv('VITE_APP_VERSION', 'v1.0.0');
+        renderWithProviders(<Header />);
+
+        const version = screen.getByTestId(TestIds.header.version);
+        expect(version).toHaveTextContent('v1.0.0');
+        expect(version).toHaveAccessibleName('Version v1.0.0: see what changed');
+        expect(version).toHaveAttribute('href', `${profile.links.repository}/releases/tag/v1.0.0`);
+    });
+
+    it('shows no version in a build without one', () => {
+        vi.stubEnv('VITE_APP_VERSION', '');
+        renderWithProviders(<Header />);
+
+        expect(screen.queryByTestId(TestIds.header.version)).not.toBeInTheDocument();
     });
 
     it('renders an inline nav with the six section links and an accessible name, and the same links in the menu', () => {

@@ -12,6 +12,7 @@ export const TestIds = {
         menuButton: 'header-menu-button',
         menuDialog: 'header-menu-dialog',
         closeButton: 'header-close-button',
+        version: 'header-version',
     },
     home: {
         heading: 'home-title-heading',
@@ -75,7 +76,6 @@ export const TestIds = {
     },
     footer: {
         sourceLink: 'footer-source-link',
-        version: 'footer-version',
     },
     stats: {
         counterText: 'stats-counter-text',
