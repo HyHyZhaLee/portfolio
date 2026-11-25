@@ -165,10 +165,9 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       environment: staging
-    secrets:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    # inherit, not a list: a called workflow sees its environment's secrets (the Render hook) only when the caller
+    # passes secrets through; otherwise they resolve to an empty string (GitHub docs, Reuse workflows).
+    secrets: inherit
 
   # A tag ships only if its commit is on main and passed staging, or went live before (PF-027 F3).
   release-gate:
@@ -198,10 +197,9 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       environment: production
-    secrets:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    # inherit, not a list: a called workflow sees its environment's secrets (the Render hook) only when the caller
+    # passes secrets through; otherwise they resolve to an empty string (GitHub docs, Reuse workflows).
+    secrets: inherit
 
   # The Releases page lists what went live: created only after the production deploy and smoke test passed, and an
   # owner-created Release is left as it is (PF-027 P13). It sits here rather than in deploy.yml so that the staging call

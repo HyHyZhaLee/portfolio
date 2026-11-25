@@ -12,16 +12,9 @@ on:
         description: staging or production
         required: true
         type: string
-    secrets:
-      VERCEL_TOKEN:
-        required: true
-      VERCEL_ORG_ID:
-        required: true
-      VERCEL_PROJECT_ID:
-        required: true
-      # RENDER_DEPLOY_HOOK_URL is deliberately not declared here: the deploy job reads it from its GitHub environment, and a
-      # declared secret that the caller does not pass resolves to an empty string even when the environment holds one
-      # (seen in run 45592131148). actionlint's warning about it is ignored in .github/actionlint.yaml.
+    # Secrets come from the caller's `secrets: inherit`: VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID from the
+    # repository, and RENDER_DEPLOY_HOOK_URL from the job's GitHub environment, which a reusable workflow can read only
+    # when the caller passes secrets through (PF-027, run 45593658140).
 
 permissions: {}
 
