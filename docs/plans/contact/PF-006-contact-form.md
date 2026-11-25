@@ -2,6 +2,8 @@
 
 **Ticket**: PF-006 · **Refined requirement**: [PF-006-refined-requirement.md](PF-006-refined-requirement.md) · **Packages**: backend and frontend · **Status**: Approved 2026-11-23 · **Last updated**: 2026-11-23 (planned in `/plan`; every clarifying question decided with its recommended default, pre-approved by the owner (blanket approval, 2026-11-23); built in `/dev` and synced with the code: the build-time refinements are marked "Built:" in P7, P8, P10, P13, P19, P20, and section 8)
 
+> **Changed by PF-028 (2026-11-25):** the request gains a required `subject` (`@NotBlank @Size(max = 150)`, no control characters) stored in a nullable `contact_message.subject` column (`VARCHAR(150)`, null for earlier rows) and shown in the owner's email body, never the email's subject line (D6); `message` loses its minimum and allows up to 10,000 characters (`VARCHAR(10000)`); the success note reads "Message sent. Thanks for getting in touch." and no longer shows the correlation-ID reference, so `sendContactMessage` returns nothing. Limits and strings below are PF-006's originals.
+
 > ⚠️ **Review these flows first** — [F1 — Submit a contact message](#f1--submit-a-contact-message) · [F2 — Retry failed messages](#f2--retry-failed-messages) · [F3 — The form's outcome](#f3--the-forms-outcome)
 
 ## 1. Requirement summary

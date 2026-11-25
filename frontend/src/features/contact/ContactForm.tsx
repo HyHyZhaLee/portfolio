@@ -7,15 +7,16 @@ import { t } from '../../i18n/en';
 import { useSendContactMessage } from './queries';
 import { contactSchema, type ContactFormValues } from './validation';
 
-type VisibleField = 'name' | 'email' | 'message';
+type VisibleField = 'name' | 'email' | 'subject' | 'message';
 
-const EMPTY: ContactFormValues = { name: '', email: '', message: '', website: '' };
+const EMPTY: ContactFormValues = { name: '', email: '', subject: '', message: '', website: '' };
 const fieldError: Record<VisibleField, string> = {
     name: t('contact.error.name'),
     email: t('contact.error.email'),
+    subject: t('contact.error.subject'),
     message: t('contact.error.message'),
 };
-const FIELD_ORDER: readonly VisibleField[] = ['name', 'email', 'message'];
+const FIELD_ORDER: readonly VisibleField[] = ['name', 'email', 'subject', 'message'];
 
 const labelClass = 'font-ui text-label font-semibold text-ink';
 const inputClass =
@@ -92,9 +93,6 @@ export function ContactForm() {
                 {...getTestIdProp(TestIds.contact.successRegion)}
             >
                 <p className='text-title font-semibold text-ink'>{t('contact.form.success')}</p>
-                {mutation.data.correlationId && (
-                    <p className='text-caption text-muted select-all'>{t('contact.form.reference', { id: mutation.data.correlationId })}</p>
-                )}
                 <button
                     type='button'
                     onClick={() => {
@@ -165,6 +163,25 @@ export function ContactForm() {
                         </p>
                     )}
                 </div>
+            </div>
+            <div className='grid gap-1.5'>
+                <label htmlFor='contact-subject' className={labelClass}>
+                    {t('contact.form.subject')}
+                </label>
+                <input
+                    id='contact-subject'
+                    type='text'
+                    aria-invalid={errors.subject ? true : undefined}
+                    aria-describedby={describedBy('subject')}
+                    className={inputClass}
+                    {...register('subject')}
+                    {...getTestIdProp(TestIds.contact.subjectInput)}
+                />
+                {errors.subject && (
+                    <p id='contact-subject-error' className={errorClass}>
+                        {errors.subject.message}
+                    </p>
+                )}
             </div>
             <div className='grid gap-1.5'>
                 <label htmlFor='contact-message' className={labelClass}>

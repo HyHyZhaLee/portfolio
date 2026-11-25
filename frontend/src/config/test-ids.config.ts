@@ -34,6 +34,7 @@ export const TestIds = {
         form: 'contact-form-region',
         nameInput: 'contact-name-input',
         emailInput: 'contact-email-input',
+        subjectInput: 'contact-subject-input',
         messageInput: 'contact-message-input',
         websiteInput: 'contact-website-input',
         submitButton: 'contact-submit-button',

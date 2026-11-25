@@ -101,13 +101,19 @@
           },
           "message" : {
             "type" : "string",
-            "maxLength" : 2000,
-            "minLength" : 10,
+            "maxLength" : 10000,
+            "minLength" : 0,
             "pattern" : "[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]*"
           },
           "name" : {
             "type" : "string",
             "maxLength" : 100,
+            "minLength" : 0,
+            "pattern" : "[^\\p{Cntrl}]*"
+          },
+          "subject" : {
+            "type" : "string",
+            "maxLength" : 150,
             "minLength" : 0,
             "pattern" : "[^\\p{Cntrl}]*"
           },
@@ -117,7 +123,7 @@
             "minLength" : 0
           }
         },
-        "required" : [ "email", "message", "name" ]
+        "required" : [ "email", "message", "name", "subject" ]
       },
       "ProjectListResponse" : {
         "type" : "object",

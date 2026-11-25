@@ -48,7 +48,11 @@ public class ContactMessageEntity {
     @Column(name = "email", nullable = false, updatable = false, length = 254)
     private String email;
 
-    @Column(name = "message", nullable = false, updatable = false, length = 2000)
+    /** {@code null} only for messages received before PF-028 added the field. */
+    @Column(name = "subject", updatable = false, length = 150)
+    private String subject;
+
+    @Column(name = "message", nullable = false, updatable = false, length = 10000)
     private String message;
 
     @Enumerated(EnumType.STRING)
@@ -75,9 +79,17 @@ public class ContactMessageEntity {
     protected ContactMessageEntity() {}
 
     private ContactMessageEntity(
-            String name, String email, String message, Status status, int attempts, String senderHash, Instant now) {
+            String name,
+            String email,
+            String subject,
+            String message,
+            Status status,
+            int attempts,
+            String senderHash,
+            Instant now) {
         this.name = name;
         this.email = email;
+        this.subject = subject;
         this.message = message;
         this.status = status;
         this.attempts = attempts;
@@ -91,10 +103,16 @@ public class ContactMessageEntity {
      * is filled, {@code SPAM} with no attempt, never sent (SITE-004).
      */
     public static ContactMessageEntity receive(
-            String name, String email, String message, String honeypot, String senderHash, Instant now) {
+            String name,
+            String email,
+            String subject,
+            String message,
+            String honeypot,
+            String senderHash,
+            Instant now) {
         final var spam = honeypot != null && !honeypot.isBlank();
         return new ContactMessageEntity(
-                name, email, message, spam ? Status.SPAM : Status.PENDING, spam ? 0 : 1, senderHash, now);
+                name, email, subject, message, spam ? Status.SPAM : Status.PENDING, spam ? 0 : 1, senderHash, now);
     }
 
     /** {@code PENDING} → {@code SENT}; the provider's ID may be {@code null} and is cut to its column. */
@@ -146,6 +164,10 @@ public class ContactMessageEntity {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getSubject() {
+        return subject;
     }
 
     public String getMessage() {

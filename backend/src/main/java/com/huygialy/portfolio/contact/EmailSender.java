@@ -22,13 +22,15 @@ public interface EmailSender {
     record Email(long messageId, int attempt, String replyTo, String subject, String text) {
 
         /**
-         * The owner's email for the message's current attempt (PF-006 P9, D6): the subject never holds content, the body
-         * is plain text, and replying goes to the visitor.
+         * The owner's email for the message's current attempt (PF-006 P9, D6): the email's subject line never holds content, so
+         * the visitor's subject goes in the plain-text body (PF-028); replying goes to the visitor.
          */
         public static Email from(ContactMessageEntity message) {
             final long id = message.getId();
+            final var visitorSubject = message.getSubject() == null ? "(none)" : message.getSubject();
             final var text = "Name: " + message.getName() + "\n"
                     + "Email: " + message.getEmail() + "\n"
+                    + "Subject: " + visitorSubject + "\n"
                     + "Received: " + message.getCreatedAt() + "\n"
                     + "Message ID: " + id + "\n\n"
                     + message.getMessage() + "\n";

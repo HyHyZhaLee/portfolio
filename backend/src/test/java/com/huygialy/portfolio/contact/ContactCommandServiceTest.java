@@ -57,12 +57,18 @@ class ContactCommandServiceTest {
     }
 
     private static CreateContactMessageRequest request(String website) {
-        return new CreateContactMessageRequest("Ada Example", "visitor@example.com", "Hello there!", website);
+        return new CreateContactMessageRequest("Ada Example", "visitor@example.com", "A role", "Hello there!", website);
     }
 
     private static ContactMessageEntity saved(CreateContactMessageRequest body, long id) {
         final var entity = ContactMessageEntity.receive(
-                body.name(), body.email(), body.message(), body.website(), HASH, Instant.parse("2026-11-23T10:00:00Z"));
+                body.name(),
+                body.email(),
+                body.subject(),
+                body.message(),
+                body.website(),
+                HASH,
+                Instant.parse("2026-11-23T10:00:00Z"));
         ReflectionTestUtils.setField(entity, "id", id);
         return entity;
     }
