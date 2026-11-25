@@ -23,6 +23,7 @@ const en = {
     'nav.closeMenu': 'Close menu',
     'nav.brand': 'Portfolio',
     'nav.home': '{name} portfolio, home',
+    'nav.version': 'Version {version}: see what changed',
 
     'hero.portraitAlt': 'Portrait of {name}',
     'hero.stackLabel': 'Main stack',
@@ -78,7 +79,6 @@ const en = {
 
     'footer.copyright': '© {year} {name}',
     'footer.source': 'View source',
-    'footer.version': 'Version {version}: see what changed',
 
     'apiStatus.title': 'This page is a live full-stack app',
     'apiStatus.subtitle': 'Status now',

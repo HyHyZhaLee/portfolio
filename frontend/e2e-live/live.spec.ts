@@ -17,10 +17,10 @@ test('a project deep link renders its page', async ({ page }) => {
     await expect(page).not.toHaveTitle(/Page not found/);
 });
 
-test('the footer shows the version this deploy built', async ({ page }) => {
+test('the header shows the version this deploy built', async ({ page }) => {
     test.skip(expectedVersion === '', 'LIVE_VERSION is not set');
     await page.goto('/?notrack=1');
-    await expect(page.getByTestId('footer-version')).toHaveText(expectedVersion);
+    await expect(page.getByTestId('header-version')).toHaveText(expectedVersion);
 });
 
 test('staging shows the badge and is not indexed', async ({ page, request }) => {
