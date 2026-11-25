@@ -19,9 +19,9 @@ on:
         required: true
       VERCEL_PROJECT_ID:
         required: true
-      # Never passed by the caller: each GitHub environment holds its own, and an environment secret wins over a passed one.
-      RENDER_DEPLOY_HOOK_URL:
-        required: false
+      # RENDER_DEPLOY_HOOK_URL is deliberately not declared here: the deploy job reads it from its GitHub environment, and a
+      # declared secret that the caller does not pass resolves to an empty string even when the environment holds one
+      # (seen in run 45592131148). actionlint's warning about it is ignored in .github/actionlint.yaml.
 
 permissions: {}
 
