@@ -1,11 +1,17 @@
+import { lazy } from 'react';
 import type { RouteObject } from 'react-router';
-import { CaseStudyPage } from '../pages/CaseStudyPage';
 import { HomePage } from '../pages/HomePage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { RouteErrorPage } from '../pages/RouteErrorPage';
 import { RootLayout } from './RootLayout';
 
-/** The pages that can render inside the layout. An unknown `/work/` slug renders the 404 page from `CaseStudyPage`. */
+/** The case-study page, with its diagram kit and data, is its own chunk that the home page never downloads (PF-026 D1). */
+const CaseStudyPage = lazy(() => import('../pages/CaseStudyPage').then((module) => ({ default: module.CaseStudyPage })));
+
+/**
+ * The pages that can render inside the layout. An unknown `/work/` slug renders the 404 page from `CaseStudyPage`.
+ * `RootLayout`'s `Suspense` boundary holds the lazy page: a boundary created with the route would show its empty fallback even inside a transition.
+ */
 export const pageRoutes: RouteObject[] = [
     { index: true, element: <HomePage /> },
     { path: 'work/:slug', element: <CaseStudyPage /> },

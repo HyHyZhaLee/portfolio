@@ -13,6 +13,8 @@ test('the home page renders every section with the API unreachable', async ({ pa
     for (const id of sections) {
         await expect(page.locator(`section#${id}`)).toBeAttached();
     }
+    // The contact form chunk loads once Contact is near the viewport (PF-026).
+    await page.locator('#contact').scrollIntoViewIfNeeded();
     await expect(page.getByTestId('contact-form-region')).toBeVisible();
 });
 
@@ -44,6 +46,8 @@ test('an unknown route shows the 404 page', async ({ page }) => {
 
 test('the contact form shows field errors for invalid input', async ({ page }) => {
     await page.goto('/');
+    await page.locator('#contact').scrollIntoViewIfNeeded();
+    await expect(page.getByTestId('contact-form-region')).toBeVisible();
     await page.getByTestId('contact-email-input').fill('not-an-email');
     await page.getByTestId('contact-message-input').fill('short');
     await page.getByTestId('contact-submit-button').click();
@@ -71,4 +75,17 @@ test('at 360 px wide the diagram scrolls inside its frame and the page does not 
         '(() => { const frame = document.querySelector(\'[data-test-id="case-study-diagram-scroll-region"]\'); return frame !== null && frame.scrollWidth > frame.clientWidth; })()',
     );
     expect(frameScrolls).toBe(true);
+});
+
+// PF-026 D11: fresh page loads all share the router key `default`; keyed by path, a case study opened by URL starts at the top, and Back still restores the home position.
+test('a case study opened by URL after scrolling the home page starts at the top', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('home-title-heading')).toBeVisible();
+    await page.evaluate('window.scrollTo(0, 3000)');
+    await page.goto('/work/this-site');
+    await expect(page.locator('h1#case-study-title')).toBeVisible();
+    expect(await page.evaluate<number>('Math.round(window.scrollY)')).toBe(0);
+    await page.goBack();
+    await expect(page.getByTestId('home-title-heading')).toBeAttached();
+    await expect.poll(() => page.evaluate<number>('Math.round(window.scrollY)')).toBe(3000);
 });

@@ -1,10 +1,11 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useRef } from 'react';
 import { getTestIdProp, TestIds } from '../config/test-ids.config';
 import { profile } from '../content/profile';
 import { site } from '../content/site';
 import { t } from '../i18n/en';
+import { useNearViewport } from './useNearViewport';
 
-// The form (react-hook-form and zod) loads as its own chunk so it stays off the critical path of the first paint (PF-009).
+// The form (react-hook-form and zod) loads as its own chunk, and only when the form nears the viewport (PF-026 D2), so it stays off the critical path of the first paint (PF-009).
 const ContactForm = lazy(() => import('../features/contact').then((module) => ({ default: module.ContactForm })));
 
 const linkClass =
@@ -33,6 +34,11 @@ function ExternalIcon() {
  * the card's bottom edge, with the visual order equal to the DOM order (D13). Unlike the other sections, the heading leads the left column instead of a rail, so the form gets the width.
  */
 export function Contact() {
+    const cardRef = useRef<HTMLDivElement>(null);
+    const near = useNearViewport(cardRef);
+    // As tall as the form (30rem stacked, 24rem with the fields side by side), so nothing moves when it replaces the placeholder.
+    const placeholder = <div aria-hidden className='min-h-120 sm:min-h-96' />;
+
     return (
         <section id='contact' aria-labelledby='contact-heading' className='border-t border-line py-10 sm:py-16 lg:py-22'>
             <div className='wrap grid gap-8 sm:gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16'>
@@ -57,10 +63,14 @@ export function Contact() {
                         ))}
                     </ul>
                 </div>
-                <div className='reveal rounded-panel border border-line bg-surface-raised p-5 shadow-panel sm:p-7'>
-                    <Suspense fallback={<div aria-hidden className='min-h-[28rem]' />}>
-                        <ContactForm />
-                    </Suspense>
+                <div ref={cardRef} className='reveal rounded-panel border border-line bg-surface-raised p-5 shadow-panel sm:p-7'>
+                    {near ? (
+                        <Suspense fallback={placeholder}>
+                            <ContactForm />
+                        </Suspense>
+                    ) : (
+                        placeholder
+                    )}
                 </div>
             </div>
         </section>
