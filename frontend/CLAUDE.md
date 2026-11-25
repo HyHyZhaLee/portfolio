@@ -49,7 +49,7 @@ scripts/with-node.sh pnpm --dir frontend gen:api          # regenerate src/api/s
 frontend/
 ├── index.html                  # default title, meta description, Open Graph tags
 ├── vercel.json                 # SPA rewrite for /work/:slug, pinned install and build commands, Git deploys off (PF-013)
-├── public/                     # favicon.svg (WL monogram) and apple-touch-icon.png (PF-025); og-image.png, robots.txt, sitemap.xml are PF-012 items not created yet
+├── public/                     # favicon.svg (WL monogram) and apple-touch-icon.png (PF-025), robots.txt (PF-012); og-image.png and sitemap.xml are PF-012 items not created yet
 └── src/
     ├── index.css               # Tailwind import and @theme design tokens
     ├── api/                    # schema.d.ts (generated, never edited) · client.ts · errors.ts

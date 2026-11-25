@@ -89,3 +89,15 @@ test('a case study opened by URL after scrolling the home page starts at the top
     await expect(page.getByTestId('home-title-heading')).toBeAttached();
     await expect.poll(() => page.evaluate<number>('Math.round(window.scrollY)')).toBe(3000);
 });
+
+// PF-012: the SPA rewrite used to answer /robots.txt with the HTML page, so a crawler never saw the policy; the file must be served as plain text.
+test('robots.txt is served as plain text that allows crawling', async ({ request }) => {
+    const response = await request.get('/robots.txt');
+    expect(response.ok()).toBe(true);
+    expect(response.headers()['content-type']).toMatch(/^text\/plain/);
+    const body = await response.text();
+    expect(body).toContain('User-agent: *');
+    expect(body).toContain('Allow: /');
+    expect(body).not.toMatch(/Disallow:\s*\/\s*$/m);
+    expect(body).not.toContain('<html');
+});
