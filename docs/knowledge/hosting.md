@@ -40,6 +40,12 @@ Facts about Vercel, Render, and Neon observed on this site's own projects. Versi
 - **Verified**: before the staging alias was first assigned; 2026-11-25
 - **Discovered in**: PF-027
 
+### An aliased preview deployment is served without `noindex`
+- **Rule / Behavior**: A preview deployment reached through a `*.vercel.app` alias set with `vercel alias set` answered 200 with no `X-Robots-Tag` header, so Vercel's usual `noindex` for non-production deployments cannot be relied on for a shared staging address. A `headers` rule in `vercel.json` with `"has": [{ "type": "host", "value": "<alias>" }]` adds `X-Robots-Tag: noindex` for that host only, leaving production's domain untouched.
+- **Source**: `curl -sI https://will-ly-portfolio-staging.vercel.app`; the staging smoke test; `frontend/vercel.json`
+- **Verified**: the first staging deploy (run 45595354590), whose smoke test failed on the missing header; 2026-11-25
+- **Discovered in**: PF-027
+
 ## Render
 
 ### Root Directory `backend` builds the Dockerfile there and ignores other changes
