@@ -66,9 +66,12 @@ openapi: ## Regenerate backend/openapi/openapi.json and the frontend API types
 	$(GRADLE) testIT --tests '*OpenApiSnapshotIT'
 	$(call frontend_or_skip,gen:api)
 
-release: ## Release VERSION=x.y.z: tag the head of origin/main as vx.y.z and push it; ci-cd deploys it to production
-	@[[ "$(VERSION)" =~ ^[0-9]+\.[0-9]+\.[0-9]+$$ ]] || { echo "Usage: make release VERSION=1.2.3 (MAJOR.MINOR.PATCH)"; exit 1; }
+release: ## Release the version in frontend/package.json: tag the head of origin/main as v<version> and push it; ci-cd deploys it to production
 	git fetch origin main --tags
-	git tag --annotate "v$(VERSION)" --message "Release v$(VERSION)" origin/main
-	git push origin "v$(VERSION)"
-	@echo "Pushed v$(VERSION). The ci-cd run deploys it once the release gate passes: gh run list --workflow ci-cd.yml --limit 3"
+	@version="$$(git show origin/main:frontend/package.json | sed -nE 's/^[[:space:]]*"version":[[:space:]]*"([^"]*)".*/\1/p' | head -n 1)"; \
+	[[ "$$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$$ ]] || { echo "frontend/package.json on origin/main has no MAJOR.MINOR.PATCH version (found '$$version')."; exit 1; }; \
+	[[ -z "$(VERSION)" || "$(VERSION)" == "$$version" ]] || { echo "VERSION=$(VERSION) does not match frontend/package.json on origin/main ($$version). Change the version there in a pull request first."; exit 1; }; \
+	if git rev-parse --quiet --verify "refs/tags/v$$version" > /dev/null; then echo "v$$version is already released. Raise the version in frontend/package.json in a pull request, merge it, then run make release."; exit 1; fi; \
+	git tag --annotate "v$$version" --message "Release v$$version" origin/main && \
+	git push origin "v$$version" && \
+	echo "Pushed v$$version. The ci-cd run deploys it once the release gate passes: gh run list --workflow ci-cd.yml --limit 3"

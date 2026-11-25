@@ -16,6 +16,7 @@
 | Analytics | `@vercel/analytics` (cookieless, PF-012) plus the site's own visit tracking (PF-005) |
 | Tests | Vitest, Testing Library, jest-dom, MSW |
 | Hosting | Vercel Hobby; Root Directory `frontend`; `.github/workflows/deploy.yml` builds and deploys it with the Vercel CLI: Preview variables and the alias `will-ly-portfolio-staging.vercel.app` for staging on every merge to `main`, `--prod` for a release tag (PF-027). Vercel's own Git deploys are off and the install and build commands are in `vercel.json` (PF-013) |
+| Version | `version` in `package.json` is the site's version; `vite.config.ts` defines it as `__APP_VERSION__` and the header shows `v1.0.0`. Raise it in a pull request before `make release`, which tags `main` with it (PF-027 P16) |
 
 ## Commands
 

@@ -149,7 +149,7 @@ Rows marked _built_ exist; the others are planned until the ticket named has run
 | Path | Holds | Ticket |
 |---|---|---|
 | `src/api/` | `schema.d.ts` (generated), `client.ts`, `errors.ts` | PF-002, _built_ |
-| `src/app/` | `App`, `AppProviders`, `queryClient`, `routes`, `RootLayout` (header, footer, scroll restoration since PF-003), `useDocumentMeta`, `StagingBadge` (only when `VITE_LIVE_SITE_URL` is set, which only staging builds do), `appVersion` (the deployed version from `VITE_APP_VERSION` and its GitHub link, shown in the header beside the brand) | PF-002, PF-003, PF-027, _built_ |
+| `src/app/` | `App`, `AppProviders`, `queryClient`, `routes`, `RootLayout` (header, footer, scroll restoration since PF-003), `useDocumentMeta`, `StagingBadge` (only when `VITE_LIVE_SITE_URL` is set, which only staging builds do), `appVersion` (the site's version, `v` plus `version` in `package.json`, defined as `__APP_VERSION__` in `vite.config.ts`, and its release-notes link, shown in the header beside the brand) | PF-002, PF-003, PF-027, _built_ |
 | `src/index.css` | Tailwind import, the `@theme` design tokens of the approved design (colours, fonts, type sizes, radii, animations), the `wrap` utility, and base styles | PF-002, PF-003, _built_ |
 | `src/config/test-ids.config.ts` | `TestIds`, `getTestIdProp` | PF-002, _built_ |
 | `src/i18n/en.ts` | UI strings and `t()` | PF-002, _built_ |

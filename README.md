@@ -83,9 +83,9 @@ One workflow, [`ci-cd.yml`](.github/workflows/ci-cd.yml), runs for every commit,
 | Merge to `main` | every check, `ci-ok`, then a deploy to **staging**: the backend first (the pipeline waits until `/actuator/info` reports the new commit), then the frontend, then a live browser smoke test |
 | Release tag `vX.Y.Z` on `main` | a release gate (the commit passed staging, or went live before), the same deploy and smoke test against **production**, then a GitHub Release with generated notes |
 
-Staging is a full free-tier copy with none of production's data: [will-ly-portfolio-staging.vercel.app](https://will-ly-portfolio-staging.vercel.app), a second Render service, and its own Neon project. It shows a "Staging" badge and is not indexed. The header shows the deployed version beside the brand: the release tag in production, `git describe` on staging.
+Staging is a full free-tier copy with none of production's data: [will-ly-portfolio-staging.vercel.app](https://will-ly-portfolio-staging.vercel.app), a second Render service, and its own Neon project. It shows a "Staging" badge and is not indexed. The header shows the site's version beside the brand: `v` plus `version` in `frontend/package.json`.
 
-To release what staging shows: `make release VERSION=1.2.3`. To roll back, run `ci-cd` by hand from an older tag. Actions are pinned to commit SHAs, and secret scanning, push protection, Dependabot, and CodeQL are on.
+To release what staging shows: raise `version` in `frontend/package.json` in a pull request, merge it, then run `make release`, which tags `main` with that version. To roll back, run `ci-cd` by hand from an older tag. Actions are pinned to commit SHAs, and secret scanning, push protection, Dependabot, and CodeQL are on.
 
 ## Documentation
 

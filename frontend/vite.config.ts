@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -12,6 +13,9 @@ function port(value: string | undefined, fallback: number): number {
     const parsed = Number(value);
     return value && Number.isInteger(parsed) && parsed > 0 && parsed < 65536 ? parsed : fallback;
 }
+
+/** The site's version, `v` plus `version` in package.json: the only place a release number is written (PF-027 P16). */
+const appVersion = `v${(JSON.parse(readFileSync(new URL('package.json', import.meta.url), 'utf8')) as { version: string }).version}`;
 
 // In development VITE_API_URL is empty, so the API client calls relative paths and Vite forwards them to the backend.
 const proxiedPaths = ['/api', '/actuator', '/v3/api-docs', '/swagger-ui'];
@@ -57,6 +61,7 @@ export default defineConfig(({ mode }) => {
     const backendUrl = `http://localhost:${port(env.SERVER_PORT, 8080)}`;
     return {
         plugins: [react(), tailwindcss(), preloadFonts()],
+        define: { __APP_VERSION__: JSON.stringify(appVersion) },
         build: { sourcemap: true },
         server: {
             port: port(env.FRONTEND_PORT, 5173),

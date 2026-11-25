@@ -41,16 +41,15 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0 # git describe needs the tags and the history
           persist-credentials: false
-      # The release tag is the version: v1.0.0 on a release, v1.0.0-3-gabc1234 on staging, the short SHA before the
-      # first tag (PF-027 P16).
+      # The version is `v` plus `version` in frontend/package.json, the same value vite.config.ts builds into the header;
+      # the smoke test checks the deployed site shows it (PF-027 P16).
       - name: Compute the version
         id: version
         env:
           SITE_URL: ${{ vars.SITE_URL }}
         run: |
-          echo "version=$(git describe --tags --match 'v[0-9]*.[0-9]*.[0-9]*' --abbrev=7 --always)" >> "$GITHUB_OUTPUT"
+          echo "version=v$(jq --raw-output .version frontend/package.json)" >> "$GITHUB_OUTPUT"
           echo "site-url=${SITE_URL}" >> "$GITHUB_OUTPUT"
       # The ref parameter makes Render build exactly this commit; a hook call with ref keeps Render's auto-deploy out of
       # the way (PF-013 D9).
@@ -79,7 +78,6 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           ENVIRONMENT: ${{ inputs.environment }}
-          VITE_APP_VERSION: ${{ steps.version.outputs.version }}
         run: |
           if [[ "$ENVIRONMENT" == production ]]; then
             vercel build --prod --token="$VERCEL_TOKEN"

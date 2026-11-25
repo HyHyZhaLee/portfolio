@@ -62,7 +62,6 @@ function stubObserverWithSections() {
 
 afterEach(() => {
     vi.unstubAllGlobals();
-    vi.unstubAllEnvs();
     observerCallback = undefined;
     observed.length = 0;
     for (const { id } of sections) document.getElementById(id)?.remove();
@@ -78,21 +77,14 @@ describe('Header', () => {
         expect(home).toHaveAttribute('href', '/');
     });
 
-    it('shows the deployed version beside the brand, linked to its release', () => {
-        vi.stubEnv('VITE_APP_VERSION', 'v1.0.0');
+    it('shows the version beside the brand, linked to its release notes', () => {
         renderWithProviders(<Header />);
 
         const version = screen.getByTestId(TestIds.header.version);
-        expect(version).toHaveTextContent('v1.0.0');
-        expect(version).toHaveAccessibleName('Version v1.0.0: see what changed');
-        expect(version).toHaveAttribute('href', `${profile.links.repository}/releases/tag/v1.0.0`);
-    });
-
-    it('shows no version in a build without one', () => {
-        vi.stubEnv('VITE_APP_VERSION', '');
-        renderWithProviders(<Header />);
-
-        expect(screen.queryByTestId(TestIds.header.version)).not.toBeInTheDocument();
+        const text = version.textContent ?? '';
+        expect(text).toMatch(/^v\d+\.\d+\.\d+$/);
+        expect(version).toHaveAccessibleName(`Version ${text}: see what changed`);
+        expect(version).toHaveAttribute('href', `${profile.links.repository}/releases/tag/${text}`);
     });
 
     it('renders an inline nav with the six section links and an accessible name, and the same links in the menu', () => {
