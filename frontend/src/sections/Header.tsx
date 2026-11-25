@@ -10,7 +10,7 @@ import { navItems } from './navItems';
 const navIds = navItems.map((item) => item.id);
 
 /**
- * The site header, fixed to the top: the brand with the deployed version, the section links from 1024px, and the menu
+ * The site header, fixed to the top: the brand with the site's version, the section links from 1024px, and the menu
  * below it. Fixed rather than sticky, because Chromium scrolls the page each time focus lands on a sticky element inside
  * the scroll-padding band, so tabbing through the links made the page jump (PF-015). The spacer keeps its place in the flow.
  */
@@ -33,7 +33,7 @@ export function Header() {
                         >
                             {t('nav.brand')}
                         </Link>
-                        {version ? <Version version={version} /> : null}
+                        <Version version={version} />
                     </div>
                     <nav aria-label={t('nav.label')} className='hidden items-center gap-6 lg:flex'>
                         {navItems.map((item) => (
@@ -56,9 +56,8 @@ export function Header() {
 }
 
 /**
- * The deployed version beside the brand, linked to its release notes, the changes since the last release, or its commit
- * (PF-027 P16). The ellipsis sits on an inner span, so a long staging value shrinks on a narrow screen without clipping
- * the link's touch target.
+ * The site's version beside the brand, linked to its release notes (PF-027 P16). The ellipsis sits on an inner span, so
+ * on a very narrow screen the text shrinks without clipping the link's touch target.
  */
 function Version({ version }: { version: string }) {
     const href = versionLink(version, profile.links.repository);

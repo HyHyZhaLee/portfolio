@@ -37,7 +37,13 @@ refuse() {
 git fetch --quiet origin main
 git merge-base --is-ancestor "$SHA" origin/main || refuse "$SHA is not on main. Tag a commit on main."
 
-# Rule 3: a redeploy or rollback of a commit that went live before (D16). A deployment's latest status turns `inactive`
+# Rule 3: the tag names the version the commit builds, so the site shows the tag it was released as (P16).
+package_version="$(git show "$SHA:frontend/package.json" | jq --raw-output .version)" ||
+    refuse "could not read frontend/package.json at $SHA."
+[[ "v$package_version" == "$TAG" ]] ||
+    refuse "$TAG does not match frontend/package.json at $SHA (version $package_version). Release with make release, which tags the version in that file."
+
+# Rule 4: a redeploy or rollback of a commit that went live before (D16). A deployment's latest status turns `inactive`
 # once a newer deployment succeeds, so any `success` status counts.
 deployment_ids="$(gh api "$repo/deployments?environment=production&sha=$SHA&per_page=100" --jq '.[].id')" ||
     refuse "could not read the production deployments of $SHA from GitHub."
@@ -47,7 +53,7 @@ for id in $deployment_ids; do
     fi
 done
 
-# Rule 4: the main run for this exact commit passed every check, the staging deploy, and the staging smoke test (D15).
+# Rule 5: the main run for this exact commit passed every check, the staging deploy, and the staging smoke test (D15).
 deadline=$((SECONDS + wait_seconds))
 while true; do
     runs="$(gh api "$repo/actions/workflows/ci-cd.yml/runs?head_sha=$SHA&branch=main&per_page=20" \

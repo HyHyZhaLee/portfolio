@@ -1,24 +1,11 @@
-/** The deployed version, which the deploy job sets from `git describe` (PF-027 P16); undefined in development and tests. */
-export function appVersion(): string | undefined {
-    const version = import.meta.env.VITE_APP_VERSION;
-    return version === '' ? undefined : version;
+/** The site's version, such as `v1.0.0`: `v` plus `version` in frontend/package.json, set at build time (PF-027 P16). */
+export function appVersion(): string {
+    return __APP_VERSION__;
 }
 
 const releaseTag = /^v\d+\.\d+\.\d+$/;
-const describedCommit = /^(v\d+\.\d+\.\d+)-\d+-g([0-9a-f]{7,40})$/;
-const bareCommit = /^[0-9a-f]{7,40}$/;
 
-/**
- * Where a version's changes are on GitHub: a release tag (`v1.0.0`) links to its release notes, a `git describe` value
- * (`v1.0.0-3-gabc1234`) to the changes since that release, and a bare commit to the commit. Anything else has no link.
- */
+/** The GitHub Release notes of a version such as `v1.0.0`, or null for anything that is not a release number. */
 export function versionLink(version: string, repositoryUrl: string): string | null {
-    if (releaseTag.test(version)) {
-        return `${repositoryUrl}/releases/tag/${version}`;
-    }
-    const [, tag, commit] = describedCommit.exec(version) ?? [];
-    if (tag && commit) {
-        return `${repositoryUrl}/compare/${tag}...${commit}`;
-    }
-    return bareCommit.test(version) ? `${repositoryUrl}/commit/${version}` : null;
+    return releaseTag.test(version) ? `${repositoryUrl}/releases/tag/${version}` : null;
 }

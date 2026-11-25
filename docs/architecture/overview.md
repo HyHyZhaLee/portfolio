@@ -33,7 +33,7 @@ No keep-alive pinger runs: Render Free has one pool of 750 instance hours a mont
 | Staging | Vercel preview deployment at `will-ly-portfolio-staging.vercel.app`, with a "Staging" badge, not indexed | Render Free `will-ly-portfolio-api-staging`, `APP_ENVIRONMENT=staging` | its own Neon Free project, empty except for staging's own visits and messages | every merge to `main`, after every check passes |
 | Production | Vercel production `will-ly-portfolio.vercel.app` | Render Free `will-ly-portfolio-api` | Neon Free project | a release tag `vX.Y.Z` on a commit that passed staging |
 
-Both are built from the same commit by `.github/workflows/deploy.yml`, backend first: the pipeline waits until the public `/actuator/info` reports the new commit and environment, then deploys the frontend, then runs a live smoke test. The header shows the deployed version beside the brand, taken from the git tag (PF-027).
+Both are built from the same commit by `.github/workflows/deploy.yml`, backend first: the pipeline waits until the public `/actuator/info` reports the new commit and environment, then deploys the frontend, then runs a live smoke test. The header shows the site's version beside the brand, `v` plus `version` in `frontend/package.json`, and a release tags that version (PF-027).
 
 ## Request lifecycle (backend)
 
