@@ -6,8 +6,9 @@ An ADR records one decision that shaped the system: the context, the decision, w
 
 | ADR | Title | Status |
 |---|---|---|
+| [0001](0001-where-data-lives.md) | Editorial content in the frontend, live data in the backend | Accepted |
 
-No ADRs yet. Likely first candidates once built: free-tier hosting split (Vercel, Render, Neon), static content with API-backed extras, and visitor hashing instead of storing IP addresses.
+Likely next candidates: the free-tier hosting split (Vercel, Render, Neon) and visitor hashing instead of storing IP addresses.
 
 ## Rules
 

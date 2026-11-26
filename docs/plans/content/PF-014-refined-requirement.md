@@ -2,7 +2,9 @@
 
 > Living document. The backlog entry or the user's description was the starting point; this is the complete, current requirement as clarified in conversation, and it wins over the original wording. It says **what** to build; the plan says **how**. Sole author: the background refinement agent.
 
-**Ticket**: PF-014 — Content API: case studies and skills served by the backend · **Plan**: [PF-014-content-api.md](PF-014-content-api.md) · **Master plan section**: `../portfolio-implementation-plan.md` (architecture sections) and `../cv-portfolio-content-plan.md` (content split) · **Status**: Refining · **Last updated**: 2026-11-24 · **Branch**: `feature/PF-014-content-api`
+**Ticket**: PF-014 — Content API: case studies and skills served by the backend · **Plan**: [PF-014-content-api.md](PF-014-content-api.md) · **Master plan section**: `../portfolio-implementation-plan.md` (architecture sections) and `../cv-portfolio-content-plan.md` (content split) · **Status**: Dropped · **Last updated**: 2026-11-24 · **Branch**: `feature/PF-014-content-api`
+
+> **Dropped on 2026-11-25** (PF-029 D1): portfolio content stays in the frontend, as [ADR 0001](../../architecture/adr/0001-where-data-lives.md) records. This document is kept for the record and is not to be built.
 
 ## 1. Problem and goal
 

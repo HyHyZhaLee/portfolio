@@ -15,6 +15,19 @@ export interface TrackingParams {
     remaining: string;
 }
 
+/** The paths that count as views (SITE-002, PF-029 P7); the API's `RecordVisitRequest` accepts only these. */
+const TRACKED_PATH = /^\/(work\/[a-z0-9]+(-[a-z0-9]+)*)?$/;
+const TRACKED_PATH_MAX = 70;
+
+/**
+ * The path to send for a route, without a trailing slash, or undefined for a route that does not count as a view (the
+ * 404 page at any other path), so the beacon never sends what the API would reject.
+ */
+export function trackedPath(pathname: string): string | undefined {
+    const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+    return path.length <= TRACKED_PATH_MAX && TRACKED_PATH.test(path) ? path : undefined;
+}
+
 /** The last `?notrack` decision of this page load, kept in memory so it holds even when storage is blocked (FR-3). */
 let optedOutThisLoad = false;
 

@@ -16,11 +16,11 @@ docs/plans/
 | Domain | Holds | Tickets |
 |---|---|---|
 | `platform` | Scaffolding, the cross-cutting backend platform (errors, correlation IDs, security, rate limits, client info), CI, and deployment | PF-002, PF-004, PF-008, PF-013, PF-024, PF-027 |
-| `site` | The static site: layout, sections, content, routes, SEO, and launch | PF-003, PF-009 |
+| `site` | The static site: layout, sections, content, routes, SEO, and launch; the launch audit | PF-003, PF-009, PF-012, PF-015, PF-022, PF-026, PF-029 |
 | `visits` | Visit tracking and the stats summary | PF-005, PF-023 |
 | `contact` | The contact form and email delivery | PF-006 |
 | `projects` | The open-source projects list | PF-007 |
-| `content` | The content API: backend-owned portfolio content, its Flyway seed, and the frontend snapshot | PF-014, PF-020 |
+| `content` | The dropped content API (backend-owned content, its Flyway seed, and a frontend snapshot); kept for the record ([ADR 0001](../architecture/adr/0001-where-data-lives.md)) | PF-014, PF-020 (dropped) |
 
 Add a domain only when a ticket fits none of these, and list it here. A docs or tooling chore without a plan needs no folder.
 

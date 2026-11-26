@@ -24,6 +24,21 @@ describe('contactSchema', () => {
         expect(contactSchema.safeParse({ ...VALID, ...change }).success).toBe(success);
     });
 
+    it.each([
+        ['a name with a right-to-left override', { name: 'Ada\u202EExample' }, 'name'],
+        ['a subject with a line separator', { subject: 'A backend\u2028role' }, 'subject'],
+        ['a message with a next-line control', { message: 'Hello\u0085there' }, 'message'],
+    ])('rejects %s on its own field', (_case, change, field) => {
+        const result = contactSchema.safeParse({ ...VALID, ...change });
+
+        expect(result.success).toBe(false);
+        expect(result.error?.issues.map((issue) => issue.path[0])).toEqual([field]);
+    });
+
+    it('still accepts tab and line breaks in the message', () => {
+        expect(contactSchema.safeParse({ ...VALID, message: 'Line one\n\tindented\r\nline three' }).success).toBe(true);
+    });
+
     it('trims the visible fields and passes the honeypot through unchanged', () => {
         const parsed = contactSchema.parse({ name: ' Ada ', email: ' visitor@example.com ', subject: ' A role ', message: '  Hello there!  ', website: ' x ' });
 

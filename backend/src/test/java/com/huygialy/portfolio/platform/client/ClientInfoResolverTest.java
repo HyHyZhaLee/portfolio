@@ -2,13 +2,9 @@ package com.huygialy.portfolio.platform.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.slf4j.LoggerFactory;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 class ClientInfoResolverTest {
@@ -62,7 +58,7 @@ class ClientInfoResolverTest {
         request.setRemoteAddr("192.0.2.1");
         request.addHeader("X-Forwarded-For", ip);
         request.addHeader("User-Agent", userAgent);
-        return new ClientInfoResolver(new ClientProperties(secret, 1, false)).resolve(request);
+        return new ClientInfoResolver(new ClientProperties(secret, 1)).resolve(request);
     }
 
     @Test
@@ -79,32 +75,40 @@ class ClientInfoResolverTest {
     }
 
     @Test
-    void forwardedForIsLoggedOnceOnlyWhenEnabled() {
-        final var logger = (Logger) LoggerFactory.getLogger(ClientInfoResolver.class);
-        final var events = new ListAppender<ILoggingEvent>();
-        events.start();
-        logger.addAppender(events);
-        try {
-            final var request = new MockHttpServletRequest();
-            request.addHeader("X-Forwarded-For", "203.0.113.9, 198.51.100.7");
-            new ClientInfoResolver(new ClientProperties("s1", 1, false)).resolve(request);
-            assertThat(events.list).isEmpty();
-
-            final var enabled = new ClientInfoResolver(new ClientProperties("s1", 1, true));
-            enabled.resolve(request);
-            enabled.resolve(request);
-            assertThat(events.list).hasSize(1);
-        } finally {
-            logger.detachAppender(events);
-        }
-    }
-
-    @Test
     void rateLimitKeyIgnoresTheUserAgentButNotTheAddress() {
         final var base = resolve("s1", "198.51.100.7", CHROME);
         final var otherAgent = resolve("s1", "198.51.100.7", CHROME + " X");
         assertThat(otherAgent.rateLimitKey()).isEqualTo(base.rateLimitKey()).matches("[0-9a-f]{64}");
         assertThat(otherAgent.visitorHash()).isNotEqualTo(base.visitorHash());
         assertThat(resolve("s1", "203.0.113.9", CHROME).rateLimitKey()).isNotEqualTo(base.rateLimitKey());
+    }
+
+    @Test
+    void probeLayoutMasksEntriesOnlyWhenTheProbeAddressIsPresent() {
+        assertThat(ClientInfoResolver.probeLayout("192.0.2.1, 198.51.100.7"))
+                .isEqualTo("2 entries: 192.0.2.0/24, 198.51.100.0/24");
+        assertThat(ClientInfoResolver.probeLayout("198.51.100.7")).isNull();
+        assertThat(ClientInfoResolver.probeLayout(null)).isNull();
+    }
+
+    @Test
+    void globalPrivacyControlHeaderSetsGpc() {
+        final var withGpc = new MockHttpServletRequest();
+        withGpc.addHeader("Sec-GPC", "1");
+        withGpc.addHeader("User-Agent", CHROME);
+        final var without = new MockHttpServletRequest();
+        without.addHeader("User-Agent", CHROME);
+        final var resolver = new ClientInfoResolver(new ClientProperties("s1", 1));
+        assertThat(resolver.resolve(withGpc).gpc()).isTrue();
+        assertThat(resolver.resolve(without).gpc()).isFalse();
+    }
+
+    @Test
+    void ipv6AddressesInOneSlash64ShareTheRateLimitKey() {
+        final var first = resolve("s1", "2001:db8:1:2::a", CHROME).rateLimitKey();
+        assertThat(resolve("s1", "2001:db8:1:2:ffff::1", CHROME).rateLimitKey()).isEqualTo(first);
+        assertThat(resolve("s1", "2001:db8:1:2:ffff::1", CHROME).visitorHash())
+                .isEqualTo(resolve("s1", "2001:db8:1:2::a", CHROME).visitorHash());
+        assertThat(resolve("s1", "2001:db8:1:3::a", CHROME).rateLimitKey()).isNotEqualTo(first);
     }
 }

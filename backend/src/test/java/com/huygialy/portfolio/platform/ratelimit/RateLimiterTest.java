@@ -44,6 +44,16 @@ class RateLimiterTest {
                         ApiException.class, e -> assertThat(e.code()).isEqualTo(ErrorCode.RATE_LIMITED));
     }
 
+    @Test
+    void contactGlobalAllowsTwentyPerHourAcrossVisitors() {
+        for (int i = 0; i < 20; i++) {
+            limiter.check(RateLimit.CONTACT_GLOBAL, RateLimit.GLOBAL_KEY);
+        }
+        assertThatThrownBy(() -> limiter.check(RateLimit.CONTACT_GLOBAL, RateLimit.GLOBAL_KEY))
+                .isInstanceOfSatisfying(
+                        ApiException.class, e -> assertThat(e.code()).isEqualTo(ErrorCode.RATE_LIMITED));
+    }
+
     private static final class MutableClock extends Clock {
 
         private Instant now = Instant.parse("2026-01-01T00:00:00Z");
