@@ -31,12 +31,16 @@ public class ContactCommandService {
     }
 
     /**
-     * F1: the rate limit first, spam included (429 {@code RATE_LIMITED}, D4); TX 1 saves the message; a honeypot hit
-     * returns with the same 202 and is never sent; otherwise one delivery attempt. The visitor gets 202 once the message
-     * is saved, whatever the delivery outcome (D1).
+     * F1: the client's rate limit first, spam included (429 {@code RATE_LIMITED}, D4); then, for a message that would be
+     * emailed, the limit all clients share, so bots that fill the honeypot cannot lock real visitors out (PF-029 P4);
+     * TX 1 saves the message; a honeypot hit returns with the same 202 and is never sent; otherwise one delivery
+     * attempt. The visitor gets 202 once the message is saved, whatever the delivery outcome (D1).
      */
     public void submit(CreateContactMessageRequest body, ClientInfo client) {
         rateLimiter.check(RateLimit.CONTACT, client.rateLimitKey());
+        if (!ContactMessageEntity.isHoneypotHit(body.website())) {
+            rateLimiter.check(RateLimit.CONTACT_GLOBAL, RateLimit.GLOBAL_KEY);
+        }
         final var message = lifecycle.savePending(body, client.visitorHash());
         if (message.isSpam()) {
             log.info("Contact message {} stored as spam, not sent", message.getId());

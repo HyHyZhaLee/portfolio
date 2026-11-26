@@ -425,3 +425,9 @@ Facts about the libraries and tools this site uses. The entries marked **Carried
 - **Source**: `react-router` 8.5.2 `dist/development/lib/components.js` (`RouterProvider`) and `lib/router/router.js` (`initialMatches.some((m) => m.route.lazy)` sets `initialized = false`)
 - **Verified**: read the source, 2026-11-25; Playwright with the chunk held back: the route-level boundary blanked `main`, the layout boundary kept the home page (`frontend/e2e/performance.spec.ts`, "the home page stays on screen while the case-study chunk loads")
 - **Discovered in**: PF-026
+
+### `vite preview` proxies the API to a running local backend
+- **Rule / Behavior**: `vite preview` inherits `server.proxy` from `vite.config.ts`, so `/api` and `/actuator` reach whatever listens on `SERVER_PORT` (default 8080); a "no backend" measurement such as a Lighthouse run needs that port dead (for example `SERVER_PORT=9`), or its page views land in the local database.
+- **Source**: `frontend/vite.config.ts` (`server.proxy`)
+- **Verified**: 2026-11-25, a Lighthouse run against `vite preview` posted page views to a local backend on :8080; rerun with `SERVER_PORT=9` answered 502 for `/api`
+- **Discovered in**: PF-029

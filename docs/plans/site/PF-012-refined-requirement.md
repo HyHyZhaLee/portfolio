@@ -6,7 +6,7 @@
 
 ## 1. Problem and goal
 
-PF-012 is a large ticket. Its content swap is done (plan `PF-012-content-swap.md`); this first version of the refined requirement covers the remaining frontend deploy items, and only `robots.txt` is in this slice. Later slices (`sitemap.xml`, `og-image.png`, `@vercel/analytics`) fold into this document. Today `/robots.txt` falls through the SPA rewrite and returns the HTML page, so search crawlers get no valid crawl rules and Lighthouse's `robots-txt` audit fails. SEO scores 92 on `/` and 91 on a case study, and this is its only failing SEO audit. On 2026-11-25 the owner asked to "do PF-012 robots.txt the same way" as PF-015 and PF-026: plan, build, review, pull request, and merge without asking for permission.
+PF-012 is a large ticket. Its content swap is done (plan `PF-012-content-swap.md`); this first version of the refined requirement covers the remaining frontend deploy items, and only `robots.txt` is in this slice. The remaining in-repo items moved to PF-029 on 2026-11-25: `sitemap.xml` and `og-image.png` are built there, and `@vercel/analytics` is dropped (D5). Today `/robots.txt` falls through the SPA rewrite and returns the HTML page, so search crawlers get no valid crawl rules and Lighthouse's `robots-txt` audit fails. SEO scores 92 on `/` and 91 on a case study, and this is its only failing SEO audit. On 2026-11-25 the owner asked to "do PF-012 robots.txt the same way" as PF-015 and PF-026: plan, build, review, pull request, and merge without asking for permission.
 
 ## 2. Scope
 
@@ -16,9 +16,9 @@ PF-012 is a large ticket. Its content swap is done (plan `PF-012-content-swap.md
 
 **Out of scope (deferred)**
 
-- `sitemap.xml` and the `Sitemap:` line: still PF-012, planned, in a later slice.
-- `og-image.png`: still PF-012, planned, in a later slice.
-- `@vercel/analytics`: still PF-012, planned, in a later slice.
+- `sitemap.xml` and the `Sitemap:` line: moved to PF-029 (SEO slice), built there. See D5.
+- `og-image.png`: moved to PF-029 (SEO slice), built there. See D5.
+- `@vercel/analytics`: dropped (decided 2026-11-25). See D5.
 - Crawler-specific rules (for example for AI crawlers): they need an owner decision.
 
 ## 3. Functional requirements
@@ -55,6 +55,7 @@ PF-012 is a large ticket. Its content swap is done (plan `PF-012-content-swap.md
 | D2 | 2026-11-25 | No `Sitemap:` line yet. | It needs an absolute URL and `/sitemap.xml` does not exist, so the line would point at the SPA rewrite and crawlers would report an error. It is added with `sitemap.xml`. |
 | D3 | 2026-11-25 | Allow everything, with no crawler-specific rules. | A public portfolio meant to be found; blocking specific crawlers needs an owner decision. |
 | D4 | 2026-11-25 | The owner asked for no permission prompts, so the plan was approved by the orchestrating session on 2026-11-25. | Owner instruction 2026-11-25. |
+| D5 | 2026-11-25 | The remaining in-repo PF-012 items move to PF-029: `sitemap.xml` and `og-image.png` are built there, and `@vercel/analytics` is dropped because the site's own visit counter already covers views, devices, and browsers. PF-012 is marked Done when PF-029's SEO slice merges; PF-012's remaining owner steps (the contact-form smoke test, Render's health-check path) are on PF-029's owner checklist. | PF-029 bundles every audit fix in one ticket (PF-029 D2, D7). |
 
 ## 8. Acceptance criteria (refined)
 

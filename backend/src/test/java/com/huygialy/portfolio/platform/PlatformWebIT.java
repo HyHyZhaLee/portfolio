@@ -138,4 +138,28 @@ class PlatformWebIT {
                 .jsonPath("$.instance")
                 .isEqualTo("/api/v1/x;jsessionid=1");
     }
+
+    @Test
+    void everyApiResponseCarriesTheSecurityHeaders() {
+        client.get()
+                .uri("/api/v1/stats/summary")
+                .exchange()
+                .expectHeader()
+                .value("Strict-Transport-Security", value -> assertThat(value).contains("max-age=31536000"))
+                .expectHeader()
+                .valueEquals("Referrer-Policy", "no-referrer")
+                .expectHeader()
+                .valueEquals("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'");
+    }
+
+    @Test
+    void theSwaggerUiIsExemptFromTheContentSecurityPolicy() {
+        client.get()
+                .uri("/swagger-ui/index.html")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectHeader()
+                .doesNotExist("Content-Security-Policy");
+    }
 }

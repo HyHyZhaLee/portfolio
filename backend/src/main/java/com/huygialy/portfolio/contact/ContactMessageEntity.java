@@ -110,9 +110,14 @@ public class ContactMessageEntity {
             String honeypot,
             String senderHash,
             Instant now) {
-        final var spam = honeypot != null && !honeypot.isBlank();
+        final var spam = isHoneypotHit(honeypot);
         return new ContactMessageEntity(
                 name, email, subject, message, spam ? Status.SPAM : Status.PENDING, spam ? 0 : 1, senderHash, now);
+    }
+
+    /** The honeypot rule (SITE-004): any non-blank value marks the message as spam. */
+    static boolean isHoneypotHit(String honeypot) {
+        return honeypot != null && !honeypot.isBlank();
     }
 
     /** {@code PENDING} → {@code SENT}; the provider's ID may be {@code null} and is cut to its column. */

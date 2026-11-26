@@ -112,6 +112,20 @@ describe('useTrackPageView', () => {
         expect(bodies).toHaveLength(2);
     });
 
+    it('sends no view for a path that is not a tracked page', async () => {
+        renderAt('/no-such-page');
+
+        await settle();
+        expect(bodies).toHaveLength(0);
+    });
+
+    it('sends the path without its trailing slash', async () => {
+        renderAt('/work/sample-study/');
+
+        await waitFor(() => expect(bodies).toHaveLength(1));
+        expect(bodies).toEqual([{ path: '/work/sample-study' }]);
+    });
+
     it('sends the ref tag on every view and removes it from the address', async () => {
         const { router } = renderAt('/?ref=company-a');
 

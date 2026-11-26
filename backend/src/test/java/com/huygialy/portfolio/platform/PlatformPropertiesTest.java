@@ -30,7 +30,6 @@ class PlatformPropertiesTest {
             final var client = context.getBean(ClientProperties.class);
             assertThat(client.visitorHashSecret()).isEqualTo("synthetic-secret");
             assertThat(client.trustedProxyHops()).isEqualTo(1);
-            assertThat(client.logForwardedForOnce()).isFalse();
         });
     }
 
@@ -42,6 +41,14 @@ class PlatformPropertiesTest {
     @Test
     void failsWithoutVisitorHashSecret() {
         runner.withPropertyValues(ORIGINS).run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
+    void clientPropertiesToStringNeverPrintsTheSecret() {
+        runner.withPropertyValues(ORIGINS, SECRET)
+                .run(context -> assertThat(
+                                context.getBean(ClientProperties.class).toString())
+                        .doesNotContain("synthetic-secret"));
     }
 
     @Configuration(proxyBeanMethods = false)

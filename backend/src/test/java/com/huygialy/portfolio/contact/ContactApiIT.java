@@ -90,7 +90,7 @@ class ContactApiIT {
 
     /**
      * A blank name, an invalid email, a blank subject, a blank message, a message over 10,000 characters, and a NUL, which
-     * PostgreSQL would reject as a 500.
+     * PostgreSQL would reject as a 500, a U+2028 in the name and a U+202E in the subject (PF-029).
      */
     @ParameterizedTest
     @CsvSource({
@@ -99,7 +99,9 @@ class ContactApiIT {
         "Ada Example, contact-api-it-no-subject@example.com, ' ', Hello from a test, subject",
         "Ada Example, contact-api-it-empty@example.com, A role, ' ', message",
         "Ada Example, contact-api-it-long@example.com, A role, TOO_LONG, message",
-        "Ada Example, contact-api-it-nul@example.com, A role, Hello\u0000 from a test, message"
+        "Ada Example, contact-api-it-nul@example.com, A role, Hello\u0000 from a test, message",
+        "Ada\u2028Example, contact-api-it-line-sep@example.com, A role, Hello from a test, name",
+        "Ada Example, contact-api-it-bidi@example.com, A role\u202Eevil, Hello from a test, subject"
     })
     void anInvalidMessageIsRejectedWithAFieldErrorAndNotStored(
             String name, String email, String subject, String message, String field) {
@@ -130,6 +132,19 @@ class ContactApiIT {
         assertThat(single(email).get("message")).asString().hasSize(length);
     }
 
+    /** PF-029 P5: the message keeps tab and line breaks, while separators and bidi controls are rejected. */
+    @Test
+    void aMessageWithTabsAndLineBreaksIsAccepted() {
+        final var email = "contact-api-it-multiline@example.com";
+        wireMock.stubFor(post("/emails").willReturn(okJson("{\"id\":\"email-api-multiline\"}")));
+
+        send(valid(email, "Line one\nLine two\r\n\tIndented"), "192.0.2.16")
+                .expectStatus()
+                .isAccepted();
+
+        assertThat(single(email).get("message")).isEqualTo("Line one\nLine two\r\n\tIndented");
+    }
+
     @Test
     void aFilledHoneypotIsAcceptedStoredAsSpamAndNeverSent() {
         final var email = "contact-api-it-spam@example.com";
@@ -142,6 +157,8 @@ class ContactApiIT {
         wireMock.verify(0, postRequestedFor(urlEqualTo("/emails")));
     }
 
+    // The global limit (20 per hour, in memory, shared by the whole integration-test JVM) is not tested here: the
+    // suite's messages that would be emailed already spend about 5 of its tokens (honeypot hits do not count).
     @Test
     void theFourthMessageInAnHourFromOneAddressIsRateLimitedSpamIncluded() {
         final var ip = "192.0.2.13";

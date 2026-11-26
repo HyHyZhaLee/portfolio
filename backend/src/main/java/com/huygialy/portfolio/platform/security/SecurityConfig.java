@@ -14,6 +14,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -44,6 +51,11 @@ class SecurityConfig {
         "/api/v1/stats/summary",
         "/api/v1/projects"
     };
+    /** One year, without subdomains: the API host is a subdomain of Render's shared domain (PF-029 FR-4). */
+    private static final Duration HSTS_MAX_AGE = Duration.ofDays(365);
+    /** The API's responses are data, never a page that loads anything or may be framed (PF-029 FR-4). */
+    private static final String API_CSP = "default-src 'none'; frame-ancestors 'none'";
+
     /** Public write endpoints; each has Bean Validation and a per-client rate limit (Non-Negotiable 4). */
     private static final String[] PUBLIC_POST_PATHS = {"/api/v1/visits", "/api/v1/contact-messages"};
 
@@ -55,7 +67,24 @@ class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
+        // CSRF protection stays off on purpose (PF-029 FR-13): the chain is stateless and the API sets and reads no
+        // cookie or other ambient credential, so a forged cross-site request carries nothing a real one would not. The
+        // two public POSTs are anonymous by design and defended by validation and rate limits (Non-Negotiable 4).
         return http.csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers
+                        // Render terminates TLS and `forwarded.strategy` is `none`, so Spring never sees the request as
+                        // secure and its default writer would skip HSTS; this one writes it on every response.
+                        .httpStrictTransportSecurity(hsts -> hsts.requestMatcher(AnyRequestMatcher.INSTANCE)
+                                .includeSubDomains(false)
+                                .maxAgeInSeconds(HSTS_MAX_AGE.toSeconds()))
+                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.NO_REFERRER))
+                        // JSON never needs to load anything; Swagger UI is a page with its own scripts, so it is
+                        // exempt.
+                        .addHeaderWriter(new DelegatingRequestMatcherHeaderWriter(
+                                new NegatedRequestMatcher(new OrRequestMatcher(
+                                        PathPatternRequestMatcher.pathPattern("/swagger-ui.html"),
+                                        PathPatternRequestMatcher.pathPattern("/swagger-ui/**"))),
+                                new StaticHeadersWriter("Content-Security-Policy", API_CSP))))
                 .cors(Customizer.withDefaults())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)

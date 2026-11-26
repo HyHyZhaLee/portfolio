@@ -136,6 +136,41 @@ class VisitApiIT {
     }
 
     @Test
+    void aViewWithGlobalPrivacyControlIsAcceptedAndNotStored() {
+        final var path = "/work/visit-api-it-gpc";
+
+        client.post()
+                .uri(VISITS)
+                .header(FORWARDED_FOR, "203.0.113.15")
+                .header(HttpHeaders.USER_AGENT, CHROME)
+                .header("Sec-GPC", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("path", path))
+                .exchange()
+                .expectStatus()
+                .isAccepted();
+
+        assertThat(rows(path)).isEmpty();
+    }
+
+    @Test
+    void theHomePageIsATrackedPath() {
+        post(Map.of("path", "/"), "203.0.113.17", CHROME).expectStatus().isAccepted();
+    }
+
+    @Test
+    void aPathOutsideThePublicRoutesIsRejected() {
+        post(Map.of("path", "/admin"), "203.0.113.16", CHROME)
+                .expectStatus()
+                .isBadRequest()
+                .expectBody()
+                .jsonPath("$.code")
+                .isEqualTo("VALIDATION_FAILED")
+                .jsonPath("$.errors[?(@.field == 'path')]")
+                .exists();
+    }
+
+    @Test
     void aBotViewIsAcceptedAndNotStored() {
         final var path = "/work/visit-api-it-bot";
 

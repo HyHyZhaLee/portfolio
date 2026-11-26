@@ -29,13 +29,13 @@ public class VisitCommandService {
     }
 
     /**
-     * F1: the rate limit first, for bots too (D7, 429 {@code RATE_LIMITED}); then a bot returns with nothing stored
-     * (FR-7); then the referrer and the ref tag are reduced and one row is inserted (FR-6). A stored view is announced
+     * F1: the rate limit first, for bots too (D7, 429 {@code RATE_LIMITED}); then a bot, or a browser that sent the
+     * Global Privacy Control signal, returns with nothing stored (FR-7, PF-029 P6); then the referrer and the ref tag are reduced and one row is inserted (FR-6). A stored view is announced
      * with {@link PageViewRecorded}, after the insert committed (PF-023 D5).
      */
     public void record(RecordVisitRequest request, ClientInfo client) {
         rateLimiter.check(RateLimit.VISIT, client.rateLimitKey());
-        if (client.bot()) {
+        if (client.bot() || client.gpc()) {
             return;
         }
         final var referrerHost = VisitValidator.referrerHost(request.referrer());

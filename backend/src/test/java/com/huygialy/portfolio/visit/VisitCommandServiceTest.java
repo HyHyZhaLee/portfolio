@@ -46,6 +46,6 @@ class VisitCommandServiceTest {
     }
 
     private static ClientInfo client(boolean bot) {
-        return new ClientInfo("c".repeat(64), "rate-key", DeviceType.DESKTOP, "Chrome", bot);
+        return new ClientInfo("c".repeat(64), "rate-key", DeviceType.DESKTOP, "Chrome", bot, false);
     }
 }

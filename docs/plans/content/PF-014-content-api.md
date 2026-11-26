@@ -1,6 +1,8 @@
 # PF-014 — Content API: case studies and skills served by the backend
 
-**Ticket**: PF-014 · **Refined requirement**: [PF-014-refined-requirement.md](PF-014-refined-requirement.md) · **Packages**: backend and frontend · **Status**: Draft · **Last updated**: 2026-11-24
+**Ticket**: PF-014 · **Refined requirement**: [PF-014-refined-requirement.md](PF-014-refined-requirement.md) · **Packages**: backend and frontend · **Status**: Dropped · **Last updated**: 2026-11-24
+
+> **Dropped on 2026-11-25** (PF-029 D1): portfolio content stays in the frontend, as [ADR 0001](../../architecture/adr/0001-where-data-lives.md) records. This document is kept for the record and is not to be built.
 
 > ⚠️ **Review these flows first** — [F1 Catalog load and serve](#f1--catalog-load-and-serve) · [F2 Snapshot first, then live](#f2--snapshot-first-then-live) · [F3 Content change and drift check](#f3--content-change-and-drift-check)
 

@@ -69,7 +69,7 @@ const en = {
     'contact.error.subject': 'Enter a subject, up to 150 characters.',
     'contact.error.message': 'Write your message, up to 10,000 characters.',
     'contact.error.invalid': 'Some fields need attention. Check them and try again.',
-    'contact.error.rateLimited': 'You have sent several messages in the last hour. Please try again later, or reach me on LinkedIn.',
+    'contact.error.rateLimited': 'Too many messages are arriving right now. Please try again later, or reach me on LinkedIn.',
     'contact.error.network':
         'The API did not answer, so the message may not have arrived. It may be waking up: try again in a minute, or reach me on LinkedIn.',
     'contact.error.unexpected': 'Something went wrong while sending. Please try again later.',

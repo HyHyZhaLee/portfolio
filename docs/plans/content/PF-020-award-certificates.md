@@ -1,6 +1,8 @@
 # PF-020 — Award certificates in object storage, awards served by the backend
 
-**Ticket**: PF-020 · **Refined requirement**: [PF-020-refined-requirement.md](PF-020-refined-requirement.md) · **Packages**: backend and frontend · **Depends on**: [PF-014](PF-014-content-api.md) (content API, catalog, snapshot) · **Status**: Draft · **Last updated**: 2026-11-24
+**Ticket**: PF-020 · **Refined requirement**: [PF-020-refined-requirement.md](PF-020-refined-requirement.md) · **Packages**: backend and frontend · **Depends on**: [PF-014](PF-014-content-api.md) (content API, catalog, snapshot) · **Status**: Dropped · **Last updated**: 2026-11-24
+
+> **Dropped on 2026-11-25** (PF-029 D1): portfolio content stays in the frontend, as [ADR 0001](../../architecture/adr/0001-where-data-lives.md) records. This document is kept for the record and is not to be built.
 
 > ⚠️ **Review these flows first** — No new complex flows: the awards query joins PF-014's [F1 Catalog load and serve](PF-014-content-api.md#f1--catalog-load-and-serve) as a third query in the same read-only transaction, and the awards ride PF-014's [F2](PF-014-content-api.md#f2--snapshot-first-then-live) and [F3](PF-014-content-api.md#f3--content-change-and-drift-check) unchanged.
 

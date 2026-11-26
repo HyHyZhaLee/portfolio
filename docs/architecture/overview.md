@@ -37,7 +37,7 @@ Both are built from the same commit by `.github/workflows/deploy.yml`, backend f
 
 ## Request lifecycle (backend)
 
-1. Render's proxy forwards the request; the forwarded-headers strategy (`server.request.header.forwarded.strategy`) resolves the client address, trusting only Render's hop from PF-004 on.
+1. Render's proxy forwards the request; Spring's forwarded-header strategy is `none`, and `ClientInfoResolver` takes the client address from the `X-Forwarded-For` entry Render's proxy appended (`app.client.trusted-proxy-hops`, counted from the right), never a client-supplied one; an IPv6 address counts by its /64 prefix (PF-004, PF-029).
 2. A correlation filter accepts or creates `X-Correlation-Id` and puts it in the logging context.
 3. CORS allows only the configured origins; the rate-limit filter checks the visitor's bucket for public `POST` endpoints.
 4. The controller validates the request shape and calls one service method.

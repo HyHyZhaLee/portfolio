@@ -4,6 +4,8 @@
 
 > No complex flows.
 
+
+> **Update 2026-11-25 (PF-029 D7):** the remaining in-repo items, `sitemap.xml` and `og-image.png`, are built in [PF-029](PF-029-site-audit.md), and `@vercel/analytics` is dropped (PF-029 D5): the site's own visit counter covers views, devices, and browsers.
 ## 1. Requirement summary
 Replace every placeholder in `frontend/src/content/` with the owner-reviewed content pack, and add a content test that fails on any leftover `TODO:` or `#todo-` target. Maps to `../cv-portfolio-content-plan.md` §7 Phase C and the PF-012 row of the backlog. The scope is the content swap and the test only: the public `cv.pdf`, `robots.txt`, `sitemap.xml`, `og-image.png`, `@vercel/analytics`, and every deploy step stay with the owner under PF-012.
 
@@ -74,13 +76,13 @@ After the first swap went live, the owner asked for these changes; each was appl
 | Open source intro | Content pack, site copy | A | Dropped (no field for it) |
 | Fallback repository descriptions (six) | Content pack, open source | A | Removed with the section (round 2) |
 | Frontera: case study | Content pack, case studies | A | Shipped |
-| Frontera deep-dive story, diagram, defect-simulation outcome, testing lesson | Content pack, case studies | B (pending) | Held |
+| Frontera deep-dive story, defect-simulation outcome, testing lesson | Content pack, case studies | B (pending) | Held; the diagram itself was approved and shipped in PF-022 (D11, D12) |
 | Clockwork: case study | Content pack, case studies | A | Shipped |
 | Clockwork deep dive and first lesson | Content pack, case studies | B (pending) | Held |
 | TPMA/DCA web port: case study | Content pack, case studies | A | Shipped |
 | TPMA/DCA deep-dive story, autosave rules, lesson, role-split sentences | Content pack, case studies | B (pending) | Held |
 | TPMA multi-tenancy: case study | Content pack, case studies | A | Shipped |
-| TPMA multi-tenancy deep-dive story, diagram, isolation-testing statement, first lesson | Content pack, case studies | B (pending) | Held |
+| TPMA multi-tenancy deep-dive story, isolation-testing statement, first lesson | Content pack, case studies | B (pending) | Held; the diagram itself was approved and shipped in PF-022 (D11, D12) |
 | TPMA multi-tenancy: startup-job lesson (cause not confirmed) | Content pack, case studies | Unconfirmed | Dropped until confirmed |
 | FAST: case study | Content pack, case studies | A | Shipped |
 | FAST deep-dive story | Content pack, case studies | B (pending) | Held |
